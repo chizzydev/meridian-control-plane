@@ -1,69 +1,146 @@
-import Image from "next/image";
+import Link from "next/link";
+
+import { CENTERPIECE_CHANGE } from "@/lib/change-case/domain";
+
+const lifecycle = [
+  "PROPOSED",
+  "PREFLIGHTED",
+  "READY",
+  "APPLIED",
+  "CONVERGING",
+  "VERIFIED",
+] as const;
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="mx-auto min-h-screen max-w-6xl px-6 py-8 sm:px-10 sm:py-12">
+      <header className="flex items-center justify-between border-b border-white/10 pb-6">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-200/70">
+            InterSystems IRIS security change control
           </p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight">
+            Meridian Control Plane
+          </h1>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="rounded-full border border-emerald-200/20 bg-emerald-200/5 px-3 py-1 text-xs text-emerald-100">
+          PRE-FLIGHT → APPLY → CONVERGE
         </div>
-      </main>
-    </div>
+      </header>
+
+      <section className="grid gap-10 py-14 lg:grid-cols-[1.2fr_0.8fr] lg:items-start">
+        <div>
+          <p className="max-w-3xl text-4xl font-semibold leading-[1.08] tracking-[-0.04em] sm:text-6xl">
+            A role change is not finished when the configuration changes.
+          </p>
+
+          <p className="mt-6 max-w-2xl text-base leading-7 text-white/60 sm:text-lg">
+            Meridian keeps an IRIS security change open until intended
+            configuration and observed live access have actually converged.
+          </p>
+
+          <div className="mt-10 flex flex-wrap gap-2">
+            {lifecycle.map((state, index) => (
+              <div
+                key={state}
+                className="flex items-center gap-2"
+              >
+                <span className="rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-medium text-white/70">
+                  {state}
+                </span>
+
+                {index < lifecycle.length - 1 ? (
+                  <span className="text-white/20">→</span>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <aside className="rounded-3xl border border-white/10 bg-white/[0.035] p-6 shadow-2xl shadow-black/20 backdrop-blur">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/40">
+            First controlled Change Case
+          </p>
+
+          <div className="mt-6 space-y-5">
+            <div>
+              <p className="text-sm text-white/40">Target user</p>
+              <p className="mt-1 text-xl font-medium">
+                {CENTERPIECE_CHANGE.displayName}
+              </p>
+              <p className="mt-1 font-mono text-sm text-white/45">
+                {CENTERPIECE_CHANGE.username}
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 border-y border-white/10 py-5">
+              <div>
+                <p className="text-xs uppercase tracking-wider text-white/35">
+                  Operation
+                </p>
+                <p className="mt-2 font-semibold text-amber-200">
+                  {CENTERPIECE_CHANGE.operation}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-xs uppercase tracking-wider text-white/35">
+                  Role
+                </p>
+                <p className="mt-2 font-medium">
+                  {CENTERPIECE_CHANGE.role}
+                </p>
+              </div>
+            </div>
+
+            <Link
+              href="/change-cases/new"
+              className="flex w-full items-center justify-center rounded-xl bg-emerald-300 px-4 py-3 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-200"
+            >
+              Stage this change
+            </Link>
+          </div>
+        </aside>
+      </section>
+
+      <section className="grid gap-4 border-t border-white/10 pt-8 md:grid-cols-3">
+        <ProofCard
+          label="1"
+          title="Preflight impact"
+          body="Derive effective-role, permission, application, and declared REST impact from IRIS facts."
+        />
+        <ProofCard
+          label="2"
+          title="Live convergence"
+          body="Keep configuration and live access visibly separate while stale runtime authority remains."
+        />
+        <ProofCard
+          label="3"
+          title="Native receipt"
+          body="Close VERIFIED only after convergence and native IRIS audit evidence are bound."
+        />
+      </section>
+    </main>
+  );
+}
+
+function ProofCard({
+  label,
+  title,
+  body,
+}: {
+  label: string;
+  title: string;
+  body: string;
+}) {
+  return (
+    <article className="rounded-2xl border border-white/10 bg-black/10 p-5">
+      <span className="text-xs font-semibold text-emerald-200/70">
+        0{label}
+      </span>
+      <h2 className="mt-4 font-semibold">{title}</h2>
+      <p className="mt-2 text-sm leading-6 text-white/45">{body}</p>
+    </article>
   );
 }

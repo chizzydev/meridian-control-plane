@@ -105,6 +105,10 @@ export default function ChangeQueuePage() {
               <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px] text-white/50">
                 Read-only demo evidence
               </span>
+
+              <span className="rounded-full border border-cyan-300/25 bg-cyan-300/10 px-2.5 py-1 text-[11px] font-semibold text-cyan-100">
+                Persistent IRIS history check
+              </span>
             </div>
 
             <h2 className="mt-4 text-2xl font-semibold tracking-[-0.03em]">
@@ -118,6 +122,11 @@ export default function ChangeQueuePage() {
             <p className="mt-4 max-w-3xl text-sm leading-6 text-white/55">
               Previewed, revalidated, applied, checked for live runtime residue,
               converged, and bound to native IRIS UserChange audit evidence.
+            </p>
+
+            <p className="mt-3 max-w-3xl text-xs leading-5 text-emerald-100/70">
+              The verified receipt route performs the live server-side IRIS
+              history read; this queue remains static and credential-free.
             </p>
           </div>
 
@@ -166,7 +175,7 @@ export default function ChangeQueuePage() {
             href="/change-cases/verified/maya-patel-supervisor-removal"
             className="inline-flex min-h-11 items-center justify-center rounded-xl bg-white px-5 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
           >
-            Open verified receipt
+            Open verified receipt + IRIS history
           </Link>
 
           <span className="text-xs text-white/40">

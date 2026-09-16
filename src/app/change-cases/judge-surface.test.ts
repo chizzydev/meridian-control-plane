@@ -67,7 +67,10 @@ describe(
             "Stage access change",
             "Recorded certified receipt",
             "Read-only demo evidence",
-            "Open verified receipt",
+            "Persistent IRIS history check",
+            "live server-side IRIS",
+            "static and credential-free",
+            "Open verified receipt + IRIS history",
           ]
         ) {
           expect(
@@ -76,7 +79,23 @@ describe(
             marker,
           );
         }
-      },
+
+        for (
+          const forbidden of [
+            "readPersistentJudgeHistory",
+            "process.env",
+            '"force-dynamic"',
+            "fetch(",
+            "Authorization:",
+            "Bearer ",
+          ]
+        ) {
+          expect(
+            queue,
+          ).not.toContain(
+            forbidden,
+          );
+        }},
     );
 
     it(

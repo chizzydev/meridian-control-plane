@@ -15,7 +15,8 @@
     "verify:iris-reviewable-preflight": "tsx scripts/verify-iris-reviewable-preflight.mts",
     "verify:iris-ready-preflight": "tsx scripts/verify-iris-ready-preflight.mts",
     "verify:iris-apply-revalidation": "tsx scripts/verify-iris-apply-revalidation.mts",
-    "verify:iris-role-mutation-design": "tsx scripts/verify-iris-role-mutation-design.mts"
+    "verify:iris-role-mutation-design": "tsx scripts/verify-iris-role-mutation-design.mts",
+    "verify:iris-role-mutation-executor": "tsx scripts/verify-iris-role-mutation-executor.mts"
   },
   "dependencies": {
     "next": "16.3.3",

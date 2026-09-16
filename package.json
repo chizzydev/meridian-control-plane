@@ -11,7 +11,8 @@
     "typecheck": "tsc --noEmit",
     "verify:iris-read": "tsx scripts/verify-iris-read-foundation.mts",
     "verify:iris-preflight": "tsx scripts/verify-iris-preflight.mts",
-    "verify:iris-impact": "tsx scripts/verify-iris-impact.mts"
+    "verify:iris-impact": "tsx scripts/verify-iris-impact.mts",
+    "verify:iris-reviewable-preflight": "tsx scripts/verify-iris-reviewable-preflight.mts"
   },
   "dependencies": {
     "next": "16.3.3",

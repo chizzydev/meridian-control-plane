@@ -13,7 +13,8 @@
     "verify:iris-preflight": "tsx scripts/verify-iris-preflight.mts",
     "verify:iris-impact": "tsx scripts/verify-iris-impact.mts",
     "verify:iris-reviewable-preflight": "tsx scripts/verify-iris-reviewable-preflight.mts",
-    "verify:iris-ready-preflight": "tsx scripts/verify-iris-ready-preflight.mts"
+    "verify:iris-ready-preflight": "tsx scripts/verify-iris-ready-preflight.mts",
+    "verify:iris-apply-revalidation": "tsx scripts/verify-iris-apply-revalidation.mts"
   },
   "dependencies": {
     "next": "16.3.3",

@@ -115,7 +115,7 @@ describe(
     );
 
     it(
-      "labels the public receipt as recorded read-only evidence instead of live privileged mutation",
+      "keeps the verified receipt read-only while wiring persistent IRIS history server-side",
       () => {
         const receipt =
           read(
@@ -140,10 +140,52 @@ describe(
           /does\s+not\s+claim\s+that\s+the\s+public\s+browser\s+owns\s+privileged\s+IRIS\s+mutation\s+authority/,
         );
 
+                expect(
+          receipt,
+        ).toContain(
+          "Persistent IRIS history live",
+        );
+
         expect(
           receipt,
-        ).toMatch(
-          /IRIS-backed\s+receipt\s+history\s+has\s+already\s+been\s+productized/,
+        ).toContain(
+          "readPersistentJudgeHistory",
+        );
+
+        expect(
+          receipt,
+        ).toContain(
+          'export const dynamic =',
+        );
+
+        expect(
+          receipt,
+        ).toContain(
+          '"force-dynamic"',
+        );
+
+        expect(
+          receipt,
+        ).toContain(
+          "Persistent IRIS history unavailable",
+        );
+
+        expect(
+          receipt,
+        ).toContain(
+          "Exact canonical receipt match: PASS",
+        );
+
+        expect(
+          receipt,
+        ).not.toContain(
+          "NEXT_PUBLIC_",
+        );
+
+        expect(
+          receipt,
+        ).not.toContain(
+          "fetch(",
         );
       },
     );

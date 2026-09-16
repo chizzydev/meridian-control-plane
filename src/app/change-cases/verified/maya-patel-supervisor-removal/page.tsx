@@ -5,8 +5,14 @@ import {
   getRecordedVerifiedReceipt,
   summarizeRecordedReceipt,
 } from "@/lib/change-case/recorded-receipt";
+import {
+  readPersistentJudgeHistory,
+} from "@/lib/iris/receipt-history-session";
 
-export default function VerifiedReceiptPage() {
+export const dynamic =
+  "force-dynamic";
+
+export default async function VerifiedReceiptPage() {
   const receipt =
     getRecordedVerifiedReceipt();
 
@@ -14,6 +20,41 @@ export default function VerifiedReceiptPage() {
     summarizeRecordedReceipt(
       receipt,
     );
+  let persistent:
+    Awaited<
+      ReturnType<
+        typeof readPersistentJudgeHistory
+      >
+    > |
+    null =
+      null;
+
+  try {
+    const observed =
+      await readPersistentJudgeHistory({
+        receiptId:
+          receipt.receiptId,
+
+        username:
+          receipt.change.username,
+      });
+
+    if (
+      observed.receipt.receiptSha256 !==
+      RECORDED_RECEIPT_SHA256
+    ) {
+      throw new Error(
+        "Persistent IRIS receipt SHA does not match the certified canonical receipt.",
+      );
+    }
+
+    persistent =
+      observed;
+  }
+  catch {
+    persistent =
+      null;
+  }
 
   return (
     <main className="mx-auto min-h-screen max-w-7xl px-6 py-8 sm:px-10 sm:py-12">
@@ -21,7 +62,7 @@ export default function VerifiedReceiptPage() {
         href="/change-cases"
         className="text-sm text-white/45 transition hover:text-white"
       >
-        ← Change Queue
+        â† Change Queue
       </Link>
 
       <header className="mt-8 border-b border-white/10 pb-8">
@@ -310,7 +351,7 @@ export default function VerifiedReceiptPage() {
           />
 
           <StateBox
-            label="Apply → audit"
+            label="Apply â†’ audit"
             value={`${receipt.nativeAudit.applyToAuditDeltaSeconds}s`}
           />
         </div>
@@ -329,23 +370,76 @@ export default function VerifiedReceiptPage() {
       </section>
 
       <section className="mt-8 rounded-3xl border border-white/10 bg-white/[0.02] p-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-200/70">
+              Persistent IRIS history
+            </p>
+
+            {persistent ? (
+              <>
+                <div className="mt-4 inline-flex rounded-full border border-emerald-300/25 bg-emerald-300/10 px-3 py-1 text-xs font-semibold text-emerald-100">
+                  Persistent IRIS history live
+                </div>
+
+                <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                  <KeyValue
+                    label="Source"
+                    value={persistent.source}
+                  />
+
+                  <KeyValue
+                    label="History entries"
+                    value={String(
+                      persistent.history.length,
+                    )}
+                  />
+                </div>
+
+                <p className="mt-5 break-all font-mono text-xs leading-6 text-white/55">
+                  Receipt SHA-256 {persistent.receipt.receiptSha256}
+                </p>
+
+                <p className="mt-3 text-xs leading-5 text-emerald-100/70">
+                  Exact canonical receipt match: PASS. This request read the
+                  persisted receipt and Maya Patel&apos;s receipt-history index
+                  from IRIS through the server-only authenticated session
+                  boundary.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="mt-4 inline-flex rounded-full border border-amber-300/25 bg-amber-300/10 px-3 py-1 text-xs font-semibold text-amber-100">
+                  Persistent IRIS history unavailable
+                </div>
+
+                <p className="mt-4 max-w-2xl text-xs leading-5 text-white/45">
+                  This request did not verify the live persistent history
+                  source. The recorded certified receipt remains visible as
+                  frozen evidence, but it is not presented as a substitute for
+                  a successful live IRIS history read.
+                </p>
+              </>
+            )}
+          </div>
+
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/35">
               Recorded evidence source
             </p>
 
-            <p className="mt-2 font-mono text-xs text-white/50">
+            <p className="mt-2 break-all font-mono text-xs text-white/50">
               SHA-256 {RECORDED_RECEIPT_SHA256}
             </p>
-          </div>
 
-          <p className="max-w-lg text-xs leading-5 text-white/40">
-            This surface is intentionally read-only recorded evidence. It does
-            not claim that the public browser owns privileged IRIS mutation
-            authority or that IRIS-backed receipt history has already been
-            productized.
-          </p>
+            <p className="mt-4 text-xs leading-5 text-white/40">
+              This public surface remains read-only and does not claim that the
+              public browser owns privileged IRIS mutation authority.
+              Privileged IRIS credentials and bearer tokens stay behind the
+              server-only boundary; the browser receives rendered evidence
+              only.
+            </p>
+          </div>
         </div>
       </section>
     </main>

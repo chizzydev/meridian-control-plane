@@ -23,7 +23,7 @@ ClassMethod WriteError(status As %String, code As %String, message As %String) A
     set out.code=code
     set out.message=message
     write out.%ToJSON()
-    quit $$$OK
+    return $$$OK
 }
 
 ClassMethod RequiredString(record As %DynamicObject, name As %String, Output value As %String) As %Boolean
@@ -74,7 +74,7 @@ ClassMethod PersistReceipt() As %Status
     set raw=%request.Content.Read()
 
     if raw="" {
-        quit ..WriteError(
+        return ..WriteError(
             "400 Bad Request",
             "RECEIPT_HISTORY_BODY_REQUIRED",
             "A verified receipt-history record is required."
@@ -84,7 +84,7 @@ ClassMethod PersistReceipt() As %Status
     try {
         set record={}.%FromJSON(raw)
     } catch ex {
-        quit ..WriteError(
+        return ..WriteError(
             "400 Bad Request",
             "RECEIPT_HISTORY_JSON_INVALID",
             "The receipt-history request body is not valid JSON."
@@ -92,7 +92,7 @@ ClassMethod PersistReceipt() As %Status
     }
 
     if '$isobject(record) {
-        quit ..WriteError(
+        return ..WriteError(
             "400 Bad Request",
             "RECEIPT_HISTORY_RECORD_REQUIRED",
             "The receipt-history payload must be an object."
@@ -104,7 +104,7 @@ ClassMethod PersistReceipt() As %Status
     for index=1:1:$length(required,",") {
         set name=$piece(required,",",index)
         if '..RequiredString(record,name,.value) {
-            quit ..WriteError(
+            return ..WriteError(
                 "400 Bad Request",
                 "RECEIPT_HISTORY_FIELD_REQUIRED",
                 "A required receipt-history field is missing: "_name
@@ -113,7 +113,7 @@ ClassMethod PersistReceipt() As %Status
     }
 
     if record.schemaVersion'="meridian.receipt-history.v1" {
-        quit ..WriteError(
+        return ..WriteError(
             "400 Bad Request",
             "RECEIPT_HISTORY_SCHEMA_INVALID",
             "Unsupported receipt-history schema."
@@ -121,7 +121,7 @@ ClassMethod PersistReceipt() As %Status
     }
 
     if record.lifecycleState'="VERIFIED" {
-        quit ..WriteError(
+        return ..WriteError(
             "400 Bad Request",
             "RECEIPT_HISTORY_NOT_VERIFIED",
             "Only VERIFIED receipts may enter persistent history."
@@ -145,10 +145,10 @@ ClassMethod PersistReceipt() As %Status
             set %response.Status="200 OK"
             set %response.ContentType="application/json"
             write out.%ToJSON()
-            quit $$$OK
+            return $$$OK
         }
 
-        quit ..WriteError(
+        return ..WriteError(
             "409 Conflict",
             "RECEIPT_HISTORY_ID_CONFLICT",
             "The receipt id already exists with different immutable content."
@@ -168,7 +168,7 @@ ClassMethod PersistReceipt() As %Status
         tcommit
     } catch ex {
         trollback
-        quit ..WriteError(
+        return ..WriteError(
             "500 Internal Server Error",
             "RECEIPT_HISTORY_WRITE_FAILED",
             "IRIS could not persist the verified receipt."
@@ -184,13 +184,13 @@ ClassMethod PersistReceipt() As %Status
     set %response.ContentType="application/json"
     write out.%ToJSON()
 
-    quit $$$OK
+    return $$$OK
 }
 
 ClassMethod GetReceipt(receiptId As %String) As %Status
 {
     if receiptId="" {
-        quit ..WriteError(
+        return ..WriteError(
             "400 Bad Request",
             "RECEIPT_HISTORY_ID_REQUIRED",
             "Receipt id is required."
@@ -198,7 +198,7 @@ ClassMethod GetReceipt(receiptId As %String) As %Status
     }
 
     if '$data(^Meridian.ControlPlane.History("receipt",receiptId,"json")) {
-        quit ..WriteError(
+        return ..WriteError(
             "404 Not Found",
             "RECEIPT_HISTORY_NOT_FOUND",
             "The requested receipt was not found."
@@ -217,13 +217,13 @@ ClassMethod GetReceipt(receiptId As %String) As %Status
     set %response.ContentType="application/json"
     write out.%ToJSON()
 
-    quit $$$OK
+    return $$$OK
 }
 
 ClassMethod ListHistory(username As %String) As %Status
 {
     if username="" {
-        quit ..WriteError(
+        return ..WriteError(
             "400 Bad Request",
             "RECEIPT_HISTORY_USERNAME_REQUIRED",
             "Username is required."
@@ -252,7 +252,7 @@ ClassMethod ListHistory(username As %String) As %Status
     set %response.ContentType="application/json"
     write out.%ToJSON()
 
-    quit $$$OK
+    return $$$OK
 }
 
 }

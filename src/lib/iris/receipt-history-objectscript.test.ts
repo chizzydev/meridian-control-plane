@@ -143,5 +143,41 @@ describe(
         );
       },
     );
+
+    it(
+      "uses RETURN for value-bearing REST exits so TRY CATCH and loop contexts remain compile-safe",
+      () => {
+        const text =
+          source();
+
+        expect(
+          text,
+        ).not.toContain(
+          "quit ..WriteError(",
+        );
+
+        expect(
+          text,
+        ).not.toContain(
+          "quit $$$OK",
+        );
+
+        expect(
+          text.match(
+            /return \.\.WriteError\(/g,
+          ),
+        ).toHaveLength(
+          11,
+        );
+
+        expect(
+          text.match(
+            /return \$\$\$OK/g,
+          ),
+        ).toHaveLength(
+          5,
+        );
+      },
+    );
   },
 );

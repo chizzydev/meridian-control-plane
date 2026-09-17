@@ -1,3 +1,4 @@
+import { AuthorizationProofSurface } from "./authorization-proof-surface";
 import Link from "next/link";
 
 import {
@@ -40,6 +41,7 @@ export default function ChangeQueuePage() {
 
   return (
     <main className="mx-auto min-h-screen max-w-7xl px-6 py-8 sm:px-10 sm:py-12">
+      <AuthorizationProofSurface />
       <header className="flex flex-col gap-6 border-b border-white/10 pb-8 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200/70">

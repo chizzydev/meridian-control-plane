@@ -1,3 +1,6 @@
+import { renderToStaticMarkup } from "react-dom/server";
+import { AuthorizationProofSurface } from "./authorization-proof-surface";
+
 import {
   readFileSync,
 } from "node:fs";
@@ -205,6 +208,127 @@ describe(
           receipt,
         ).not.toContain(
           "fetch(",
+        );
+      },
+    );
+  },
+);
+describe(
+  "Meridian certified authorization-convergence proof surface",
+  () => {
+    it(
+      "makes the certified stale-to-converged proof understandable in five seconds",
+      () => {
+        const queue =
+          read(
+            "src/app/change-cases/page.tsx",
+          );
+
+        const proof =
+          renderToStaticMarkup(
+            AuthorizationProofSurface(),
+          );
+
+        expect(
+          queue,
+        ).toContain(
+          "<AuthorizationProofSurface />",
+        );
+
+        for (
+          const marker of [
+            "Recorded certified convergence proof",
+            "Isolated synthetic witness",
+            "Read-only proof evidence",
+            "Security changes are not finished when configuration changes.",
+            "Configuration changed. Live authority did not.",
+            "EXPECTED",
+            "CONFIGURED",
+            "LIVE",
+            "NOT VERIFIED",
+            "LIVE AUTHORITY HAS NOT CONVERGED",
+            "171402",
+            "173081",
+            "Old stale PID gone",
+            "Fresh PID",
+            "VERIFIED",
+            "CONFIGURED AND LIVE AUTHORIZATION CONVERGED",
+            "not a live privileged browser mutation session",
+          ]
+        ) {
+          expect(
+            proof,
+          ).toContain(
+            marker,
+          );
+        }
+      },
+    );
+
+    it(
+      "uses the pure closure derivation instead of hand-labeling verification state",
+      () => {
+        const proof =
+          read(
+            "src/app/change-cases/authorization-proof-surface.tsx",
+          );
+
+        expect(
+          proof,
+        ).toContain(
+          "deriveAuthorizationProof",
+        );
+
+        expect(
+          proof,
+        ).toContain(
+          "verificationPresentation",
+        );
+
+        expect(
+          proof,
+        ).toContain(
+          "staleResult.state",
+        );
+
+        expect(
+          proof,
+        ).toContain(
+          "freshResult.state",
+        );
+      },
+    );
+
+    it(
+      "keeps the judge proof surface read-only",
+      () => {
+        const proof =
+          read(
+            "src/app/change-cases/authorization-proof-surface.tsx",
+          );
+
+        expect(
+          proof,
+        ).not.toContain(
+          "fetch(",
+        );
+
+        expect(
+          proof,
+        ).not.toContain(
+          "RemoveRoles",
+        );
+
+        expect(
+          proof,
+        ).not.toContain(
+          "AddRoles",
+        );
+
+        expect(
+          proof,
+        ).not.toContain(
+          "Kill process",
         );
       },
     );

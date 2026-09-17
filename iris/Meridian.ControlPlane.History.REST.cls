@@ -11,6 +11,10 @@ XData UrlMap [ XMLNamespace = "http://www.intersystems.com/urlmap" ]
 <Route Url="/receipts" Method="POST" Call="PersistReceipt"/>
 <Route Url="/receipts/:receiptId" Method="GET" Call="GetReceipt"/>
 <Route Url="/history/:username" Method="GET" Call="ListHistory"/>
+<Route Url="/cases" Method="POST" Call="CreateCase"/>
+<Route Url="/cases/:caseId/events" Method="GET" Call="ListCaseEvents"/>
+<Route Url="/cases/:caseId/events" Method="POST" Call="AppendCaseEvent"/>
+<Route Url="/cases/:caseId" Method="GET" Call="GetCase"/>
 </Routes>
 }
 
@@ -247,6 +251,606 @@ ClassMethod ListHistory(username As %String) As %Status
     set out={}
     set out.ok=1
     set out.records=records
+
+    set %response.Status="200 OK"
+    set %response.ContentType="application/json"
+    write out.%ToJSON()
+
+    return $$$OK
+}
+
+ClassMethod IsAllowedCaseState(state As %String) As %Boolean
+{
+    set allowed=",PROPOSED,PREFLIGHTED,READY,APPLIED,CONVERGING,AUDIT_PENDING,VERIFIED,STALE,APPLY_FAILED,"
+    return $find(allowed,","_state_",")>0
+}
+
+ClassMethod IsAllowedEventType(eventType As %String) As %Boolean
+{
+    set allowed=",CASE_CREATED,PREFLIGHT_COMPLETED,REVIEW_ACCEPTED,APPLY_REVALIDATION_MATCHED,APPLY_REVALIDATION_STALE,APPLY_ATTEMPT_STARTED,APPLY_SUCCEEDED,APPLY_FAILED,CONFIGURED_STATE_VERIFIED,LIVE_STALE_OBSERVED,OLD_WITNESS_CLOSED,OLD_PID_GONE,FRESH_WITNESS_BOUND,LIVE_CONVERGED,AUDIT_PENDING,AUDIT_BOUND,RECEIPT_WRITE_STARTED,RECEIPT_PERSISTED,RECEIPT_READBACK_VERIFIED,CASE_VERIFIED,"
+    return $find(allowed,","_eventType_",")>0
+}
+
+ClassMethod IsAllowedCaseTransition(fromState As %String, toState As %String) As %Boolean
+{
+    if (fromState="PROPOSED"),(toState="PREFLIGHTED") return 1
+    if (fromState="PREFLIGHTED"),(toState="READY") return 1
+    if (fromState="READY"),(toState="APPLIED") return 1
+    if (fromState="READY"),(toState="STALE") return 1
+    if (fromState="READY"),(toState="APPLY_FAILED") return 1
+    if (fromState="APPLIED"),(toState="CONVERGING") return 1
+    if (fromState="APPLIED"),(toState="AUDIT_PENDING") return 1
+    if (fromState="CONVERGING"),(toState="VERIFIED") return 1
+    if (fromState="CONVERGING"),(toState="AUDIT_PENDING") return 1
+    if (fromState="AUDIT_PENDING"),(toState="VERIFIED") return 1
+    if (fromState="STALE"),(toState="PREFLIGHTED") return 1
+    if (fromState="APPLY_FAILED"),(toState="PREFLIGHTED") return 1
+    return 0
+}
+
+ClassMethod EventOwnsCaseTransition(eventType As %String, fromState As %String, toState As %String) As %Boolean
+{
+    if eventType="CASE_CREATED" return 0
+
+    if eventType="PREFLIGHT_COMPLETED",fromState="PROPOSED",toState="PREFLIGHTED" return 1
+    if eventType="PREFLIGHT_COMPLETED",fromState="STALE",toState="PREFLIGHTED" return 1
+    if eventType="PREFLIGHT_COMPLETED",fromState="APPLY_FAILED",toState="PREFLIGHTED" return 1
+    if eventType="REVIEW_ACCEPTED",fromState="PREFLIGHTED",toState="READY" return 1
+    if eventType="APPLY_REVALIDATION_STALE",fromState="READY",toState="STALE" return 1
+    if eventType="APPLY_FAILED",fromState="READY",toState="APPLY_FAILED" return 1
+    if eventType="CONFIGURED_STATE_VERIFIED",fromState="READY",toState="APPLIED" return 1
+    if eventType="LIVE_STALE_OBSERVED",fromState="APPLIED",toState="CONVERGING" return 1
+    if eventType="AUDIT_PENDING",fromState="APPLIED",toState="AUDIT_PENDING" return 1
+    if eventType="AUDIT_PENDING",fromState="CONVERGING",toState="AUDIT_PENDING" return 1
+    if eventType="CASE_VERIFIED",fromState="CONVERGING",toState="VERIFIED" return 1
+    if eventType="CASE_VERIFIED",fromState="AUDIT_PENDING",toState="VERIFIED" return 1
+
+    if eventType="APPLY_REVALIDATION_MATCHED",fromState="READY",toState="READY" return 1
+    if eventType="APPLY_ATTEMPT_STARTED",fromState="READY",toState="READY" return 1
+    if eventType="APPLY_SUCCEEDED",fromState="READY",toState="READY" return 1
+
+    if eventType="OLD_WITNESS_CLOSED",fromState="CONVERGING",toState="CONVERGING" return 1
+    if eventType="OLD_PID_GONE",fromState="CONVERGING",toState="CONVERGING" return 1
+    if eventType="FRESH_WITNESS_BOUND",fromState="CONVERGING",toState="CONVERGING" return 1
+    if eventType="LIVE_CONVERGED",fromState="CONVERGING",toState="CONVERGING" return 1
+
+    if eventType="AUDIT_BOUND",fromState="CONVERGING",toState="CONVERGING" return 1
+    if eventType="AUDIT_BOUND",fromState="AUDIT_PENDING",toState="AUDIT_PENDING" return 1
+    if eventType="RECEIPT_WRITE_STARTED",fromState="CONVERGING",toState="CONVERGING" return 1
+    if eventType="RECEIPT_WRITE_STARTED",fromState="AUDIT_PENDING",toState="AUDIT_PENDING" return 1
+    if eventType="RECEIPT_PERSISTED",fromState="CONVERGING",toState="CONVERGING" return 1
+    if eventType="RECEIPT_PERSISTED",fromState="AUDIT_PENDING",toState="AUDIT_PENDING" return 1
+    if eventType="RECEIPT_READBACK_VERIFIED",fromState="CONVERGING",toState="CONVERGING" return 1
+    if eventType="RECEIPT_READBACK_VERIFIED",fromState="AUDIT_PENDING",toState="AUDIT_PENDING" return 1
+
+    return 0
+}
+
+ClassMethod ValidateFixedCaseAuthority(record As %DynamicObject) As %Boolean
+{
+    try {
+        if '$isobject(record) return 0
+        if record.schemaVersion'="meridian.live-change-case.v1" return 0
+        if record.mode'="LIVE_ISOLATED_DEMO" return 0
+        if record.caseId="" return 0
+        if '..IsAllowedCaseState(record.state) return 0
+        if +record.version<1 return 0
+        if record.createdAtUtc="" return 0
+        if record.updatedAtUtc="" return 0
+
+        set fixture=record.fixture
+        if '$isobject(fixture) return 0
+        if fixture.fixtureId'="meridian-live-demo-v1" return 0
+        if fixture.username'="meridian.demo.witness" return 0
+        if fixture.targetRole'="MeridianSupervisor" return 0
+        if fixture.expectedGeneration="" return 0
+
+        set intent=record.intent
+        if '$isobject(intent) return 0
+        if intent.operation'="REMOVE" return 0
+        if intent.targetRole'="MeridianSupervisor" return 0
+    } catch ex {
+        return 0
+    }
+
+    return 1
+}
+
+ClassMethod CaseEvents(caseId As %String) As %DynamicArray
+{
+    set events=[]
+    set count=+$get(^Meridian.ControlPlane.History("case",caseId,"event-count"),0)
+
+    for sequence=1:1:count {
+        if $data(^Meridian.ControlPlane.History("case",caseId,"event",sequence)) {
+            set eventJson=^Meridian.ControlPlane.History("case",caseId,"event",sequence)
+            set event={}.%FromJSON(eventJson)
+            do events.%Push(event)
+        }
+    }
+
+    return events
+}
+
+ClassMethod CaseSnapshot(caseId As %String) As %DynamicObject
+{
+    set snapshot={}
+    set recordJson=^Meridian.ControlPlane.History("case",caseId,"record")
+    set snapshot.record={}.%FromJSON(recordJson)
+    set snapshot.events=..CaseEvents(caseId)
+    return snapshot
+}
+
+ClassMethod CreateCase() As %Status
+{
+    set raw=%request.Content.Read()
+
+    if raw="" {
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_BODY_REQUIRED",
+            "A durable Change Case record is required."
+        )
+    }
+
+    try {
+        set record={}.%FromJSON(raw)
+    } catch ex {
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_JSON_INVALID",
+            "The durable Change Case request body is not valid JSON."
+        )
+    }
+
+    if '..ValidateFixedCaseAuthority(record) {
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_AUTHORITY_INVALID",
+            "The durable Change Case record is outside the fixed A3 isolated authority."
+        )
+    }
+
+    if record.state'="PROPOSED" {
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_CREATE_STATE_INVALID",
+            "New durable Change Cases must begin at PROPOSED version 1."
+        )
+    }
+
+    if +record.version'=1 {
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_CREATE_STATE_INVALID",
+            "New durable Change Cases must begin at PROPOSED version 1."
+        )
+    }
+
+    if record.createdAtUtc'=record.updatedAtUtc {
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_CREATE_STATE_INVALID",
+            "New durable Change Cases must begin at PROPOSED version 1."
+        )
+    }
+
+    set caseId=record.caseId
+
+    lock +^Meridian.ControlPlane.History("case",caseId):5
+    if '$test {
+        return ..WriteError(
+            "409 Conflict",
+            "CHANGE_CASE_LOCK_TIMEOUT",
+            "The durable Change Case is busy."
+        )
+    }
+
+    if $data(^Meridian.ControlPlane.History("case",caseId,"record")) {
+        lock -^Meridian.ControlPlane.History("case",caseId)
+        return ..WriteError(
+            "409 Conflict",
+            "CHANGE_CASE_ID_CONFLICT",
+            "The durable Change Case id already exists."
+        )
+    }
+
+    set event={}
+    set event.schemaVersion="meridian.live-change-case-event.v1"
+    set event.caseId=caseId
+    set event.sequence=1
+    set event.eventType="CASE_CREATED"
+    set event.fromState="NONE"
+    set event.toState="PROPOSED"
+    set event.versionBefore=0
+    set event.versionAfter=1
+    set event.occurredAtUtc=record.createdAtUtc
+    set event.detailJson="{}"
+
+    set recordJson=record.%ToJSON()
+    set eventJson=event.%ToJSON()
+
+    tstart
+
+    try {
+        set ^Meridian.ControlPlane.History("case",caseId,"record")=recordJson
+        set ^Meridian.ControlPlane.History("case",caseId,"event-count")=1
+        set ^Meridian.ControlPlane.History("case",caseId,"event",1)=eventJson
+        tcommit
+    } catch ex {
+        trollback
+        lock -^Meridian.ControlPlane.History("case",caseId)
+        return ..WriteError(
+            "500 Internal Server Error",
+            "CHANGE_CASE_CREATE_FAILED",
+            "IRIS could not persist the durable Change Case."
+        )
+    }
+
+    lock -^Meridian.ControlPlane.History("case",caseId)
+
+    set out={}
+    set out.ok=1
+    set out.status="CREATED"
+    set out.snapshot=..CaseSnapshot(caseId)
+
+    set %response.Status="201 Created"
+    set %response.ContentType="application/json"
+    write out.%ToJSON()
+
+    return $$$OK
+}
+
+ClassMethod GetCase(caseId As %String) As %Status
+{
+    if caseId="" {
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_ID_REQUIRED",
+            "Case id is required."
+        )
+    }
+
+    if '$data(^Meridian.ControlPlane.History("case",caseId,"record")) {
+        return ..WriteError(
+            "404 Not Found",
+            "CHANGE_CASE_NOT_FOUND",
+            "The requested durable Change Case was not found."
+        )
+    }
+
+    set out={}
+    set out.ok=1
+    set out.snapshot=..CaseSnapshot(caseId)
+
+    set %response.Status="200 OK"
+    set %response.ContentType="application/json"
+    write out.%ToJSON()
+
+    return $$$OK
+}
+
+ClassMethod ListCaseEvents(caseId As %String) As %Status
+{
+    if caseId="" {
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_ID_REQUIRED",
+            "Case id is required."
+        )
+    }
+
+    if '$data(^Meridian.ControlPlane.History("case",caseId,"record")) {
+        return ..WriteError(
+            "404 Not Found",
+            "CHANGE_CASE_NOT_FOUND",
+            "The requested durable Change Case was not found."
+        )
+    }
+
+    set out={}
+    set out.ok=1
+    set out.events=..CaseEvents(caseId)
+
+    set %response.Status="200 OK"
+    set %response.ContentType="application/json"
+    write out.%ToJSON()
+
+    return $$$OK
+}
+
+ClassMethod AppendCaseEvent(caseId As %String) As %Status
+{
+    if caseId="" {
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_ID_REQUIRED",
+            "Case id is required."
+        )
+    }
+
+    set raw=%request.Content.Read()
+
+    if raw="" {
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_EVENT_BODY_REQUIRED",
+            "A durable Change Case event command is required."
+        )
+    }
+
+    try {
+        set command={}.%FromJSON(raw)
+    } catch ex {
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_EVENT_JSON_INVALID",
+            "The durable Change Case event command is not valid JSON."
+        )
+    }
+
+    if '$isobject(command) {
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_EVENT_COMMAND_REQUIRED",
+            "The durable Change Case event command must be an object."
+        )
+    }
+
+    if command.schemaVersion'="meridian.live-change-case-event-command.v1" {
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_EVENT_SCHEMA_INVALID",
+            "Unsupported durable Change Case event-command schema."
+        )
+    }
+
+    if '..RequiredString(command,"eventType",.eventType) {
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_EVENT_TYPE_REQUIRED",
+            "Event type is required."
+        )
+    }
+
+    if '..RequiredString(command,"occurredAtUtc",.occurredAtUtc) {
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_EVENT_TIME_REQUIRED",
+            "Event timestamp is required."
+        )
+    }
+
+    if '..RequiredString(command,"detailJson",.detailJson) {
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_EVENT_DETAIL_REQUIRED",
+            "Event detail JSON is required."
+        )
+    }
+
+    if '..IsAllowedEventType(eventType) {
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_EVENT_TYPE_INVALID",
+            "Event type is not part of the frozen Change Case journal."
+        )
+    }
+
+    try {
+        set expectedVersion=+command.expectedVersion
+        set nextRecord=command.record
+    } catch ex {
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_EVENT_RECORD_REQUIRED",
+            "Expected version and next durable record are required."
+        )
+    }
+
+    if expectedVersion<1 {
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_EXPECTED_VERSION_INVALID",
+            "Expected version must be a positive integer."
+        )
+    }
+
+    if '..ValidateFixedCaseAuthority(nextRecord) {
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_AUTHORITY_INVALID",
+            "The next durable Change Case record is outside the fixed A3 isolated authority."
+        )
+    }
+
+    if nextRecord.caseId'=caseId {
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_ID_MISMATCH",
+            "The route case id and next durable record case id differ."
+        )
+    }
+
+    lock +^Meridian.ControlPlane.History("case",caseId):5
+    if '$test {
+        return ..WriteError(
+            "409 Conflict",
+            "CHANGE_CASE_LOCK_TIMEOUT",
+            "The durable Change Case is busy."
+        )
+    }
+
+    if '$data(^Meridian.ControlPlane.History("case",caseId,"record")) {
+        lock -^Meridian.ControlPlane.History("case",caseId)
+        return ..WriteError(
+            "404 Not Found",
+            "CHANGE_CASE_NOT_FOUND",
+            "The requested durable Change Case was not found."
+        )
+    }
+
+    try {
+        set currentJson=^Meridian.ControlPlane.History("case",caseId,"record")
+        set current={}.%FromJSON(currentJson)
+        set eventCount=+$get(^Meridian.ControlPlane.History("case",caseId,"event-count"),0)
+    } catch ex {
+        lock -^Meridian.ControlPlane.History("case",caseId)
+        return ..WriteError(
+            "500 Internal Server Error",
+            "CHANGE_CASE_STORED_STATE_INVALID",
+            "The durable Change Case stored state could not be read."
+        )
+    }
+
+    if '..ValidateFixedCaseAuthority(current) {
+        lock -^Meridian.ControlPlane.History("case",caseId)
+        return ..WriteError(
+            "500 Internal Server Error",
+            "CHANGE_CASE_STORED_STATE_INVALID",
+            "The durable Change Case stored state is outside the fixed authority."
+        )
+    }
+
+    set currentVersion=+current.version
+    set nextVersion=+nextRecord.version
+
+    if eventCount'=currentVersion {
+        lock -^Meridian.ControlPlane.History("case",caseId)
+        return ..WriteError(
+            "500 Internal Server Error",
+            "CHANGE_CASE_JOURNAL_INCONSISTENT",
+            "The durable Change Case version is not explained by its journal."
+        )
+    }
+
+    if eventCount<1 {
+        lock -^Meridian.ControlPlane.History("case",caseId)
+        return ..WriteError(
+            "500 Internal Server Error",
+            "CHANGE_CASE_JOURNAL_INCONSISTENT",
+            "The durable Change Case version is not explained by its journal."
+        )
+    }
+
+    if expectedVersion'=currentVersion {
+        lock -^Meridian.ControlPlane.History("case",caseId)
+        return ..WriteError(
+            "409 Conflict",
+            "CHANGE_CASE_VERSION_CONFLICT",
+            "The durable Change Case version is stale."
+        )
+    }
+
+    if nextVersion'=(currentVersion+1) {
+        lock -^Meridian.ControlPlane.History("case",caseId)
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_NEXT_VERSION_INVALID",
+            "The next durable Change Case version must increment exactly once."
+        )
+    }
+
+    if nextRecord.createdAtUtc'=current.createdAtUtc {
+        lock -^Meridian.ControlPlane.History("case",caseId)
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_CREATED_AT_IMMUTABLE",
+            "The durable Change Case creation timestamp is immutable."
+        )
+    }
+
+    if nextRecord.updatedAtUtc'=occurredAtUtc {
+        lock -^Meridian.ControlPlane.History("case",caseId)
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_EVENT_TIME_MISMATCH",
+            "The durable Change Case update timestamp must equal the journal event timestamp."
+        )
+    }
+
+    set currentFixture=current.fixture
+    set nextFixture=nextRecord.fixture
+
+    if nextFixture.expectedGeneration'=currentFixture.expectedGeneration {
+        lock -^Meridian.ControlPlane.History("case",caseId)
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_FIXTURE_GENERATION_IMMUTABLE",
+            "The expected fixture generation is immutable."
+        )
+    }
+
+    set fromState=current.state
+    set toState=nextRecord.state
+
+    if (fromState'=toState),'..IsAllowedCaseTransition(fromState,toState) {
+        lock -^Meridian.ControlPlane.History("case",caseId)
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_TRANSITION_INVALID",
+            "The requested durable Change Case lifecycle transition is invalid."
+        )
+    }
+
+    if '..EventOwnsCaseTransition(eventType,fromState,toState) {
+        lock -^Meridian.ControlPlane.History("case",caseId)
+        return ..WriteError(
+            "400 Bad Request",
+            "CHANGE_CASE_EVENT_STATE_INVALID",
+            "The journal event does not own the requested lifecycle transition."
+        )
+    }
+
+    set sequence=eventCount+1
+
+    if $data(^Meridian.ControlPlane.History("case",caseId,"event",sequence)) {
+        lock -^Meridian.ControlPlane.History("case",caseId)
+        return ..WriteError(
+            "409 Conflict",
+            "CHANGE_CASE_EVENT_SEQUENCE_CONFLICT",
+            "The next durable Change Case event sequence already exists."
+        )
+    }
+
+    set event={}
+    set event.schemaVersion="meridian.live-change-case-event.v1"
+    set event.caseId=caseId
+    set event.sequence=sequence
+    set event.eventType=eventType
+    set event.fromState=fromState
+    set event.toState=toState
+    set event.versionBefore=currentVersion
+    set event.versionAfter=nextVersion
+    set event.occurredAtUtc=occurredAtUtc
+    set event.detailJson=detailJson
+
+    set nextJson=nextRecord.%ToJSON()
+    set eventJson=event.%ToJSON()
+
+    tstart
+
+    try {
+        set ^Meridian.ControlPlane.History("case",caseId,"record")=nextJson
+        set ^Meridian.ControlPlane.History("case",caseId,"event-count")=sequence
+        set ^Meridian.ControlPlane.History("case",caseId,"event",sequence)=eventJson
+        tcommit
+    } catch ex {
+        trollback
+        lock -^Meridian.ControlPlane.History("case",caseId)
+        return ..WriteError(
+            "500 Internal Server Error",
+            "CHANGE_CASE_EVENT_APPEND_FAILED",
+            "IRIS could not append the durable Change Case event."
+        )
+    }
+
+    lock -^Meridian.ControlPlane.History("case",caseId)
+
+    set out={}
+    set out.ok=1
+    set out.status="APPENDED"
+    set out.snapshot=..CaseSnapshot(caseId)
 
     set %response.Status="200 OK"
     set %response.ContentType="application/json"

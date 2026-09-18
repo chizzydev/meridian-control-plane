@@ -1,0 +1,6 @@
+.gitattributes text eol=lf
+iris/Meridian.ControlPlane.Internal.REST.cls text eol=lf
+iris/Meridian.ControlPlane.History.REST.cls text eol=lf
+iris/Meridian.API.spec.cls text eol=lf
+iris/Meridian.API.impl.cls text eol=lf
+scripts/install-iris-helper-web-app.ps1 text eol=lf

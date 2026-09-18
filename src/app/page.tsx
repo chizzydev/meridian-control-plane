@@ -58,7 +58,7 @@ export default function Home() {
                   lifecycle.length -
                     1 ? (
                     <span className="text-white/20">
-                      →
+                      â†’
                     </span>
                   ) : null}
                 </div>
@@ -162,7 +162,32 @@ export default function Home() {
           body="Close VERIFIED only after changed permissions converge and a native IRIS UserChange event is defensibly bound."
         />
       </section>
-    </main>
+          <section className="mt-8 rounded-2xl border border-sky-300/15 bg-sky-300/[0.045] p-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-100/60">
+          Supporting control-plane breadth
+        </p>
+
+        <div className="mt-3 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold text-white">
+              Web Apps &amp; REST
+            </h2>
+
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/50">
+              Inspect protected Meridian web applications and deployed REST operations
+              without widening browser mutation authority.
+            </p>
+          </div>
+
+          <Link
+            href="/web-rest"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-sky-300/25 bg-sky-300/10 px-4 text-sm font-semibold text-sky-100 transition hover:bg-sky-300/15"
+          >
+            Explore Web Apps / REST
+          </Link>
+        </div>
+      </section>
+</main>
   );
 }
 

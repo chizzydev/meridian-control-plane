@@ -212,6 +212,32 @@ export default function Home() {
           </Link>
         </div>
       </section>
+      <section className="mt-8 rounded-2xl border border-cyan-300/15 bg-cyan-300/[0.045] p-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-100/60">
+          Supporting control-plane breadth
+        </p>
+
+        <div className="mt-3 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold text-white">
+              Task Management
+            </h2>
+
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/50">
+              Inspect live Task Manager state, configured schedules, upcoming
+              executions, and recent history through a task-specific escalation role.
+            </p>
+          </div>
+
+          <Link
+            href="/tasks"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-cyan-300/25 bg-cyan-300/10 px-4 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-300/15"
+          >
+            Explore Task Management
+          </Link>
+        </div>
+      </section>
+
 </main>
   );
 }

@@ -263,6 +263,31 @@ export default function Home() {
           </Link>
         </div>
       </section>
+      <section className="mt-8 rounded-2xl border border-amber-300/15 bg-amber-300/[0.045] p-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-100/60">
+          Supporting control-plane breadth
+        </p>
+
+        <div className="mt-3 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold text-white">
+              Logs
+            </h2>
+
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/50">
+              Explore non-audit operational log evidence by source, severity,
+              and time through a narrow SQL SELECT boundary.
+            </p>
+          </div>
+
+          <Link
+            href="/logs"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-amber-300/25 bg-amber-300/10 px-4 text-sm font-semibold text-amber-100 transition hover:bg-amber-300/15"
+          >
+            Explore Logs
+          </Link>
+        </div>
+      </section>
 </main>
   );
 }

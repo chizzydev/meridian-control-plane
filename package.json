@@ -1,38 +1,43 @@
 {
-  "name": "meridian-control-plane",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "test": "vitest run",
-    "typecheck": "tsc --noEmit",
-    "verify:iris-read": "tsx scripts/verify-iris-read-foundation.mts",
-    "verify:iris-preflight": "tsx scripts/verify-iris-preflight.mts",
-    "verify:iris-impact": "tsx scripts/verify-iris-impact.mts",
-    "verify:iris-reviewable-preflight": "tsx scripts/verify-iris-reviewable-preflight.mts",
-    "verify:iris-ready-preflight": "tsx scripts/verify-iris-ready-preflight.mts",
-    "verify:iris-apply-revalidation": "tsx scripts/verify-iris-apply-revalidation.mts",
-    "verify:iris-role-mutation-design": "tsx scripts/verify-iris-role-mutation-design.mts",
-    "verify:iris-role-mutation-executor": "tsx scripts/verify-iris-role-mutation-executor.mts"
-  },
-  "dependencies": {
-    "next": "16.3.3",
-    "react": "19.2.8",
-    "react-dom": "19.2.8"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.3.3",
-    "tailwindcss": "^4",
-    "tsx": "4.23.13",
-    "typescript": "^5",
-    "vitest": "4.1.11"
-  }
+    "name":  "meridian-control-plane",
+    "version":  "0.1.0",
+    "private":  true,
+    "scripts":  {
+                    "dev":  "next dev",
+                    "build":  "next build",
+                    "start":  "next start",
+                    "lint":  "eslint",
+                    "test":  "vitest run",
+                    "typecheck":  "tsc --noEmit",
+                    "verify:iris-read":  "tsx scripts/verify-iris-read-foundation.mts",
+                    "verify:iris-preflight":  "tsx scripts/verify-iris-preflight.mts",
+                    "verify:iris-impact":  "tsx scripts/verify-iris-impact.mts",
+                    "verify:iris-reviewable-preflight":  "tsx scripts/verify-iris-reviewable-preflight.mts",
+                    "verify:iris-ready-preflight":  "tsx scripts/verify-iris-ready-preflight.mts",
+                    "verify:iris-apply-revalidation":  "tsx scripts/verify-iris-apply-revalidation.mts",
+                    "verify:iris-role-mutation-design":  "tsx scripts/verify-iris-role-mutation-design.mts",
+                    "verify:iris-role-mutation-executor":  "tsx scripts/verify-iris-role-mutation-executor.mts",
+                    "demo:setup:check":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/meridian-repro.ps1 -Command setup-check",
+                    "demo:setup":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/meridian-repro.ps1 -Command setup",
+                    "demo:readiness":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/meridian-repro.ps1 -Command readiness",
+                    "demo:cycle":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/meridian-repro.ps1 -Command cycle",
+                    "demo:start":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/meridian-repro.ps1 -Command start"
+                },
+    "dependencies":  {
+                         "next":  "16.3.3",
+                         "react":  "19.2.8",
+                         "react-dom":  "19.2.8"
+                     },
+    "devDependencies":  {
+                            "@tailwindcss/postcss":  "^4",
+                            "@types/node":  "^20",
+                            "@types/react":  "^19",
+                            "@types/react-dom":  "^19",
+                            "eslint":  "^9",
+                            "eslint-config-next":  "16.3.3",
+                            "tailwindcss":  "^4",
+                            "tsx":  "4.23.13",
+                            "typescript":  "^5",
+                            "vitest":  "4.1.11"
+                        }
 }

@@ -13,6 +13,7 @@ import {
 
 import {
   join,
+  resolve,
 } from "node:path";
 
 import {
@@ -238,12 +239,15 @@ const vault:
 };
 
 const PROCESS_QUERY_PYTHON =
-  join(
-    homedir(),
-    "intersystems-inspections",
-    "s1a-native-sdk-venv",
-    "Scripts",
-    "python.exe",
+  process.env
+    .MERIDIAN_IRISPYTHON_EXECUTABLE
+    ?.trim() ||
+  resolve(
+    process.cwd(),
+    ".venv-iris",
+    process.platform === "win32"
+      ? "Scripts/python.exe"
+      : "bin/python",
   );
 
 const PROCESS_QUERY_SOURCE =

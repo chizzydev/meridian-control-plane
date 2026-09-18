@@ -238,6 +238,31 @@ export default function Home() {
         </div>
       </section>
 
+      <section className="mt-8 rounded-2xl border border-sky-300/15 bg-sky-300/[0.045] p-6">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-100/60">
+          Supporting control-plane breadth
+        </p>
+
+        <div className="mt-3 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold text-white">
+              OS / System
+            </h2>
+
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/50">
+              Inspect live resource pressure, usage, memory, locks, and process
+              visibility through a read-only server-owned authority boundary.
+            </p>
+          </div>
+
+          <Link
+            href="/system"
+            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-sky-300/25 bg-sky-300/10 px-4 text-sm font-semibold text-sky-100 transition hover:bg-sky-300/15"
+          >
+            Explore OS / System
+          </Link>
+        </div>
+      </section>
 </main>
   );
 }

@@ -21,7 +21,9 @@
                     "demo:setup":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/meridian-repro.ps1 -Command setup",
                     "demo:readiness":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/meridian-repro.ps1 -Command readiness",
                     "demo:cycle":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/meridian-repro.ps1 -Command cycle",
-                    "demo:start":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/meridian-repro.ps1 -Command start"
+                    "demo:start":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/meridian-repro.ps1 -Command start",
+                    "demo:bootstrap:check":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/bootstrap-iris.ps1",
+                    "demo:bootstrap":  "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/bootstrap-iris.ps1 -Apply"
                 },
     "dependencies":  {
                          "next":  "16.3.3",

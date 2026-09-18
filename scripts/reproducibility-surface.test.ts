@@ -163,6 +163,8 @@ describe(
         ).toEqual(
           expect.arrayContaining(
             [
+              "demo:bootstrap:check",
+              "demo:bootstrap",
               "demo:setup:check",
               "demo:setup",
               "demo:readiness",
@@ -210,7 +212,18 @@ describe(
         expect(
           wrapper,
         ).toContain(
-          "MERIDIAN_REPRO_IRIS_DECLARATIVE_BOOTSTRAP=PENDING_B1B2",
+          "MERIDIAN_REPRO_IRIS_DECLARATIVE_BOOTSTRAP=PASS",
+        );
+        expect(
+          wrapper,
+        ).toContain(
+          "bootstrap-iris.ps1",
+        );
+
+        expect(
+          wrapper,
+        ).toContain(
+          "MERIDIAN_REPRO_IRIS_BOOTSTRAP_DRY_RUN=PASS",
         );
       },
     );

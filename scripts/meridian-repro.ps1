@@ -38,6 +38,10 @@ $HelperInstaller =
     Join-Path `
         $Repo `
         "scripts\install-iris-helper-web-app.ps1"
+$BootstrapInstaller =
+    Join-Path `
+        $Repo `
+        "scripts\bootstrap-iris.ps1"
 
 $TsxCli =
     Join-Path `
@@ -230,6 +234,44 @@ function Invoke-HelperDryRun {
     Assert-Exit `
         -ExitCode $LASTEXITCODE `
         -Label "MERIDIAN_REPRO_HELPER_INSTALLER_DRY_RUN"
+}
+
+function Invoke-BootstrapDryRun {
+    $Output = @(
+        & powershell.exe `
+            -NoProfile `
+            -ExecutionPolicy Bypass `
+            -File $BootstrapInstaller `
+            -ContainerName $ContainerName `
+            2>&1
+    )
+
+    $ExitCode = $LASTEXITCODE
+    foreach ($Line in $Output) { Write-Host $Line }
+    if ($ExitCode -ne 0) { throw "Declarative IRIS bootstrap dry-run failed." }
+
+    $Text = ($Output | ForEach-Object { [string]$_ }) -join "`n"
+    $Lines = @(
+        $Text.Replace("`r`n","`n").Replace("`r","`n") -split "`n"
+    )
+    if (-not ($Lines -contains "MERIDIAN_BOOTSTRAP_RESULT=ALREADY_CONVERGED")) {
+        throw "IRIS is not converged. Run demo:setup to apply the frozen bootstrap."
+    }
+
+    Write-Host "MERIDIAN_REPRO_IRIS_BOOTSTRAP_DRY_RUN=PASS"
+}
+
+function Invoke-BootstrapApply {
+    & powershell.exe `
+        -NoProfile `
+        -ExecutionPolicy Bypass `
+        -File $BootstrapInstaller `
+        -ContainerName $ContainerName `
+        -Apply
+
+    Assert-Exit `
+        -ExitCode $LASTEXITCODE `
+        -Label "MERIDIAN_REPRO_IRIS_BOOTSTRAP_APPLY"
 }
 
 function Invoke-LiveFixtureCommand {
@@ -488,6 +530,7 @@ function Invoke-SetupCheck {
         $Requirements,
         $FixtureCli,
         $HelperInstaller,
+        $BootstrapInstaller,
         $TsxCli
     )) {
         if (
@@ -503,9 +546,10 @@ function Invoke-SetupCheck {
 
     Assert-DbApi
     Invoke-HelperDryRun
+    Invoke-BootstrapDryRun
 
     Write-Host "MERIDIAN_REPRO_HOST_SETUP=PASS"
-    Write-Host "MERIDIAN_REPRO_IRIS_DECLARATIVE_BOOTSTRAP=PENDING_B1B2"
+    Write-Host "MERIDIAN_REPRO_IRIS_DECLARATIVE_BOOTSTRAP=PASS"
     Write-Host "MERIDIAN_REPRO_SETUP_CHECK=PASS"
 }
 
@@ -564,10 +608,11 @@ function Invoke-Setup {
         -ExitCode $LASTEXITCODE `
         -Label "MERIDIAN_REPRO_IRISPYTHON_INSTALL"
 
+    Invoke-BootstrapApply
     Invoke-SetupCheck
 
     Write-Host "MERIDIAN_REPRO_SETUP=PASS"
-    Write-Host "MERIDIAN_REPRO_IRIS_DECLARATIVE_BOOTSTRAP=PENDING_B1B2"
+    Write-Host "MERIDIAN_REPRO_IRIS_DECLARATIVE_BOOTSTRAP=PASS"
 }
 
 Set-Location `

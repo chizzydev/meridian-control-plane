@@ -1815,3 +1815,165 @@ body {
     padding: 16px;
   }
 }
+/* MERIDIAN_DESIGN_D2E_RUNTIME_EVIDENCE */
+.meridian-runtime-page {
+  width: min(100%, 1540px);
+  margin: 0 auto;
+  padding: 34px 34px 56px;
+}
+
+.meridian-runtime-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.meridian-runtime-section {
+  margin-top: 34px;
+  border-top: 1px solid var(--meridian-line);
+  padding-top: 18px;
+}
+
+.meridian-runtime-section > .meridian-table-wrap {
+  margin-top: 16px;
+}
+
+.meridian-runtime-split {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.meridian-runtime-table {
+  min-width: 680px;
+}
+
+.meridian-process-table {
+  min-width: 900px;
+}
+
+.meridian-lock-table {
+  min-width: 760px;
+}
+
+.meridian-task-table {
+  min-width: 980px;
+}
+
+.meridian-log-table {
+  min-width: 1080px;
+}
+
+.meridian-authority-table {
+  min-width: 620px;
+}
+
+.meridian-runtime-filter {
+  display: grid;
+  grid-template-columns:
+    minmax(180px, 1.25fr)
+    minmax(150px, 0.8fr)
+    minmax(150px, 0.8fr)
+    auto;
+  gap: 1px;
+  margin-top: 16px;
+  border: 1px solid var(--meridian-line);
+  background: var(--meridian-line);
+}
+
+.meridian-runtime-filter > label,
+.meridian-runtime-filter-actions {
+  min-width: 0;
+  background: var(--meridian-surface-0);
+  padding: 12px;
+}
+
+.meridian-runtime-filter > label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.meridian-runtime-filter > label > span {
+  color: var(--meridian-text-faint);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.meridian-runtime-filter input,
+.meridian-runtime-filter select {
+  width: 100%;
+  min-height: 34px;
+  border: 1px solid var(--meridian-line);
+  border-radius: 3px;
+  outline: 0;
+  background: var(--meridian-surface-1);
+  color: var(--meridian-text);
+  padding: 0 9px;
+  font-size: 10px;
+}
+
+.meridian-runtime-filter input:focus,
+.meridian-runtime-filter select:focus {
+  border-color: rgba(103, 232, 249, 0.42);
+}
+
+.meridian-runtime-filter-actions {
+  display: flex;
+  align-items: end;
+  gap: 7px;
+}
+
+.meridian-runtime-page .meridian-authority-callout {
+  margin-top: 14px;
+}
+
+.meridian-runtime-page .meridian-key-value-inspector {
+  margin-top: 14px;
+}
+
+.meridian-runtime-page .meridian-data-table td {
+  vertical-align: top;
+}
+
+.meridian-runtime-page .meridian-data-table small {
+  display: block;
+  margin-top: 4px;
+  color: var(--meridian-text-faint);
+  font-size: 9px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+@media (max-width: 1180px) {
+  .meridian-runtime-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .meridian-runtime-split {
+    grid-template-columns: 1fr;
+  }
+
+  .meridian-runtime-filter {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .meridian-runtime-page {
+    padding: 24px 16px 42px;
+  }
+
+  .meridian-runtime-metrics,
+  .meridian-runtime-filter {
+    grid-template-columns: 1fr;
+  }
+
+  .meridian-runtime-filter-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

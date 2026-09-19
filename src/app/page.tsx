@@ -1,339 +1,432 @@
 import Link from "next/link";
 
 import {
+  AuthorityCallout,
+  CodeValue,
+  EvidenceBlock,
+  EvidenceRail,
+  KeyValueInspector,
+  MetricCell,
+  PageHeader,
+  SectionHeader,
+  StatusBadge,
+} from "@/components/meridian/primitives";
+import {
   getRecordedVerifiedReceipt,
   summarizeRecordedReceipt,
 } from "@/lib/change-case/recorded-receipt";
 
 const lifecycle = [
-  "PRE-FLIGHT",
-  "APPLY",
-  "CONVERGE",
-  "VERIFIED",
+  {
+    label: "PRE-FLIGHT",
+    detail: "Impact resolved",
+    state: "complete",
+  },
+  {
+    label: "APPLY",
+    detail: "Reviewed mutation",
+    state: "complete",
+  },
+  {
+    label: "CONVERGE",
+    detail: "Live authority cleared",
+    state: "complete",
+  },
+  {
+    label: "VERIFIED",
+    detail: "Native audit bound",
+    state: "complete",
+  },
 ] as const;
 
-export default function Home() {
-  const receipt =
-    getRecordedVerifiedReceipt();
 
-  const summary =
-    summarizeRecordedReceipt(
-      receipt,
-    );
+export default function Home() {
+  const receipt = getRecordedVerifiedReceipt();
+  const summary = summarizeRecordedReceipt(receipt);
+
+  const caseTitle = `${receipt.change.operation} ${receipt.change.role}`;
 
   return (
-    <main className="mx-auto min-h-screen max-w-7xl px-6 py-8 sm:px-10 sm:py-12">
-      <section className="grid gap-8 lg:grid-cols-[1.3fr_0.7fr] lg:items-start">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200/70">
-            Meridian Control Plane
-          </p>
-
-          <h1 className="mt-4 max-w-4xl text-5xl font-semibold tracking-[-0.055em] sm:text-6xl lg:text-7xl">
-            Security changes are not finished when configuration changes.
-          </h1>
-
-          <p className="mt-6 max-w-3xl text-lg leading-8 text-white/55">
-            Meridian previews the real authorization impact, applies the exact
-            reviewed role change, observes whether live IRIS processes still
-            retain removed authority, and closes the Change Case only after
-            convergence and native audit evidence agree.
-          </p>
-
-          <div className="mt-7 flex flex-wrap items-center gap-2">
-            {lifecycle.map(
-              (
-                stage,
-                index,
-              ) => (
-                <div
-                  key={stage}
-                  className="flex items-center gap-2"
-                >
-                  <span className="rounded-lg border border-white/10 bg-white/[0.035] px-3 py-2 text-xs font-semibold tracking-wide text-white/70">
-                    {stage}
-                  </span>
-
-                  {index <
-                  lifecycle.length -
-                    1 ? (
-                    <span className="text-white/20">
-                      Ã¢â€ â€™
-                    </span>
-                  ) : null}
-                </div>
-              ),
-            )}
-          </div>
-
-          <div className="mt-8 flex flex-wrap gap-3">
+    <main className="meridian-control-room">
+      <PageHeader
+        eyebrow="Meridian Control Plane / Control room"
+        title="Security change, under proof."
+        description="Security changes are not finished when configuration changes. Meridian binds reviewed authority, live convergence, and native IRIS evidence into one inspectable Change Case."
+        actions={
+          <>
             <Link
               href="/change-cases"
-              className="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-300 px-6 text-sm font-semibold text-emerald-950 transition hover:bg-emerald-200"
+              className="meridian-action meridian-action-primary"
             >
               Open Change Queue
             </Link>
-
             <Link
               href="/change-cases/new"
-              className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/10 bg-white/[0.035] px-6 text-sm font-semibold text-white/70 transition hover:bg-white/[0.07]"
+              className="meridian-action"
             >
               Stage access change
             </Link>
+          </>
+        }
+      />
+
+      <section className="meridian-control-signal-row" aria-label="Control room summary">
+        <MetricCell
+          label="Case state"
+          value="VERIFIED"
+          detail="Recorded certified receipt"
+        />
+        <MetricCell
+          label="Effective roles removed"
+          value={summary.lostEffectiveRoleCount}
+          detail="Derived from authoritative impact"
+        />
+        <MetricCell
+          label="Permissions removed"
+          value={summary.lostPermissionCount}
+          detail="Changed permission pairs"
+        />
+        <MetricCell
+          label="Residual live access"
+          value={receipt.convergence.liveResidueObserved ? "Observed" : "None"}
+          detail="Recorded convergence result"
+        />
+      </section>
+
+      <section className="meridian-control-focus">
+        <div className="meridian-control-case">
+          <SectionHeader
+            eyebrow="Verified centerpiece"
+            title="Maya Patel / supervisor removal"
+            detail="One change case carried from pre-flight through native audit closure."
+            action={<StatusBadge tone="success">VERIFIED</StatusBadge>}
+          />
+
+          <div className="meridian-control-case-title">
+            <div>
+              <span className="meridian-record-label">Certified change</span>
+              <strong>{caseTitle}</strong>
+            </div>
+            <CodeValue>{receipt.change.username}</CodeValue>
+          </div>
+
+          <div className="meridian-control-rail-wrap">
+            <EvidenceRail steps={[...lifecycle]} />
+          </div>
+
+          <div className="meridian-control-inspector-grid">
+            <KeyValueInspector
+              rows={[
+                {
+                  label: "User",
+                  value: receipt.change.username,
+                  mono: true,
+                },
+                {
+                  label: "Operation",
+                  value: receipt.change.operation,
+                },
+                {
+                  label: "Role",
+                  value: receipt.change.role,
+                  mono: true,
+                },
+                {
+                  label: "Receipt",
+                  value: <CodeValue truncate>{receipt.receiptId}</CodeValue>,
+                },
+              ]}
+            />
+
+            <KeyValueInspector
+              rows={[
+                {
+                  label: "Configuration",
+                  value: "Applied and verified",
+                },
+                {
+                  label: "Live access",
+                  value: receipt.convergence.targetProcessPresent
+                    ? "Target process present"
+                    : "Target process absent",
+                },
+                {
+                  label: "Native audit",
+                  value: `UserChange #${receipt.nativeAudit.auditIndex}`,
+                  mono: true,
+                },
+                {
+                  label: "Evidence mode",
+                  value: "Read-only demo evidence",
+                },
+              ]}
+            />
           </div>
         </div>
 
-        <aside className="rounded-3xl border border-emerald-300/20 bg-emerald-300/[0.045] p-6 shadow-2xl shadow-black/20 sm:p-7">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-2.5 py-1 text-[10px] font-semibold text-emerald-100">
-              VERIFIED
-            </span>
-
-            <span className="text-[10px] uppercase tracking-[0.16em] text-white/35">
-              Recorded centerpiece
-            </span>
+        <aside className="meridian-control-receipt">
+          <div className="meridian-control-receipt-head">
+            <div>
+              <p className="meridian-eyebrow">Recorded certified receipt</p>
+              <h2>Closure evidence</h2>
+            </div>
+            <StatusBadge tone="success">BOUND</StatusBadge>
           </div>
 
-          <h2 className="mt-5 text-2xl font-semibold tracking-[-0.03em]">
-            Maya Patel
-          </h2>
+          <EvidenceBlock
+            label="Authority removed"
+            title={`${summary.lostPermissionCount} permission pairs`}
+            tone="success"
+          >
+            <div className="meridian-control-impact-list">
+              <span>
+                <strong>{summary.lostEffectiveRoleCount}</strong>
+                roles lost
+              </span>
+              <span>
+                <strong>{summary.lostApplicationCount}</strong>
+                protected app lost
+              </span>
+              <span>
+                <strong>{summary.lostRestOperationCount}</strong>
+                REST ops lost
+              </span>
+            </div>
+          </EvidenceBlock>
 
-          <p className="mt-1 font-mono text-sm text-white/40">
-            {receipt.change.username}
-          </p>
-
-          <div className="mt-6 rounded-2xl border border-white/10 bg-black/15 p-5">
-            <p className="text-xs text-white/35">
-              Certified change
+          <EvidenceBlock
+            label="Convergence"
+            title="CONFIGURATION + LIVE ACCESS"
+            tone="info"
+          >
+            <p className="meridian-control-evidence-copy">
+              Configuration changed, live authority converged, and the exact
+              native audit event was bound before VERIFIED closure.
             </p>
-
-            <p className="mt-2 text-sm font-semibold text-white/75">
-              {receipt.change.operation} {receipt.change.role}
-            </p>
-          </div>
-
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <MiniMetric
-              value={summary.lostEffectiveRoleCount}
-              label="roles lost"
-            />
-
-            <MiniMetric
-              value={summary.lostPermissionCount}
-              label="permissions lost"
-            />
-
-            <MiniMetric
-              value={summary.lostApplicationCount}
-              label="app lost"
-            />
-
-            <MiniMetric
-              value={summary.lostRestOperationCount}
-              label="REST ops lost"
-            />
-          </div>
+          </EvidenceBlock>
 
           <Link
             href="/change-cases/verified/maya-patel-supervisor-removal"
-            className="mt-5 flex min-h-11 w-full items-center justify-center rounded-xl bg-white px-4 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
+            className="meridian-control-receipt-link"
           >
             Inspect verified receipt
+            <span aria-hidden="true">-&gt;</span>
           </Link>
         </aside>
       </section>
 
-      <section className="mt-10 grid gap-4 border-t border-white/10 pt-8 md:grid-cols-3">
-        <ProofCard
-          label="01"
-          title="PRE-FLIGHT"
-          body="Derive effective-role, permission, application, REST-operation and causal impact from authoritative IRIS facts before mutation."
+      <section className="meridian-control-section">
+        <SectionHeader
+          eyebrow="Change control"
+          title="Recent change cases"
+          detail="The control room favors state, authority, convergence, and receipt evidence over marketing summaries."
+          action={
+            <Link href="/change-cases" className="meridian-text-link">
+              Full queue
+            </Link>
+          }
         />
 
-        <ProofCard
-          label="02"
-          title="CONVERGE"
-          body="Keep CONFIGURATION and LIVE ACCESS separate. A successful role update does not by itself close the Change Case."
+        <div className="meridian-table-wrap">
+          <table className="meridian-data-table">
+            <thead>
+              <tr>
+                <th>Case</th>
+                <th>Subject</th>
+                <th>Authority change</th>
+                <th>Convergence</th>
+                <th>Receipt</th>
+                <th aria-label="Open case" />
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <StatusBadge tone="success">VERIFIED</StatusBadge>
+                </td>
+                <td>
+                  <strong>Maya Patel</strong>
+                  <small>{receipt.change.username}</small>
+                </td>
+                <td>
+                  <CodeValue>
+                    {receipt.change.operation} {receipt.change.role}
+                  </CodeValue>
+                </td>
+                <td>
+                  <span className="meridian-inline-state" data-tone="success">
+                    <span />
+                    No residual access
+                  </span>
+                </td>
+                <td>
+                  <CodeValue truncate>{receipt.receiptId}</CodeValue>
+                </td>
+                <td>
+                  <Link
+                    href="/change-cases/verified/maya-patel-supervisor-removal"
+                    className="meridian-row-link"
+                    aria-label="Open Maya Patel verified change case"
+                  >
+                    View
+                  </Link>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="meridian-control-grid">
+        <div className="meridian-control-section">
+          <SectionHeader
+            eyebrow="Evidence posture"
+            title="Configuration is not closure"
+            detail="The change only closes when configured state, live process authority, and native audit evidence agree."
+          />
+
+          <div className="meridian-control-posture">
+            <div>
+              <span className="meridian-posture-index">01</span>
+              <div>
+                <strong>PRE-FLIGHT</strong>
+                <p>
+                  Resolve effective-role, permission, application, REST-operation,
+                  and causal impact before mutation.
+                </p>
+              </div>
+            </div>
+            <div>
+              <span className="meridian-posture-index">02</span>
+              <div>
+                <strong>CONVERGE</strong>
+                <p>
+                  Keep CONFIGURATION and LIVE ACCESS separate until changed
+                  authority has actually disappeared.
+                </p>
+              </div>
+            </div>
+            <div>
+              <span className="meridian-posture-index">03</span>
+              <div>
+                <strong>RECEIPT</strong>
+                <p>
+                  Bind an exact native IRIS UserChange event before VERIFIED
+                  becomes defensible.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="meridian-control-section">
+          <SectionHeader
+            eyebrow="Authority boundary"
+            title="Evidence, not browser privilege"
+            detail="The public-facing surface presents certified evidence without widening privileged mutation authority."
+          />
+
+          <AuthorityCallout
+            eyebrow="Recorded evidence"
+            title="Read-only demo evidence"
+            detail="The centerpiece receipt is a recorded certified artifact. Privileged IRIS mutation stays outside the browser authority boundary."
+            tone="info"
+          />
+
+          <div className="meridian-control-boundary-stats">
+            <MetricCell
+              label="Browser mutation authority"
+              value="None"
+              detail="No privileged role mutation from this surface"
+            />
+            <MetricCell
+              label="Receipt validation"
+              value="Bound"
+              detail="Validated product-side receipt contract"
+            />
+          </div>
+        </div>
+      </section>
+
+      <section className="meridian-control-section">
+        <SectionHeader
+          eyebrow="Supporting control-plane breadth"
+          title="Runtime surfaces"
+          detail="Five operational surfaces expose the surrounding IRIS control plane without competing with the change-case fast path."
         />
 
-        <ProofCard
-          label="03"
-          title="RECEIPT"
-          body="Close VERIFIED only after changed permissions converge and a native IRIS UserChange event is defensibly bound."
-        />
-      </section>
-          <section className="mt-8 rounded-2xl border border-sky-300/15 bg-sky-300/[0.045] p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-100/60">
-          Supporting control-plane breadth
-        </p>
+        <div className="meridian-surface-ledger">
+          <Link href="/system" aria-label="Explore OS / System">
+            <span className="meridian-surface-state" aria-hidden="true" />
+            <span>
+              <strong>OS / System</strong>
+              <small>Runtime identity, pressure, locks, process evidence</small>
+            </span>
+            <span className="meridian-surface-boundary">
+              Read-only server authority
+            </span>
+            <span className="meridian-surface-open" aria-hidden="true">
+              -&gt;
+            </span>
+          </Link>
 
-        <div className="mt-3 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold text-white">
-              Web Apps &amp; REST
-            </h2>
+          <Link href="/tasks" aria-label="Explore Task Management">
+            <span className="meridian-surface-state" aria-hidden="true" />
+            <span>
+              <strong>Task Management</strong>
+              <small>Configured schedules, next execution, recent history</small>
+            </span>
+            <span className="meridian-surface-boundary">
+              Task metadata escalation
+            </span>
+            <span className="meridian-surface-open" aria-hidden="true">
+              -&gt;
+            </span>
+          </Link>
 
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/50">
-              Inspect protected Meridian web applications and deployed REST operations
-              without widening browser mutation authority.
-            </p>
-          </div>
+          <Link href="/logs" aria-label="Explore Logs">
+            <span className="meridian-surface-state" aria-hidden="true" />
+            <span>
+              <strong>Logs</strong>
+              <small>Operational events by source, severity, and time</small>
+            </span>
+            <span className="meridian-surface-boundary">
+              Narrow SQL SELECT
+            </span>
+            <span className="meridian-surface-open" aria-hidden="true">
+              -&gt;
+            </span>
+          </Link>
 
-          <Link
-            href="/web-rest"
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-sky-300/25 bg-sky-300/10 px-4 text-sm font-semibold text-sky-100 transition hover:bg-sky-300/15"
-          >
-            Explore Web Apps / REST
+          <Link href="/web-rest" aria-label="Explore Web Apps / REST">
+            <span className="meridian-surface-state" aria-hidden="true" />
+            <span>
+              <strong>Web Apps &amp; REST</strong>
+              <small>Protected applications, handlers, deployed operations</small>
+            </span>
+            <span className="meridian-surface-boundary">
+              Browser remains read-only
+            </span>
+            <span className="meridian-surface-open" aria-hidden="true">
+              -&gt;
+            </span>
+          </Link>
+
+          <Link href="/security-secrets" aria-label="Explore Security / Secrets">
+            <span className="meridian-surface-state" aria-hidden="true" />
+            <span>
+              <strong>Security &amp; Secrets</strong>
+              <small>Security metadata and explicit secret boundaries</small>
+            </span>
+            <span className="meridian-surface-boundary">
+              Secret material never reaches browser
+            </span>
+            <span className="meridian-surface-open" aria-hidden="true">
+              -&gt;
+            </span>
           </Link>
         </div>
       </section>
-      <section className="mt-8 rounded-2xl border border-violet-300/15 bg-violet-300/[0.045] p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-violet-100/60">
-          Supporting control-plane breadth
-        </p>
-
-        <div className="mt-3 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold text-white">
-              Security &amp; Secrets
-            </h2>
-
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/50">
-              Inspect safe security metadata through an explicit least-privilege
-              escalation role. Secret material never reaches the browser.
-            </p>
-          </div>
-
-          <Link
-            href="/security-secrets"
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-violet-300/25 bg-violet-300/10 px-4 text-sm font-semibold text-violet-100 transition hover:bg-violet-300/15"
-          >
-            Explore Security / Secrets
-          </Link>
-        </div>
-      </section>
-      <section className="mt-8 rounded-2xl border border-cyan-300/15 bg-cyan-300/[0.045] p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-cyan-100/60">
-          Supporting control-plane breadth
-        </p>
-
-        <div className="mt-3 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold text-white">
-              Task Management
-            </h2>
-
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/50">
-              Inspect live Task Manager state, configured schedules, upcoming
-              executions, and recent history through a task-specific escalation role.
-            </p>
-          </div>
-
-          <Link
-            href="/tasks"
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-cyan-300/25 bg-cyan-300/10 px-4 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-300/15"
-          >
-            Explore Task Management
-          </Link>
-        </div>
-      </section>
-
-      <section className="mt-8 rounded-2xl border border-sky-300/15 bg-sky-300/[0.045] p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-100/60">
-          Supporting control-plane breadth
-        </p>
-
-        <div className="mt-3 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold text-white">
-              OS / System
-            </h2>
-
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/50">
-              Inspect live resource pressure, usage, memory, locks, and process
-              visibility through a read-only server-owned authority boundary.
-            </p>
-          </div>
-
-          <Link
-            href="/system"
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-sky-300/25 bg-sky-300/10 px-4 text-sm font-semibold text-sky-100 transition hover:bg-sky-300/15"
-          >
-            Explore OS / System
-          </Link>
-        </div>
-      </section>
-      <section className="mt-8 rounded-2xl border border-amber-300/15 bg-amber-300/[0.045] p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-100/60">
-          Supporting control-plane breadth
-        </p>
-
-        <div className="mt-3 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold text-white">
-              Logs
-            </h2>
-
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-white/50">
-              Explore non-audit operational log evidence by source, severity,
-              and time through a narrow SQL SELECT boundary.
-            </p>
-          </div>
-
-          <Link
-            href="/logs"
-            className="inline-flex min-h-11 items-center justify-center rounded-xl border border-amber-300/25 bg-amber-300/10 px-4 text-sm font-semibold text-amber-100 transition hover:bg-amber-300/15"
-          >
-            Explore Logs
-          </Link>
-        </div>
-      </section>
-</main>
-  );
-}
-
-function MiniMetric({
-  value,
-  label,
-}: {
-  value: number;
-  label: string;
-}) {
-  return (
-    <div className="rounded-xl border border-white/10 bg-black/10 p-4">
-      <p className="text-2xl font-semibold">
-        {value}
-      </p>
-
-      <p className="mt-1 text-xs text-white/40">
-        {label}
-      </p>
-    </div>
-  );
-}
-
-function ProofCard({
-  label,
-  title,
-  body,
-}: {
-  label: string;
-  title: string;
-  body: string;
-}) {
-  return (
-    <article className="rounded-2xl border border-white/10 bg-black/10 p-5">
-      <span className="text-xs font-semibold text-emerald-200/70">
-        {label}
-      </span>
-
-      <h2 className="mt-4 font-semibold">
-        {title}
-      </h2>
-
-      <p className="mt-2 text-sm leading-6 text-white/45">
-        {body}
-      </p>
-    </article>
+    </main>
   );
 }

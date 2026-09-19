@@ -1,98 +1,199 @@
 import Link from "next/link";
 
+import {
+  AuthorityCallout,
+  CodeValue,
+  EvidenceRail,
+  type EvidenceStep,
+  PageHeader,
+  SectionHeader,
+  StatusBadge,
+} from "@/components/meridian/primitives";
 import { CENTERPIECE_CHANGE } from "@/lib/change-case/domain";
+
+const stagingLifecycle: EvidenceStep[] = [
+  {
+    label: "PRE-FLIGHT",
+    detail: "Not connected",
+    state: "active",
+  },
+  {
+    label: "AUTHORITY",
+    detail: "Pending IRIS read",
+    state: "pending",
+  },
+  {
+    label: "APPLY",
+    detail: "Blocked",
+    state: "pending",
+  },
+  {
+    label: "CONVERGENCE",
+    detail: "Not started",
+    state: "pending",
+  },
+  {
+    label: "RECEIPT",
+    detail: "Not available",
+    state: "pending",
+  },
+];
+
+const preflightGates = [
+  {
+    gate: "Requested identity",
+    evidence: "CENTERPIECE_CHANGE",
+    status: "BOUND",
+    tone: "neutral",
+  },
+  {
+    gate: "Mutation shape",
+    evidence: "Direct role mutation",
+    status: "BOUND",
+    tone: "neutral",
+  },
+  {
+    gate: "Authoritative IRIS impact",
+    evidence: "Live security read not connected",
+    status: "PENDING",
+    tone: "warning",
+  },
+  {
+    gate: "Counterfactual authorization",
+    evidence: "No authoritative evaluation yet",
+    status: "PENDING",
+    tone: "warning",
+  },
+] as const;
 
 export default function NewChangeCasePage() {
   return (
-    <main className="mx-auto min-h-screen max-w-5xl px-6 py-8 sm:px-10 sm:py-12">
-      <Link
-        href="/"
-        className="text-sm text-white/45 transition hover:text-white"
-      >
-        ← Change queue
-      </Link>
+    <main className="meridian-new-case">
+      <PageHeader
+        eyebrow="Change control / Stage access change"
+        title="Define the mutation. Prove the impact next."
+        description="This staging surface is intentionally constrained to one controlled user and one direct-role operation. No impact numbers are invented before the authoritative IRIS preflight exists."
+        actions={
+          <>
+            <Link href="/change-cases" className="meridian-action">
+              Back to Change Queue
+            </Link>
+            <Link href="/" className="meridian-text-link">
+              Control room
+            </Link>
+          </>
+        }
+      />
 
-      <div className="mt-10 max-w-3xl">
-        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-200/70">
-          Stage access change
-        </p>
+      <section className="meridian-new-case-rail" aria-label="Change lifecycle">
+        <EvidenceRail steps={stagingLifecycle} />
+      </section>
 
-        <h1 className="mt-3 text-4xl font-semibold tracking-[-0.035em]">
-          Define the exact mutation before asking IRIS what it means.
-        </h1>
-
-        <p className="mt-4 text-base leading-7 text-white/50">
-          This first slice is intentionally constrained to one controlled user
-          and one direct-role operation. Impact is not hard-coded here; the
-          authoritative preflight will be produced by the IRIS adapter.
-        </p>
-      </div>
-
-      <section className="mt-10 rounded-3xl border border-white/10 bg-white/[0.035] p-6 sm:p-8">
-        <div className="grid gap-6 sm:grid-cols-3">
-          <Field
-            label="User"
-            value={CENTERPIECE_CHANGE.displayName}
-            detail={CENTERPIECE_CHANGE.username}
+      <form className="meridian-staging-console" aria-label="Staged access change">
+        <section className="meridian-staging-intent">
+          <SectionHeader
+            eyebrow="01 / Change intent"
+            title="Controlled centerpiece mutation"
+            detail="The values are bound to the certified demo fixture. They are displayed as request fields but remain read-only in this checkpoint."
           />
 
-          <Field
-            label="Operation"
-            value={CENTERPIECE_CHANGE.operation}
-            detail="Direct role mutation"
+          <div className="meridian-staging-fields">
+            <label className="meridian-staging-field">
+              <span>User</span>
+              <input
+                type="text"
+                value={CENTERPIECE_CHANGE.displayName}
+                readOnly
+                aria-readonly="true"
+              />
+              <small>
+                <CodeValue>{CENTERPIECE_CHANGE.username}</CodeValue>
+              </small>
+            </label>
+
+            <label className="meridian-staging-field">
+              <span>Operation</span>
+              <input
+                type="text"
+                value={CENTERPIECE_CHANGE.operation}
+                readOnly
+                aria-readonly="true"
+              />
+              <small>Direct role mutation</small>
+            </label>
+
+            <label className="meridian-staging-field">
+              <span>Role</span>
+              <input
+                type="text"
+                value={CENTERPIECE_CHANGE.role}
+                readOnly
+                aria-readonly="true"
+              />
+              <small>Controlled centerpiece role</small>
+            </label>
+          </div>
+        </section>
+
+        <section className="meridian-staging-preflight">
+          <SectionHeader
+            eyebrow="02 / Preflight gate"
+            title="Authority must be read before impact can be claimed"
+            detail="The staging surface separates what is already bound from what still requires authoritative IRIS evidence."
           />
 
-          <Field
-            label="Role"
-            value={CENTERPIECE_CHANGE.role}
-            detail="Controlled centerpiece role"
-          />
-        </div>
-
-        <div className="mt-8 border-t border-white/10 pt-6">
-          <div className="flex items-start gap-3 rounded-2xl border border-amber-200/10 bg-amber-200/[0.04] p-4">
-            <span className="mt-0.5 text-amber-200">◇</span>
-            <div>
-              <p className="text-sm font-medium text-amber-100">
-                Authoritative preflight not connected yet
-              </p>
-              <p className="mt-1 text-sm leading-6 text-white/45">
-                The next implementation checkpoint connects this staged change
-                to live IRIS security reads and native counterfactual
-                evaluation. No impact numbers are invented in the scaffold.
-              </p>
-            </div>
+          <div className="meridian-table-wrap">
+            <table className="meridian-data-table meridian-preflight-table">
+              <thead>
+                <tr>
+                  <th>Gate</th>
+                  <th>Evidence source</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {preflightGates.map((item) => (
+                  <tr key={item.gate}>
+                    <td>
+                      <strong>{item.gate}</strong>
+                    </td>
+                    <td>{item.evidence}</td>
+                    <td>
+                      <StatusBadge
+                        tone={item.tone === "warning" ? "warning" : "neutral"}
+                      >
+                        {item.status}
+                      </StatusBadge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
-          <button
-            type="button"
-            disabled
-            className="mt-6 w-full cursor-not-allowed rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold text-white/30"
-          >
-            Run authoritative preflight
-          </button>
-        </div>
-      </section>
-    </main>
-  );
-}
+          <AuthorityCallout
+            eyebrow="Preflight boundary"
+            title="Authoritative preflight not connected yet"
+            detail="The next implementation checkpoint connects this staged change to live IRIS security reads and native counterfactual evaluation. No impact numbers are invented in this staging surface."
+            tone="warning"
+          />
 
-function Field({
-  label,
-  value,
-  detail,
-}: {
-  label: string;
-  value: string;
-  detail: string;
-}) {
-  return (
-    <div>
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-white/35">
-        {label}
-      </p>
-      <p className="mt-2 text-lg font-medium">{value}</p>
-      <p className="mt-1 text-sm text-white/40">{detail}</p>
-    </div>
+          <div className="meridian-staging-action-row">
+            <div>
+              <span className="meridian-record-label">Apply boundary</span>
+              <strong>Blocked until authoritative preflight is available</strong>
+            </div>
+
+            <button
+              type="button"
+              disabled
+              className="meridian-disabled-action"
+            >
+              Run authoritative preflight
+            </button>
+          </div>
+        </section>
+      </form>
+    </main>
   );
 }

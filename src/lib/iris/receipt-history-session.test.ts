@@ -62,7 +62,7 @@ describe(
         expect(
           source,
         ).toContain(
-          "MERIDIAN_IRIS_RUNTIME_PASSWORD",
+          "MERIDIAN_RUNTIME_PASSWORD",
         );
 
         expect(

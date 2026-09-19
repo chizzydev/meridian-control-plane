@@ -1,6 +1,17 @@
 import Link from "next/link";
 
 import {
+  AuthorityCallout,
+  CodeValue,
+  EvidenceRail,
+  KeyValueInspector,
+  MetricCell,
+  PageHeader,
+  SectionHeader,
+  StatusBadge,
+  type EvidenceStep,
+} from "@/components/meridian/primitives";
+import {
   RECORDED_RECEIPT_SHA256,
   getRecordedVerifiedReceipt,
   summarizeRecordedReceipt,
@@ -12,6 +23,29 @@ import {
 export const dynamic =
   "force-dynamic";
 
+const lifecycle: EvidenceStep[] = [
+  {
+    label: "PRE-FLIGHT",
+    detail: "Impact bound",
+    state: "complete",
+  },
+  {
+    label: "APPLY",
+    detail: "Configuration changed",
+    state: "complete",
+  },
+  {
+    label: "CONVERGENCE",
+    detail: "Live authority cleared",
+    state: "complete",
+  },
+  {
+    label: "VERIFIED",
+    detail: "Audit + receipt bound",
+    state: "complete",
+  },
+];
+
 export default async function VerifiedReceiptPage() {
   const receipt =
     getRecordedVerifiedReceipt();
@@ -20,6 +54,7 @@ export default async function VerifiedReceiptPage() {
     summarizeRecordedReceipt(
       receipt,
     );
+
   let persistent:
     Awaited<
       ReturnType<
@@ -57,525 +92,474 @@ export default async function VerifiedReceiptPage() {
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-7xl px-6 py-8 sm:px-10 sm:py-12">
-      <Link
-        href="/change-cases"
-        className="text-sm text-white/45 transition hover:text-white"
-      >
-        â† Change Queue
-      </Link>
+    <main className="meridian-verified-inspector">
+      <PageHeader
+        eyebrow="Change control / Verified case inspector"
+        title="Remove MeridianSupervisor from Maya Patel"
+        description="A verified Change Case closes only when configured state, live authority, native audit, and durable receipt evidence agree."
+        actions={
+          <>
+            <Link href="/change-cases" className="meridian-action">
+              Back to Change Queue
+            </Link>
+            <StatusBadge tone="success">VERIFIED</StatusBadge>
+          </>
+        }
+      />
 
-      <header className="mt-8 border-b border-white/10 pb-8">
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-3 py-1 text-xs font-semibold text-emerald-100">
-            VERIFIED
-          </span>
-
-          <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs text-white/50">
-            Recorded certified receipt
-          </span>
-
-          <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs text-white/50">
-            Read-only demo evidence
-          </span>
+      <section className="meridian-inspector-identity" aria-label="Verified receipt identity">
+        <div>
+          <StatusBadge tone="success">Recorded certified receipt</StatusBadge>
+          <StatusBadge>Read-only demo evidence</StatusBadge>
+          <StatusBadge tone={persistent ? "success" : "warning"}>
+            {persistent ? "Persistent IRIS history live" : "Persistent IRIS history unavailable"}
+          </StatusBadge>
         </div>
 
-        <h1 className="mt-5 max-w-4xl text-4xl font-semibold tracking-[-0.045em] sm:text-5xl">
-          Remove MeridianSupervisor from Maya Patel
-        </h1>
+        <KeyValueInspector
+          rows={[
+            {
+              label: "User",
+              value: receipt.change.username,
+              mono: true,
+            },
+            {
+              label: "Operation",
+              value: receipt.change.operation,
+            },
+            {
+              label: "Role",
+              value: receipt.change.role,
+              mono: true,
+            },
+            {
+              label: "Receipt",
+              value: <CodeValue truncate>{receipt.receiptId}</CodeValue>,
+            },
+          ]}
+        />
+      </section>
 
-        <p className="mt-4 max-w-3xl text-base leading-7 text-white/55">
-          This receipt records the certified centerpiece execution. Meridian
-          treats a security change as complete only after configuration,
-          live-access convergence, and native IRIS audit evidence agree.
-        </p>
+      <section className="meridian-inspector-rail" aria-label="Verified lifecycle">
+        <EvidenceRail steps={lifecycle} />
+      </section>
 
-        <div className="mt-6 flex flex-wrap gap-x-8 gap-y-3 text-sm">
-          <KeyValue
-            label="User"
-            value={receipt.change.username}
-          />
-
-          <KeyValue
-            label="Operation"
-            value={receipt.change.operation}
-          />
-
-          <KeyValue
-            label="Role"
-            value={receipt.change.role}
-          />
-
-          <KeyValue
-            label="Receipt"
-            value={receipt.receiptId}
-          />
-        </div>
-      </header>
-
-      <section className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Metric
+      <section className="meridian-inspector-metrics" aria-label="Impact summary">
+        <MetricCell
           label="Effective roles removed"
           value={summary.lostEffectiveRoleCount}
+          detail="Derived authorization impact"
         />
-
-        <Metric
+        <MetricCell
           label="Permissions removed"
           value={summary.lostPermissionCount}
+          detail="Changed permission pairs"
         />
-
-        <Metric
+        <MetricCell
           label="Protected apps lost"
           value={summary.lostApplicationCount}
+          detail="Declared protected assets"
         />
-
-        <Metric
+        <MetricCell
           label="Declared REST ops lost"
           value={summary.lostRestOperationCount}
+          detail="Declared REST operations"
         />
       </section>
 
-      <section className="mt-8 grid gap-4 lg:grid-cols-2">
-        <article className="rounded-3xl border border-emerald-300/20 bg-emerald-300/[0.045] p-6 sm:p-7">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-200">
-            CONFIGURATION
-          </p>
+      <section className="meridian-inspector-section">
+        <SectionHeader
+          eyebrow="State truth"
+          title="Expected, configured, live"
+          detail="The receipt remains VERIFIED only because these evidence planes agree at closure."
+        />
 
-          <h2 className="mt-3 text-2xl font-semibold">
-            Applied and verified
-          </h2>
+        <div className="meridian-table-wrap">
+          <table className="meridian-data-table meridian-truth-table">
+            <thead>
+              <tr>
+                <th>Plane</th>
+                <th>Expected</th>
+                <th>Observed</th>
+                <th>Status</th>
+                <th>Evidence</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <strong>CONFIGURATION</strong>
+                  <small>Configured security state</small>
+                </td>
+                <td>
+                  <CodeValue>{receipt.change.role} absent</CodeValue>
+                </td>
+                <td>
+                  <CodeValue>
+                    {receipt.roles.directAfter.length > 0
+                      ? receipt.roles.directAfter.join(", ")
+                      : "No direct roles"}
+                  </CodeValue>
+                </td>
+                <td>
+                  <StatusBadge tone="success">Applied and verified</StatusBadge>
+                </td>
+                <td>
+                  Direct-role before/after
+                </td>
+              </tr>
 
-          <p className="mt-3 text-sm leading-6 text-white/50">
-            MeridianSupervisor is absent from Maya&apos;s configured direct
-            roles and the changed permission pairs match the expected
-            post-state.
-          </p>
+              <tr>
+                <td>
+                  <strong>LIVE ACCESS</strong>
+                  <small>Runtime authorization state</small>
+                </td>
+                <td>No target process retaining removed authority</td>
+                <td>
+                  Target process: {receipt.convergence.targetProcessPresent ? "Present" : "Absent"}
+                  <br />
+                  Residual access: {receipt.convergence.liveResidueObserved ? "Observed" : "None"}
+                </td>
+                <td>
+                  <StatusBadge tone="success">Converged</StatusBadge>
+                </td>
+                <td>
+                  Claim boundary: POST #3 converged with no active target process.
+                </td>
+              </tr>
 
-          <RoleSet
-            label="Before"
-            values={receipt.roles.directBefore}
-          />
+              <tr>
+                <td>
+                  <strong>Native Audit</strong>
+                  <small>IRIS UserChange evidence</small>
+                </td>
+                <td>One exact native change event</td>
+                <td>
+                  <CodeValue>UserChange #{receipt.nativeAudit.auditIndex}</CodeValue>
+                </td>
+                <td>
+                  <StatusBadge tone="success">Bound</StatusBadge>
+                </td>
+                <td>
+                  Apply to audit: {receipt.nativeAudit.applyToAuditDeltaSeconds}s
+                </td>
+              </tr>
 
-          <RoleSet
-            label="After"
-            values={receipt.roles.directAfter}
-          />
-        </article>
+              <tr>
+                <td>
+                  <strong>Persistent history</strong>
+                  <small>Durable IRIS receipt read</small>
+                </td>
+                <td>Canonical receipt identity</td>
+                <td>
+                  {persistent ? (
+                    <CodeValue truncate>{persistent.receipt.receiptSha256}</CodeValue>
+                  ) : (
+                    "Live history unavailable for this request"
+                  )}
+                </td>
+                <td>
+                  <StatusBadge tone={persistent ? "success" : "warning"}>
+                    {persistent ? "Exact match" : "Unavailable"}
+                  </StatusBadge>
+                </td>
+                <td>
+                  {persistent
+                    ? `${persistent.history.length} history entries`
+                    : "Recorded receipt remains visible; live persistence is not implied"}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
-        <article className="rounded-3xl border border-sky-300/20 bg-sky-300/[0.04] p-6 sm:p-7">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-200">
-            LIVE ACCESS
-          </p>
-
-          <h2 className="mt-3 text-2xl font-semibold">
-            Converged
-          </h2>
-
-          <p className="mt-3 text-sm leading-6 text-white/50">
-            Final target-process cardinality was ZERO. No active Maya process
-            remained that could still hold one of the permissions removed by
-            this Change Case.
-          </p>
-
-          <div className="mt-5 grid grid-cols-2 gap-3">
-            <StateBox
-              label="Target process"
-              value={
-                receipt.convergence.targetProcessPresent
-                  ? "Present"
-                  : "Absent"
-              }
-            />
-
-            <StateBox
-              label="Residual access"
-              value={
-                receipt.convergence.liveResidueObserved
-                  ? "Observed"
-                  : "None"
-              }
-            />
-          </div>
-
-          <p className="mt-5 rounded-xl border border-sky-200/15 bg-black/15 p-4 text-xs leading-5 text-white/45">
-            Claim boundary: POST #3 converged with no active target process. It
-            does not claim that POST #3 demonstrated the stale-process
-            transition. The closed B6C experiment supplies that separate proof.
-          </p>
-        </article>
+        <AuthorityCallout
+          eyebrow="Claim boundary"
+          title="Configuration is not closure by itself"
+          detail="POST #3 proves the converged end state. It does not claim that POST #3 demonstrated the stale-process transition; the closed B6C experiment supplies that separate proof."
+          tone="info"
+        />
       </section>
 
-      <section className="mt-8 grid gap-4 xl:grid-cols-2">
-        <article className="rounded-3xl border border-white/10 bg-white/[0.025] p-6 sm:p-7">
-          <SectionEyebrow>
-            Permission delta
-          </SectionEyebrow>
+      <section className="meridian-inspector-section">
+        <SectionHeader
+          eyebrow="Permission delta"
+          title="Authority removed and retained"
+          detail="Repeatable permission records are shown as evidence rows rather than summary cards."
+        />
 
-          <h2 className="mt-3 text-2xl font-semibold">
-            What authority disappeared
-          </h2>
+        <div className="meridian-table-wrap">
+          <table className="meridian-data-table meridian-permission-table">
+            <thead>
+              <tr>
+                <th>Outcome</th>
+                <th>Resource</th>
+                <th>Permission</th>
+              </tr>
+            </thead>
+            <tbody>
+              {receipt.permissionDelta.lost.map((permission) => (
+                <tr key={`lost-${permission.resource}-${permission.permission}`}>
+                  <td>
+                    <StatusBadge tone="danger">LOST</StatusBadge>
+                  </td>
+                  <td>
+                    <CodeValue>{permission.resource}</CodeValue>
+                  </td>
+                  <td>
+                    <CodeValue>{permission.permission}</CodeValue>
+                  </td>
+                </tr>
+              ))}
 
-          <div className="mt-6 space-y-3">
-            {receipt.permissionDelta.lost.map(
-              (permission) => (
-                <DeltaRow
-                  key={`${permission.resource}:${permission.permission}`}
-                  primary={permission.resource}
-                  secondary={permission.permission}
-                  outcome="LOST"
-                />
-              ),
-            )}
-          </div>
+              {receipt.permissionDelta.retained.map((permission) => (
+                <tr key={`retained-${permission.resource}-${permission.permission}`}>
+                  <td>
+                    <StatusBadge tone="success">RETAINED</StatusBadge>
+                  </td>
+                  <td>
+                    <CodeValue>{permission.resource}</CodeValue>
+                  </td>
+                  <td>
+                    <CodeValue>{permission.permission}</CodeValue>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-          <h3 className="mt-7 text-sm font-semibold text-white/65">
-            Retained
-          </h3>
+      <section className="meridian-inspector-section">
+        <SectionHeader
+          eyebrow="Declared impact"
+          title="Protected assets and operations"
+          detail="Declared impact remains separate from measured permission delta."
+        />
 
-          <div className="mt-3 space-y-3">
-            {receipt.permissionDelta.retained.map(
-              (permission) => (
-                <DeltaRow
-                  key={`${permission.resource}:${permission.permission}`}
-                  primary={permission.resource}
-                  secondary={permission.permission}
-                  outcome="RETAINED"
-                />
-              ),
-            )}
-          </div>
-        </article>
-
-        <article className="rounded-3xl border border-white/10 bg-white/[0.025] p-6 sm:p-7">
-          <SectionEyebrow>
-            Declared impact
-          </SectionEyebrow>
-
-          <h2 className="mt-3 text-2xl font-semibold">
-            Protected assets and operations
-          </h2>
-
-          <div className="mt-6 space-y-3">
-            {receipt.declaredImpact.applications.map(
-              (application) => (
-                <DeltaRow
-                  key={application.asset}
-                  primary={application.asset}
-                  secondary={`${application.requiredResource}:${application.requiredPermission}`}
-                  outcome={application.outcome}
-                />
-              ),
-            )}
-          </div>
-
-          <div className="mt-6 border-t border-white/10 pt-6">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/35">
-              Declared REST operations
-            </p>
-
-            <div className="mt-4 space-y-3">
-              {receipt.declaredImpact.operations.map(
-                (operation) => (
-                  <DeltaRow
-                    key={operation.operationId}
-                    primary={`${operation.method} ${operation.path}`}
-                    secondary={`${operation.requiredResource}:${operation.requiredPermission}`}
-                    outcome={operation.outcome}
-                  />
-                ),
-              )}
+        <div className="meridian-inspector-impact">
+          <div>
+            <p className="meridian-record-label">Protected applications</p>
+            <div className="meridian-table-wrap">
+              <table className="meridian-data-table meridian-impact-table">
+                <thead>
+                  <tr>
+                    <th>Asset</th>
+                    <th>Required authority</th>
+                    <th>Outcome</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {receipt.declaredImpact.applications.map((application) => (
+                    <tr key={application.asset}>
+                      <td>
+                        <strong>{application.asset}</strong>
+                      </td>
+                      <td>
+                        <CodeValue>
+                          {application.requiredResource}:{application.requiredPermission}
+                        </CodeValue>
+                      </td>
+                      <td>
+                        <span className="meridian-inspector-outcome">
+                          {application.outcome}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
-        </article>
-      </section>
 
-      <section className="mt-8 rounded-3xl border border-white/10 bg-white/[0.025] p-6 sm:p-7">
-        <SectionEyebrow>
-          Change Receipt
-        </SectionEyebrow>
-
-        <h2 className="mt-3 text-2xl font-semibold">
-          Previewed, applied, observed, converged, audited.
-        </h2>
-
-        <div className="mt-7 grid gap-3 lg:grid-cols-3">
-          {receipt.timeline.map(
-            (
-              item,
-              index,
-            ) => (
-              <article
-                key={`${index}-${item.stage}`}
-                className="rounded-2xl border border-white/10 bg-black/15 p-4"
-              >
-                <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/30">
-                  {String(index + 1).padStart(2, "0")}
-                </p>
-
-                <h3 className="mt-2 font-semibold">
-                  {item.stage}
-                </h3>
-
-                <p className="mt-1 text-xs text-emerald-200/70">
-                  {item.status}
-                </p>
-              </article>
-            ),
-          )}
-        </div>
-      </section>
-
-      <section className="mt-8 rounded-3xl border border-amber-200/20 bg-amber-200/[0.035] p-6 sm:p-7">
-        <SectionEyebrow>
-          Native Audit
-        </SectionEyebrow>
-
-        <h2 className="mt-3 text-2xl font-semibold">
-          One exact IRIS UserChange event closes the receipt.
-        </h2>
-
-        <div className="mt-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <StateBox
-            label="Audit index"
-            value={String(receipt.nativeAudit.auditIndex)}
-          />
-
-          <StateBox
-            label="Event"
-            value={`${receipt.nativeAudit.source} / ${receipt.nativeAudit.type} / ${receipt.nativeAudit.event}`}
-          />
-
-          <StateBox
-            label="Actor"
-            value={receipt.nativeAudit.username}
-          />
-
-          <StateBox
-            label="Apply â†’ audit"
-            value={`${receipt.nativeAudit.applyToAuditDeltaSeconds}s`}
-          />
-        </div>
-
-        <div className="mt-5 rounded-2xl border border-white/10 bg-black/15 p-5">
-          <p className="font-mono text-xs leading-6 text-white/55">
-            {receipt.nativeAudit.description}
-            <br />
-            Old roles: {receipt.nativeAudit.oldDirectRoles.join(", ")}
-            <br />
-            New roles: {receipt.nativeAudit.newDirectRoles.join(", ")}
-            <br />
-            UTC: {receipt.nativeAudit.utcTimestamp}
-          </p>
-        </div>
-      </section>
-
-      <section className="mt-8 rounded-3xl border border-white/10 bg-white/[0.02] p-6">
-        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-200/70">
-              Persistent IRIS history
-            </p>
+            <p className="meridian-record-label">Declared REST operations</p>
+            <div className="meridian-table-wrap">
+              <table className="meridian-data-table meridian-impact-table">
+                <thead>
+                  <tr>
+                    <th>Operation</th>
+                    <th>Required authority</th>
+                    <th>Outcome</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {receipt.declaredImpact.operations.map((operation) => (
+                    <tr key={operation.operationId}>
+                      <td>
+                        <strong>
+                          {operation.method} {operation.path}
+                        </strong>
+                      </td>
+                      <td>
+                        <CodeValue>
+                          {operation.requiredResource}:{operation.requiredPermission}
+                        </CodeValue>
+                      </td>
+                      <td>
+                        <span className="meridian-inspector-outcome">
+                          {operation.outcome}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
 
+      <section className="meridian-inspector-section">
+        <SectionHeader
+          eyebrow="Change Receipt"
+          title="Previewed, applied, observed, converged, audited."
+          detail="The receipt timeline records the closure sequence without collapsing configuration and runtime truth."
+        />
+
+        <div className="meridian-table-wrap">
+          <table className="meridian-data-table meridian-timeline-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Stage</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {receipt.timeline.map((item, index) => (
+                <tr key={`${index}-${item.stage}`}>
+                  <td>
+                    <CodeValue>{String(index + 1).padStart(2, "0")}</CodeValue>
+                  </td>
+                  <td>
+                    <strong>{item.stage}</strong>
+                  </td>
+                  <td>
+                    <StatusBadge tone="success">{item.status}</StatusBadge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="meridian-inspector-section">
+        <SectionHeader
+          eyebrow="Native Audit"
+          title="One exact IRIS UserChange event closes the receipt."
+          detail="Native evidence is shown with its actor, event identity, role transition, and timing."
+        />
+
+        <div className="meridian-inspector-audit">
+          <KeyValueInspector
+            rows={[
+              {
+                label: "Audit index",
+                value: String(receipt.nativeAudit.auditIndex),
+                mono: true,
+              },
+              {
+                label: "Event",
+                value: `${receipt.nativeAudit.source} / ${receipt.nativeAudit.type} / ${receipt.nativeAudit.event}`,
+                mono: true,
+              },
+              {
+                label: "Actor",
+                value: receipt.nativeAudit.username,
+                mono: true,
+              },
+              {
+                label: "Apply -> audit",
+                value: `${receipt.nativeAudit.applyToAuditDeltaSeconds}s`,
+                mono: true,
+              },
+            ]}
+          />
+
+          <pre className="meridian-inspector-audit-evidence">
+            {receipt.nativeAudit.description}
+            {"\n"}
+            Old roles: {receipt.nativeAudit.oldDirectRoles.join(", ")}
+            {"\n"}
+            New roles: {receipt.nativeAudit.newDirectRoles.join(", ")}
+            {"\n"}
+            UTC: {receipt.nativeAudit.utcTimestamp}
+          </pre>
+        </div>
+      </section>
+
+      <section className="meridian-inspector-section">
+        <SectionHeader
+          eyebrow="Durable evidence"
+          title="Persistent IRIS history + recorded source"
+          detail="The dynamic server component attempts a live authenticated IRIS history read while keeping credentials out of the browser."
+        />
+
+        <div className="meridian-inspector-history">
+          <div className="meridian-inspector-history-live">
             {persistent ? (
               <>
-                <div className="mt-4 inline-flex rounded-full border border-emerald-300/25 bg-emerald-300/10 px-3 py-1 text-xs font-semibold text-emerald-100">
-                  Persistent IRIS history live
+                <div className="meridian-inspector-history-heading">
+                  <StatusBadge tone="success">Persistent IRIS history live</StatusBadge>
+                  <span>{persistent.history.length} entries</span>
                 </div>
 
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                  <KeyValue
-                    label="Source"
-                    value={persistent.source}
-                  />
+                <KeyValueInspector
+                  rows={[
+                    {
+                      label: "Source",
+                      value: persistent.source,
+                      mono: true,
+                    },
+                    {
+                      label: "History entries",
+                      value: String(persistent.history.length),
+                      mono: true,
+                    },
+                    {
+                      label: "Receipt SHA-256",
+                      value: <CodeValue>{persistent.receipt.receiptSha256}</CodeValue>,
+                    },
+                  ]}
+                />
 
-                  <KeyValue
-                    label="History entries"
-                    value={String(
-                      persistent.history.length,
-                    )}
-                  />
-                </div>
-
-                <p className="mt-5 break-all font-mono text-xs leading-6 text-white/55">
-                  Receipt SHA-256 {persistent.receipt.receiptSha256}
-                </p>
-
-                <p className="mt-3 text-xs leading-5 text-emerald-100/70">
-                  Exact canonical receipt match: PASS. This request read the
-                  persisted receipt and Maya Patel&apos;s receipt-history index
-                  from IRIS through the server-only authenticated session
-                  boundary.
+                <p className="meridian-inspector-history-proof">
+                  Exact canonical receipt match: PASS. This request read the persisted receipt and Maya Patel&apos;s receipt-history index from IRIS through the server-only authenticated session boundary.
                 </p>
               </>
             ) : (
               <>
-                <div className="mt-4 inline-flex rounded-full border border-amber-300/25 bg-amber-300/10 px-3 py-1 text-xs font-semibold text-amber-100">
-                  Persistent IRIS history unavailable
-                </div>
-
-                <p className="mt-4 max-w-2xl text-xs leading-5 text-white/45">
-                  This request did not verify the live persistent history
-                  source. The recorded certified receipt remains visible as
-                  frozen evidence, but it is not presented as a substitute for
-                  a successful live IRIS history read.
+                <StatusBadge tone="warning">Persistent IRIS history unavailable</StatusBadge>
+                <p className="meridian-inspector-history-proof">
+                  This request did not verify the live persistent history source. The recorded certified receipt remains visible as frozen evidence, but it is not presented as a substitute for a successful live IRIS history read.
                 </p>
               </>
             )}
           </div>
 
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-white/35">
-              Recorded evidence source
+          <div className="meridian-inspector-recorded-source">
+            <p className="meridian-record-label">Recorded evidence source</p>
+            <CodeValue>{RECORDED_RECEIPT_SHA256}</CodeValue>
+
+            <p>
+              IRIS-backed receipt history has already been productized through the server-only history session.
             </p>
 
-            <p className="mt-2 break-all font-mono text-xs text-white/50">
-              SHA-256 {RECORDED_RECEIPT_SHA256}
-            </p>
-
-            <p className="mt-4 text-xs leading-5 text-white/40">
-              This public surface remains read-only and does not claim that the
-              public browser owns privileged IRIS mutation authority.
-              Privileged IRIS credentials and bearer tokens stay behind the
-              server-only boundary; the browser receives rendered evidence
-              only.
-            </p>
+            <AuthorityCallout
+              eyebrow="Browser authority"
+              title="Rendered evidence only"
+              detail="This public surface remains read-only and does not claim that the public browser owns privileged IRIS mutation authority."
+              tone="info"
+            >
+              <p>
+                Privileged IRIS credentials and bearer tokens stay behind the server-only boundary; the browser receives rendered evidence only.
+              </p>
+            </AuthorityCallout>
           </div>
         </div>
       </section>
     </main>
-  );
-}
-
-function SectionEyebrow({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/35">
-      {children}
-    </p>
-  );
-}
-
-function Metric({
-  label,
-  value,
-}: {
-  label: string;
-  value: number;
-}) {
-  return (
-    <article className="rounded-2xl border border-white/10 bg-white/[0.025] p-5">
-      <p className="text-3xl font-semibold">
-        {value}
-      </p>
-
-      <p className="mt-2 text-sm text-white/45">
-        {label}
-      </p>
-    </article>
-  );
-}
-
-function KeyValue({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div>
-      <span className="text-white/35">
-        {label}
-      </span>
-
-      <span className="ml-2 font-medium text-white/75">
-        {value}
-      </span>
-    </div>
-  );
-}
-
-function RoleSet({
-  label,
-  values,
-}: {
-  label: string;
-  values: string[];
-}) {
-  return (
-    <div className="mt-5">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/30">
-        {label}
-      </p>
-
-      <div className="mt-2 flex flex-wrap gap-2">
-        {values.map(
-          (role) => (
-            <span
-              key={role}
-              className="rounded-lg border border-white/10 bg-black/15 px-3 py-1.5 font-mono text-xs text-white/60"
-            >
-              {role}
-            </span>
-          ),
-        )}
-      </div>
-    </div>
-  );
-}
-
-function StateBox({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="rounded-xl border border-white/10 bg-black/15 p-4">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-white/30">
-        {label}
-      </p>
-
-      <p className="mt-2 text-sm font-semibold text-white/75">
-        {value}
-      </p>
-    </div>
-  );
-}
-
-function DeltaRow({
-  primary,
-  secondary,
-  outcome,
-}: {
-  primary: string;
-  secondary: string;
-  outcome: string;
-}) {
-  const outcomeClass =
-    outcome === "LOST"
-      ? "text-rose-200 border-rose-300/20 bg-rose-300/[0.04]"
-      : "text-emerald-200 border-emerald-300/20 bg-emerald-300/[0.04]";
-
-  return (
-    <div className="flex flex-col gap-3 rounded-xl border border-white/10 bg-black/10 p-4 sm:flex-row sm:items-center sm:justify-between">
-      <div>
-        <p className="font-medium text-white/75">
-          {primary}
-        </p>
-
-        <p className="mt-1 font-mono text-xs text-white/35">
-          {secondary}
-        </p>
-      </div>
-
-      <span className={`w-fit rounded-full border px-2.5 py-1 text-[10px] font-semibold ${outcomeClass}`}>
-        {outcome}
-      </span>
-    </div>
   );
 }

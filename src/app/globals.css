@@ -1602,3 +1602,216 @@ body {
     flex-direction: column;
   }
 }
+/* MERIDIAN_DESIGN_D2D_VERIFIED_INSPECTOR */
+.meridian-verified-inspector {
+  width: min(100%, 1540px);
+  margin: 0 auto;
+  padding: 34px 34px 56px;
+}
+
+.meridian-inspector-identity {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.7fr) minmax(0, 1.3fr);
+  gap: 28px;
+  margin-top: 22px;
+  border-top: 1px solid var(--meridian-line);
+  border-bottom: 1px solid var(--meridian-line);
+  padding: 16px 0;
+}
+
+.meridian-inspector-identity > div:first-child {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 6px;
+}
+
+.meridian-inspector-rail {
+  margin-top: 24px;
+  border-bottom: 1px solid var(--meridian-line);
+  padding-bottom: 10px;
+}
+
+.meridian-inspector-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.meridian-inspector-section {
+  margin-top: 34px;
+  border-top: 1px solid var(--meridian-line);
+  padding-top: 18px;
+}
+
+.meridian-truth-table {
+  min-width: 1080px;
+}
+
+.meridian-truth-table td {
+  vertical-align: top;
+}
+
+.meridian-permission-table {
+  min-width: 700px;
+}
+
+.meridian-inspector-impact {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 16px;
+}
+
+.meridian-inspector-impact > div {
+  min-width: 0;
+}
+
+.meridian-inspector-impact .meridian-table-wrap {
+  margin-top: 8px;
+}
+
+.meridian-impact-table {
+  min-width: 620px;
+}
+
+.meridian-inspector-outcome {
+  color: var(--meridian-text-muted);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.meridian-timeline-table {
+  min-width: 620px;
+}
+
+.meridian-inspector-audit {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1.28fr);
+  gap: 1px;
+  margin-top: 16px;
+  border: 1px solid var(--meridian-line);
+  background: var(--meridian-line);
+}
+
+.meridian-inspector-audit > * {
+  min-width: 0;
+  background: var(--meridian-surface-0);
+  padding: 18px;
+}
+
+.meridian-inspector-audit-evidence {
+  margin: 0;
+  overflow-x: auto;
+  color: var(--meridian-text-muted);
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    Menlo,
+    monospace;
+  font-size: 10px;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.meridian-inspector-history {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(300px, 0.9fr);
+  gap: 1px;
+  margin-top: 16px;
+  border: 1px solid var(--meridian-line);
+  background: var(--meridian-line);
+}
+
+.meridian-inspector-history > div {
+  min-width: 0;
+  background: var(--meridian-surface-0);
+  padding: 20px;
+}
+
+.meridian-inspector-history-live {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.meridian-inspector-history-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.meridian-inspector-history-heading > span {
+  color: var(--meridian-text-faint);
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    Menlo,
+    monospace;
+  font-size: 9px;
+}
+
+.meridian-inspector-history-proof {
+  margin: 0;
+  color: var(--meridian-text-muted);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.meridian-inspector-recorded-source {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: #0b1117 !important;
+}
+
+.meridian-inspector-recorded-source > p {
+  margin: 0;
+  color: var(--meridian-text-muted);
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.meridian-inspector-recorded-source .meridian-code-value {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+@media (max-width: 1180px) {
+  .meridian-inspector-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .meridian-inspector-impact,
+  .meridian-inspector-history {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 860px) {
+  .meridian-inspector-identity,
+  .meridian-inspector-audit {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .meridian-verified-inspector {
+    padding: 24px 16px 42px;
+  }
+
+  .meridian-inspector-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .meridian-inspector-history > div,
+  .meridian-inspector-audit > * {
+    padding: 16px;
+  }
+}

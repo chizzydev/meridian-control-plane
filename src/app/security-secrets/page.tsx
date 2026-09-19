@@ -1,6 +1,13 @@
-import Link
-  from "next/link";
+import Link from "next/link";
 
+import {
+  AuthorityCallout,
+  CodeValue,
+  MetricCell,
+  PageHeader,
+  SectionHeader,
+  StatusBadge,
+} from "@/components/meridian/primitives";
 import {
   readSecuritySecretsSurfaceFromEnvironment,
 } from "@/lib/iris/security-secrets-product-server";
@@ -8,630 +15,407 @@ import {
 export const dynamic =
   "force-dynamic";
 
+function listOr(
+  values: readonly string[],
+  fallback: string,
+): string {
+  return values.join(", ") || fallback;
+}
+
 export default async function SecuritySecretsPage() {
   const surface =
     await readSecuritySecretsSurfaceFromEnvironment();
 
   return (
-    <main className="mx-auto min-h-screen max-w-7xl px-6 py-8 sm:px-10 sm:py-12">
-      <Link
-        href="/"
-        className="text-sm text-white/45 transition hover:text-white"
-      >
-        â† Meridian Control Plane
-      </Link>
+    <main className="meridian-runtime-page">
+      <PageHeader
+        eyebrow="Security / SECURITY / SECRETS"
+        title="Security metadata without exposing the material it protects."
+        description="Meridian uses an EXPLICIT ESCALATION ROLE for server-owned metadata reads. The browser receives approved metadata only; secret material never crosses the display boundary."
+        actions={
+          <>
+            <Link href="/" className="meridian-action">
+              Control room
+            </Link>
+            <StatusBadge tone="success">METADATA ONLY</StatusBadge>
+            <StatusBadge>READ ONLY</StatusBadge>
+          </>
+        }
+      />
 
-      <header className="mt-8 border-b border-white/10 pb-8">
-        <div className="flex flex-wrap items-center gap-3">
-          <span className="rounded-full border border-violet-300/25 bg-violet-300/10 px-3 py-1 text-xs font-semibold text-violet-100">
-            SECURITY / SECRETS
-          </span>
+      <section className="meridian-runtime-section">
+        <SectionHeader
+          eyebrow="Authority boundary"
+          title="MeridianSecurityMetadataReader"
+          detail="Permissions remains the centerpiece: narrow metadata authority is escalated explicitly instead of broadening the default runtime role."
+        />
 
-          <span className="rounded-full border border-emerald-300/25 bg-emerald-300/10 px-3 py-1 text-xs font-semibold text-emerald-100">
-            METADATA ONLY
-          </span>
-
-          <span className="rounded-full border border-sky-300/25 bg-sky-300/10 px-3 py-1 text-xs font-semibold text-sky-100">
-            EXPLICIT ESCALATION ROLE
-          </span>
-
-          <span className="rounded-full border border-white/10 bg-white/[0.035] px-3 py-1 text-xs text-white/50">
-            Permissions remains the centerpiece
-          </span>
+        <div className="meridian-table-wrap">
+          <table className="meridian-data-table meridian-authority-table">
+            <thead>
+              <tr>
+                <th>Boundary</th>
+                <th>State</th>
+                <th>Operator interpretation</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Authority</td>
+                <td><CodeValue>MeridianSecurityMetadataReader</CodeValue></td>
+                <td>Explicit server-owned metadata escalation.</td>
+              </tr>
+              <tr>
+                <td>Default runtime broadened</td>
+                <td><StatusBadge tone="success">NO</StatusBadge></td>
+                <td>The standing runtime role remains unchanged.</td>
+              </tr>
+              <tr>
+                <td>Source</td>
+                <td>Official SysAdmin REST</td>
+                <td>Six approved metadata families plus safe nested metadata.</td>
+              </tr>
+              <tr>
+                <td>Public management proxy</td>
+                <td><StatusBadge tone="success">NONE</StatusBadge></td>
+                <td>No browser management route is created.</td>
+              </tr>
+              <tr>
+                <td>Mutation controls</td>
+                <td><StatusBadge tone="success">NONE</StatusBadge></td>
+                <td>Inventory inspection only.</td>
+              </tr>
+              <tr>
+                <td>Browser credential</td>
+                <td><StatusBadge tone="success">NOT EXPOSED</StatusBadge></td>
+                <td>Credential use remains server-owned.</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
-
-        <h1 className="mt-5 max-w-4xl text-4xl font-semibold tracking-[-0.04em] text-white sm:text-5xl">
-          Security posture metadata without exposing the material it protects.
-        </h1>
-
-        <p className="mt-5 max-w-3xl text-base leading-7 text-white/55">
-          Meridian explicitly escalates a server-side read session into a narrow
-          metadata role, reads official IRIS security inventories, and returns only
-          fields approved for operator visibility.
-        </p>
-      </header>
-
-      <section className="mt-8 grid gap-4 lg:grid-cols-3">
-        <BoundaryCard
-          title="Authority"
-          value="MeridianSecurityMetadataReader"
-          detail="Escalation-only. The default runtime role is not broadened."
-        />
-
-        <BoundaryCard
-          title="Source"
-          value="Official SysAdmin REST"
-          detail="Six security metadata inventories; nested metadata only where parents exist."
-        />
-
-        <BoundaryCard
-          title="Secret material"
-          value="NEVER"
-          detail="No secret values, private-key material, certificate bodies, client secrets, or passwords."
-        />
       </section>
 
       {surface.status === "unavailable" ? (
-        <section className="mt-8 rounded-2xl border border-amber-300/20 bg-amber-300/[0.06] p-6">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-amber-100/70">
-            Safe failure boundary
-          </p>
-
-          <h2 className="mt-3 text-2xl font-semibold text-white">
-            Live security metadata unavailable
-          </h2>
-
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-white/55">
-            {surface.message}
-          </p>
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <Fact
-              label="Reason"
-              value={surface.reason}
-            />
-
-            <Fact
-              label="Fallback secret access"
-              value="NONE"
-            />
-          </div>
+        <section className="meridian-runtime-section">
+          <AuthorityCallout
+            eyebrow="Safe failure boundary"
+            title="Live security metadata unavailable"
+            detail="The metadata read failed closed. Meridian exposes no fallback secret access, public management proxy, or mutation control."
+            tone="warning"
+          >
+            <CodeValue>{surface.reason}</CodeValue>
+            <p>{surface.message}</p>
+          </AuthorityCallout>
         </section>
       ) : (
         <>
-          <section className="mt-8 rounded-2xl border border-white/10 bg-white/[0.025] p-6">
-            <div className="flex flex-wrap items-end justify-between gap-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/40">
-                  Live security authority
-                </p>
+          <section className="meridian-runtime-metrics" aria-label="Security metadata summary">
+            <MetricCell
+              label="Wallet"
+              value={surface.walletCollections.length}
+              detail="wallet collections"
+            />
+            <MetricCell
+              label="X.509"
+              value={surface.x509Credentials.length}
+              detail="credential metadata rows"
+            />
+            <MetricCell
+              label="TLS / SSL"
+              value={surface.sslConfigurations.length}
+              detail="SSL configurations"
+            />
+            <MetricCell
+              label="OAuth families"
+              value={
+                surface.oauthClientServers.length +
+                surface.oauthResourceServers.length +
+                surface.oauthServerClients.length
+              }
+              detail="approved OAuth metadata rows"
+            />
+          </section>
 
-                <h2 className="mt-2 text-2xl font-semibold text-white">
-                  Explicit escalation, metadata-only read
-                </h2>
-              </div>
+          <section className="meridian-runtime-section">
+            <SectionHeader
+              eyebrow="Wallet"
+              title={`${surface.walletCollections.length} wallet collections`}
+              detail="Secret name/type metadata only. Values are never rendered."
+            />
 
-              <div className="text-right text-xs leading-5 text-white/40">
-                <p>Runtime: {surface.runtime.username} / API v{surface.runtime.apiVersion}</p>
-                <p>Role: {surface.authority.role}</p>
-              </div>
-            </div>
-
-            <div className="mt-6 grid gap-3 sm:grid-cols-3">
-              <Fact
-                label="Explicit escalation"
-                value={surface.authority.explicitEscalation ? "YES" : "NO"}
-              />
-
-              <Fact
-                label="Default runtime broadened"
-                value={surface.authority.defaultRuntimeBroadened ? "YES" : "NO"}
-              />
-
-              <Fact
-                label="Mutation controls"
-                value="NONE"
-              />
+            <div className="meridian-table-wrap">
+              <table className="meridian-data-table meridian-security-table">
+                <thead>
+                  <tr>
+                    <th>Collection</th>
+                    <th>Edit resource</th>
+                    <th>Use resource</th>
+                    <th>Secret name/type metadata only</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {surface.walletCollections.length === 0 ? (
+                    <tr>
+                      <td colSpan={4}>No wallet collections are configured.</td>
+                    </tr>
+                  ) : (
+                    surface.walletCollections.map((collection) => (
+                      <tr key={collection.name}>
+                        <td><CodeValue>{collection.name || "UNNAMED COLLECTION"}</CodeValue></td>
+                        <td><CodeValue>{collection.editResource || "NONE"}</CodeValue></td>
+                        <td><CodeValue>{collection.useResource || "NONE"}</CodeValue></td>
+                        <td>
+                          {collection.secrets.length === 0
+                            ? "No secret metadata rows"
+                            : collection.secrets
+                                .map((secret) => `${secret.name} [${secret.type}]`)
+                                .join(", ")}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           </section>
 
-          <InventorySection
-            eyebrow="Wallet"
-            title={`${surface.walletCollections.length} wallet collections`}
-          >
-            {surface.walletCollections.length === 0 ? (
-              <EmptyInventory text="No wallet collections are configured." />
-            ) : (
-              <div className="grid gap-4 lg:grid-cols-2">
-                {surface.walletCollections.map(
-                  (
-                    collection,
-                  ) => (
-                    <article
-                      key={collection.name}
-                      className="rounded-xl border border-white/10 bg-black/20 p-5"
-                    >
-                      <code className="text-sm font-semibold text-violet-100">
-                        {collection.name || "UNNAMED COLLECTION"}
-                      </code>
+          <section className="meridian-runtime-section">
+            <SectionHeader
+              eyebrow="X.509"
+              title={`${surface.x509Credentials.length} credential metadata rows`}
+              detail="Presence and identity metadata only; private-key and certificate material remains outside the page."
+            />
 
-                      <dl className="mt-4 grid gap-3 text-sm">
-                        <Detail
-                          label="Edit resource"
-                          value={collection.editResource || "NONE"}
-                        />
+            <div className="meridian-table-wrap">
+              <table className="meridian-data-table meridian-security-table">
+                <thead>
+                  <tr>
+                    <th>Alias</th>
+                    <th>Private key present</th>
+                    <th>Owners</th>
+                    <th>Peer names</th>
+                    <th>CA file metadata</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {surface.x509Credentials.length === 0 ? (
+                    <tr>
+                      <td colSpan={5}>No X.509 credential metadata rows are configured.</td>
+                    </tr>
+                  ) : (
+                    surface.x509Credentials.map((credential) => (
+                      <tr key={credential.alias}>
+                        <td><CodeValue>{credential.alias || "UNNAMED ALIAS"}</CodeValue></td>
+                        <td>
+                          <StatusBadge tone={credential.hasPrivateKey ? "warning" : "neutral"}>
+                            {credential.hasPrivateKey ? "YES" : "NO"}
+                          </StatusBadge>
+                        </td>
+                        <td>{listOr(credential.owners, "ALL USERS")}</td>
+                        <td>{listOr(credential.peerNames, "NONE")}</td>
+                        <td><CodeValue>{credential.caFile || "NONE"}</CodeValue></td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
 
-                        <Detail
-                          label="Use resource"
-                          value={collection.useResource || "NONE"}
-                        />
-                      </dl>
+          <section className="meridian-runtime-section">
+            <SectionHeader
+              eyebrow="TLS / SSL"
+              title={`${surface.sslConfigurations.length} SSL configurations`}
+              detail="Configuration identity and state only."
+            />
 
-                      <div className="mt-5 border-t border-white/10 pt-4">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/35">
-                          Secret name/type metadata only
-                        </p>
+            <div className="meridian-table-wrap">
+              <table className="meridian-data-table meridian-security-table">
+                <thead>
+                  <tr>
+                    <th>Configuration</th>
+                    <th>State</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {surface.sslConfigurations.length === 0 ? (
+                    <tr>
+                      <td colSpan={4}>No SSL configuration metadata rows are configured.</td>
+                    </tr>
+                  ) : (
+                    surface.sslConfigurations.map((configuration) => (
+                      <tr key={configuration.name}>
+                        <td><CodeValue>{configuration.name || "UNNAMED CONFIGURATION"}</CodeValue></td>
+                        <td>
+                          <StatusBadge tone={configuration.enabled ? "success" : "neutral"}>
+                            {configuration.enabled ? "ENABLED" : "DISABLED"}
+                          </StatusBadge>
+                        </td>
+                        <td>{configuration.type || "UNSPECIFIED"}</td>
+                        <td>{configuration.description || "NONE"}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
 
-                        {collection.secrets.length === 0 ? (
-                          <p className="mt-3 text-sm text-white/40">
-                            No secret metadata rows.
-                          </p>
-                        ) : (
-                          <div className="mt-3 grid gap-2">
-                            {collection.secrets.map(
-                              (
-                                secret,
-                              ) => (
-                                <div
-                                  key={`${secret.name}:${secret.type}`}
-                                  className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-white/10 bg-white/[0.025] px-3 py-2"
-                                >
-                                  <code className="text-xs text-white/70">
-                                    {secret.name}
-                                  </code>
+          <section className="meridian-runtime-section">
+            <SectionHeader
+              eyebrow="OAuth client"
+              title={`${surface.oauthClientServers.length} authorization-server definitions`}
+              detail="Authorization-server identity plus Client configuration metadata."
+            />
 
-                                  <span className="text-xs text-white/40">
-                                    {secret.type}
-                                  </span>
-                                </div>
-                              ),
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </article>
-                  ),
-                )}
+            <div className="meridian-table-wrap">
+              <table className="meridian-data-table meridian-security-oauth-table">
+                <thead>
+                  <tr>
+                    <th>Server</th>
+                    <th>Issuer endpoint</th>
+                    <th>Clients</th>
+                    <th>Resources</th>
+                    <th>Client configuration metadata</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {surface.oauthClientServers.length === 0 ? (
+                    <tr>
+                      <td colSpan={5}>No OAuth client-server definitions are configured.</td>
+                    </tr>
+                  ) : (
+                    surface.oauthClientServers.map((server) => (
+                      <tr key={server.id}>
+                        <td><CodeValue>{server.id || "UNNAMED SERVER"}</CodeValue></td>
+                        <td><CodeValue>{server.issuerEndpoint || "NONE"}</CodeValue></td>
+                        <td>{server.clientCount}</td>
+                        <td>{server.resourceCount}</td>
+                        <td>
+                          {server.clients.length === 0
+                            ? "No client configuration metadata rows"
+                            : server.clients
+                                .map(
+                                  (client) =>
+                                    `${client.applicationName || "NONE"} / ${client.clientType || "NONE"} / ${client.defaultScope || "NONE"}`,
+                                )
+                                .join("; ")}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="meridian-runtime-split">
+            <div className="meridian-runtime-section">
+              <SectionHeader
+                eyebrow="OAuth resource server"
+                title={`${surface.oauthResourceServers.length} resource-server metadata rows`}
+                detail="Registered resource-server identity and server-definition metadata."
+              />
+
+              <div className="meridian-table-wrap">
+                <table className="meridian-data-table meridian-security-table">
+                  <thead>
+                    <tr>
+                      <th>Resource server</th>
+                      <th>Server definition</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {surface.oauthResourceServers.length === 0 ? (
+                      <tr>
+                        <td colSpan={2}>No OAuth resource-server metadata rows are configured.</td>
+                      </tr>
+                    ) : (
+                      surface.oauthResourceServers.map((server) => (
+                        <tr key={server.name}>
+                          <td><CodeValue>{server.name || "UNNAMED RESOURCE SERVER"}</CodeValue></td>
+                          <td>{server.serverDefinition || "NONE"}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
-            )}
-          </InventorySection>
+            </div>
 
-          <InventorySection
-            eyebrow="X.509"
-            title={`${surface.x509Credentials.length} credential metadata rows`}
-          >
-            {surface.x509Credentials.length === 0 ? (
-              <EmptyInventory text="No X.509 credential metadata rows are configured." />
-            ) : (
-              <div className="grid gap-4 lg:grid-cols-2">
-                {surface.x509Credentials.map(
-                  (
-                    credential,
-                  ) => (
-                    <article
-                      key={credential.alias}
-                      className="rounded-xl border border-white/10 bg-black/20 p-5"
-                    >
-                      <code className="text-sm font-semibold text-violet-100">
-                        {credential.alias || "UNNAMED ALIAS"}
-                      </code>
+            <div className="meridian-runtime-section">
+              <SectionHeader
+                eyebrow="OAuth server client"
+                title={`${surface.oauthServerClients.length} registered-client metadata rows`}
+                detail="Approved registration metadata without client-secret material."
+              />
 
-                      <dl className="mt-4 grid gap-3 text-sm">
-                        <Detail
-                          label="Private key present"
-                          value={credential.hasPrivateKey ? "YES" : "NO"}
-                        />
-
-                        <Detail
-                          label="Owners"
-                          value={credential.owners.join(", ") || "ALL USERS"}
-                        />
-
-                        <Detail
-                          label="Peer names"
-                          value={credential.peerNames.join(", ") || "NONE"}
-                        />
-
-                        <Detail
-                          label="CA file metadata"
-                          value={credential.caFile || "NONE"}
-                        />
-                      </dl>
-                    </article>
-                  ),
-                )}
+              <div className="meridian-table-wrap">
+                <table className="meridian-data-table meridian-security-table">
+                  <thead>
+                    <tr>
+                      <th>Client</th>
+                      <th>Client ID</th>
+                      <th>Type</th>
+                      <th>Redirect URLs</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {surface.oauthServerClients.length === 0 ? (
+                      <tr>
+                        <td colSpan={4}>No OAuth server-client metadata rows are configured.</td>
+                      </tr>
+                    ) : (
+                      surface.oauthServerClients.map((client) => (
+                        <tr key={`${client.name}:${client.clientId}`}>
+                          <td>
+                            <strong>{client.name || "UNNAMED CLIENT"}</strong>
+                            <small>{client.description || "No description"}</small>
+                          </td>
+                          <td><CodeValue>{client.clientId || "NONE"}</CodeValue></td>
+                          <td>{client.clientType || "NONE"}</td>
+                          <td>{listOr(client.redirectUrls, "NONE")}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
-            )}
-          </InventorySection>
-
-          <InventorySection
-            eyebrow="TLS / SSL"
-            title={`${surface.sslConfigurations.length} SSL configurations`}
-          >
-            {surface.sslConfigurations.length === 0 ? (
-              <EmptyInventory text="No SSL configuration metadata rows are configured." />
-            ) : (
-              <div className="grid gap-4 lg:grid-cols-2">
-                {surface.sslConfigurations.map(
-                  (
-                    configuration,
-                  ) => (
-                    <article
-                      key={configuration.name}
-                      className="rounded-xl border border-white/10 bg-black/20 p-5"
-                    >
-                      <div className="flex flex-wrap items-center justify-between gap-3">
-                        <code className="text-sm font-semibold text-violet-100">
-                          {configuration.name || "UNNAMED CONFIGURATION"}
-                        </code>
-
-                        <span className="rounded-full border border-white/10 bg-white/[0.035] px-2.5 py-1 text-[11px] font-semibold text-white/60">
-                          {configuration.enabled ? "ENABLED" : "DISABLED"}
-                        </span>
-                      </div>
-
-                      <dl className="mt-4 grid gap-3 text-sm">
-                        <Detail
-                          label="Type"
-                          value={configuration.type || "UNSPECIFIED"}
-                        />
-
-                        <Detail
-                          label="Description"
-                          value={configuration.description || "NONE"}
-                        />
-                      </dl>
-                    </article>
-                  ),
-                )}
-              </div>
-            )}
-          </InventorySection>
-
-          <InventorySection
-            eyebrow="OAuth client"
-            title={`${surface.oauthClientServers.length} authorization-server definitions`}
-          >
-            {surface.oauthClientServers.length === 0 ? (
-              <EmptyInventory text="No OAuth client-server definitions are configured." />
-            ) : (
-              <div className="grid gap-4">
-                {surface.oauthClientServers.map(
-                  (
-                    server,
-                  ) => (
-                    <article
-                      key={server.id}
-                      className="rounded-xl border border-white/10 bg-black/20 p-5"
-                    >
-                      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)]">
-                        <div>
-                          <code className="text-sm font-semibold text-violet-100">
-                            {server.id || "UNNAMED SERVER"}
-                          </code>
-
-                          <p className="mt-3 break-all text-sm text-white/50">
-                            {server.issuerEndpoint || "No issuer endpoint metadata"}
-                          </p>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                          <Fact
-                            label="Client count"
-                            value={String(server.clientCount)}
-                          />
-
-                          <Fact
-                            label="Resource count"
-                            value={String(server.resourceCount)}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="mt-5 border-t border-white/10 pt-4">
-                        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/35">
-                          Client configuration metadata
-                        </p>
-
-                        {server.clients.length === 0 ? (
-                          <p className="mt-3 text-sm text-white/40">
-                            No client configuration metadata rows.
-                          </p>
-                        ) : (
-                          <div className="mt-3 grid gap-2">
-                            {server.clients.map(
-                              (
-                                client,
-                              ) => (
-                                <div
-                                  key={`${client.applicationName}:${client.clientType}:${client.defaultScope}`}
-                                  className="grid gap-2 rounded-lg border border-white/10 bg-white/[0.025] p-3 sm:grid-cols-3"
-                                >
-                                  <Fact
-                                    label="Application"
-                                    value={client.applicationName || "NONE"}
-                                  />
-
-                                  <Fact
-                                    label="Client type"
-                                    value={client.clientType || "NONE"}
-                                  />
-
-                                  <Fact
-                                    label="Default scope"
-                                    value={client.defaultScope || "NONE"}
-                                  />
-                                </div>
-                              ),
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </article>
-                  ),
-                )}
-              </div>
-            )}
-          </InventorySection>
-
-          <InventorySection
-            eyebrow="OAuth resource server"
-            title={`${surface.oauthResourceServers.length} resource-server metadata rows`}
-          >
-            {surface.oauthResourceServers.length === 0 ? (
-              <EmptyInventory text="No OAuth resource-server metadata rows are configured." />
-            ) : (
-              <div className="grid gap-4 lg:grid-cols-2">
-                {surface.oauthResourceServers.map(
-                  (
-                    server,
-                  ) => (
-                    <article
-                      key={server.name}
-                      className="rounded-xl border border-white/10 bg-black/20 p-5"
-                    >
-                      <code className="text-sm font-semibold text-violet-100">
-                        {server.name || "UNNAMED RESOURCE SERVER"}
-                      </code>
-
-                      <p className="mt-3 text-sm text-white/45">
-                        Server definition: {server.serverDefinition || "NONE"}
-                      </p>
-                    </article>
-                  ),
-                )}
-              </div>
-            )}
-          </InventorySection>
-
-          <InventorySection
-            eyebrow="OAuth server client"
-            title={`${surface.oauthServerClients.length} registered-client metadata rows`}
-          >
-            {surface.oauthServerClients.length === 0 ? (
-              <EmptyInventory text="No OAuth server-client metadata rows are configured." />
-            ) : (
-              <div className="grid gap-4 lg:grid-cols-2">
-                {surface.oauthServerClients.map(
-                  (
-                    client,
-                  ) => (
-                    <article
-                      key={`${client.name}:${client.clientId}`}
-                      className="rounded-xl border border-white/10 bg-black/20 p-5"
-                    >
-                      <code className="text-sm font-semibold text-violet-100">
-                        {client.name || "UNNAMED CLIENT"}
-                      </code>
-
-                      <dl className="mt-4 grid gap-3 text-sm">
-                        <Detail
-                          label="Client ID"
-                          value={client.clientId || "NONE"}
-                        />
-
-                        <Detail
-                          label="Client type"
-                          value={client.clientType || "NONE"}
-                        />
-
-                        <Detail
-                          label="Description"
-                          value={client.description || "NONE"}
-                        />
-
-                        <Detail
-                          label="Redirect URLs"
-                          value={client.redirectUrls.join(", ") || "NONE"}
-                        />
-                      </dl>
-                    </article>
-                  ),
-                )}
-              </div>
-            )}
-          </InventorySection>
+            </div>
+          </section>
         </>
       )}
 
-      <section className="mt-8 rounded-2xl border border-white/10 bg-black/20 p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/40">
-          Non-negotiable material boundary
-        </p>
+      <section className="meridian-runtime-section">
+        <SectionHeader
+          eyebrow="Non-negotiable material boundary"
+          title="Metadata visibility stops before secret material."
+          detail="These display prohibitions are part of the product contract, not empty-state copy."
+        />
 
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <Fact
-            label="Secret values"
-            value="NEVER"
-          />
-
-          <Fact
-            label="Private-key material"
-            value="NEVER"
-          />
-
-          <Fact
-            label="Certificate bodies"
-            value="NEVER"
-          />
-
-          <Fact
-            label="Client secrets / passwords"
-            value="NEVER"
-          />
-
-          <Fact
-            label="Browser credential"
-            value="NOT EXPOSED"
-          />
-
-          <Fact
-            label="Public management proxy"
-            value="NONE"
-          />
-
-          <Fact
-            label="Mutation controls"
-            value="NONE"
-          />
-
-          <Fact
-            label="Mode"
-            value="READ ONLY"
-          />
+        <div className="meridian-table-wrap">
+          <table className="meridian-data-table meridian-material-boundary-table">
+            <thead>
+              <tr>
+                <th>Material class</th>
+                <th>Display policy</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Secret values</td><td><StatusBadge tone="success">NEVER</StatusBadge></td></tr>
+              <tr><td>Private-key material</td><td><StatusBadge tone="success">NEVER</StatusBadge></td></tr>
+              <tr><td>Certificate bodies</td><td><StatusBadge tone="success">NEVER</StatusBadge></td></tr>
+              <tr><td>Client secrets / passwords</td><td><StatusBadge tone="success">NEVER</StatusBadge></td></tr>
+              <tr><td>Browser credential</td><td><StatusBadge tone="success">NOT EXPOSED</StatusBadge></td></tr>
+              <tr><td>Public management proxy</td><td><StatusBadge tone="success">NONE</StatusBadge></td></tr>
+              <tr><td>Mutation controls</td><td><StatusBadge tone="success">NONE</StatusBadge></td></tr>
+              <tr><td>Mode</td><td><StatusBadge tone="success">READ ONLY</StatusBadge></td></tr>
+            </tbody>
+          </table>
         </div>
       </section>
     </main>
-  );
-}
-
-function InventorySection({
-  eyebrow,
-  title,
-  children,
-}: {
-  readonly eyebrow:
-    string;
-
-  readonly title:
-    string;
-
-  readonly children:
-    React.ReactNode;
-}) {
-  return (
-    <section className="mt-8 rounded-2xl border border-white/10 bg-white/[0.025] p-6">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/40">
-        {eyebrow}
-      </p>
-
-      <h2 className="mt-2 text-2xl font-semibold text-white">
-        {title}
-      </h2>
-
-      <div className="mt-6">
-        {children}
-      </div>
-    </section>
-  );
-}
-
-function EmptyInventory({
-  text,
-}: {
-  readonly text:
-    string;
-}) {
-  return (
-    <div className="rounded-xl border border-dashed border-white/10 bg-black/15 p-5 text-sm text-white/40">
-      {text}
-    </div>
-  );
-}
-
-function BoundaryCard({
-  title,
-  value,
-  detail,
-}: {
-  readonly title:
-    string;
-
-  readonly value:
-    string;
-
-  readonly detail:
-    string;
-}) {
-  return (
-    <article className="rounded-2xl border border-white/10 bg-white/[0.025] p-5">
-      <p className="text-xs uppercase tracking-[0.16em] text-white/35">
-        {title}
-      </p>
-
-      <p className="mt-3 break-words text-lg font-semibold text-white">
-        {value}
-      </p>
-
-      <p className="mt-2 text-sm leading-6 text-white/45">
-        {detail}
-      </p>
-    </article>
-  );
-}
-
-function Detail({
-  label,
-  value,
-}: {
-  readonly label:
-    string;
-
-  readonly value:
-    string;
-}) {
-  return (
-    <div className="grid grid-cols-[9rem_minmax(0,1fr)] gap-3">
-      <dt className="text-white/35">
-        {label}
-      </dt>
-
-      <dd className="break-words text-white/70">
-        {value}
-      </dd>
-    </div>
-  );
-}
-
-function Fact({
-  label,
-  value,
-}: {
-  readonly label:
-    string;
-
-  readonly value:
-    string;
-}) {
-  return (
-    <div className="rounded-xl border border-white/10 bg-white/[0.025] p-4">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">
-        {label}
-      </p>
-
-      <p className="mt-2 break-words text-sm font-semibold text-white/75">
-        {value}
-      </p>
-    </div>
   );
 }

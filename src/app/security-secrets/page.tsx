@@ -29,8 +29,8 @@ export default async function SecuritySecretsPage() {
   return (
     <main className="meridian-runtime-page">
       <PageHeader
-        eyebrow="Security / SECURITY / SECRETS"
-        title="Security metadata without exposing the material it protects."
+        eyebrow="Surfaces / SECURITY / SECRETS"
+        title="Security metadata, never secret material."
         description="Meridian uses an EXPLICIT ESCALATION ROLE for server-owned metadata reads. The browser receives approved metadata only; secret material never crosses the display boundary."
         actions={
           <>

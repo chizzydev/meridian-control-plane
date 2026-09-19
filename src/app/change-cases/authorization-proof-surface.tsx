@@ -163,7 +163,7 @@ export function AuthorizationProofSurface() {
   return (
     <section
       aria-labelledby="authorization-proof-title"
-      className="mb-10 rounded-3xl border border-rose-300/20 bg-rose-300/[0.035] p-5 shadow-2xl shadow-black/10 sm:p-7"
+      className="meridian-convergence-proof mb-10 rounded-3xl border border-rose-300/20 bg-rose-300/[0.035] p-5 shadow-2xl shadow-black/10 sm:p-7"
     >
       <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
         <div className="max-w-4xl">
@@ -244,18 +244,9 @@ export function AuthorizationProofSurface() {
         </p>
       </div>
 
-      <div className="mt-5 space-y-3">
-        {staleRows.map(
-          (
-            row,
-          ) => (
-            <PermissionProofRowView
-              key={row.id}
-              row={row}
-            />
-          ),
-        )}
-      </div>
+            <PermissionProofMatrix
+        rows={staleRows}
+      />
 
       <div className="mt-7 grid gap-4 lg:grid-cols-[1fr_auto_1fr] lg:items-stretch">
         <article className="rounded-2xl border border-rose-300/20 bg-black/15 p-5">
@@ -331,86 +322,62 @@ export function AuthorizationProofSurface() {
   );
 }
 
-function PermissionProofRowView({
-  row,
+function PermissionProofMatrix({
+  rows,
 }: {
-  row:
-    PermissionProofRow;
-}) {
-  const mismatch =
-    row.configuredDecision !==
-    row.liveDecision;
-
-  return (
-    <article className="rounded-2xl border border-white/10 bg-black/10 p-4">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="font-medium text-white/80">
-            {row.resource}:{row.permission}
-          </p>
-
-          <p className="mt-1 text-xs text-white/35">
-            {mismatch
-              ? "Configured and live authorization disagree."
-              : "Configured and live authorization agree."}
-          </p>
-        </div>
-
-        <span
-          className={
-            mismatch
-              ? "w-fit rounded-full border border-rose-300/20 bg-rose-300/[0.06] px-2.5 py-1 text-[10px] font-semibold text-rose-100"
-              : "w-fit rounded-full border border-emerald-300/20 bg-emerald-300/[0.05] px-2.5 py-1 text-[10px] font-semibold text-emerald-100"
-          }
-        >
-          {mismatch
-            ? "MISMATCH"
-            : "MATCH"}
-        </span>
-      </div>
-
-      <div className="mt-4 grid gap-2 sm:grid-cols-3">
-        <DecisionCell
-          label="EXPECTED"
-          value={row.expectedDecision}
-        />
-
-        <DecisionCell
-          label="CONFIGURED"
-          value={row.configuredDecision}
-        />
-
-        <DecisionCell
-          label="LIVE"
-          value={row.liveDecision}
-        />
-      </div>
-    </article>
-  );
-}
-
-function DecisionCell({
-  label,
-  value,
-}: {
-  label:
-    string;
-  value:
-    "ALLOW" | "DENY" | "UNKNOWN";
+  rows:
+    PermissionProofRow[];
 }) {
   return (
-    <div className="rounded-xl border border-white/10 bg-black/15 p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">
-        {label}
-      </p>
+    <div className="meridian-table-wrap meridian-convergence-matrix-wrap">
+      <table className="meridian-data-table meridian-convergence-matrix">
+        <thead>
+          <tr>
+            <th>Permission</th>
+            <th>EXPECTED</th>
+            <th>CONFIGURED</th>
+            <th>LIVE</th>
+            <th>Verdict</th>
+          </tr>
+        </thead>
 
-      <p className="mt-2 font-mono text-sm font-semibold text-white/75">
-        {value}
-      </p>
+        <tbody>
+          {rows.map((row) => {
+            const mismatch =
+              row.configuredDecision !==
+              row.liveDecision;
+
+            return (
+              <tr key={row.id}>
+                <td>
+                  <strong>
+                    {row.resource}:{row.permission}
+                  </strong>
+                  <small>
+                    {mismatch
+                      ? "Configured and live authorization disagree."
+                      : "Configured and live authorization agree."}
+                  </small>
+                </td>
+                <td>{row.expectedDecision}</td>
+                <td>{row.configuredDecision}</td>
+                <td>{row.liveDecision}</td>
+                <td>
+                  <span
+                    className="meridian-proof-verdict"
+                    data-tone={mismatch ? "danger" : "success"}
+                  >
+                    {mismatch ? "MISMATCH" : "MATCH"}
+                  </span>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
-
 function WitnessFact({
   label,
   value,

@@ -23,7 +23,7 @@ export default async function WebRestPage() {
     <main className="meridian-runtime-page">
       <PageHeader
         eyebrow="Surfaces / WEB APPS / REST"
-        title="Deployment identity, declared protection, and endpoint proof in one view."
+        title="Deployment identity and endpoint proof."
         description="Permissions remains the centerpiece. Meridian joins live application inventory and Native emitted Swagger to Authoritative OpenAPI protection metadata without widening browser authority."
         actions={
           <>

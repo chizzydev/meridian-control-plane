@@ -2067,3 +2067,232 @@ background: var(--meridian-surface-1);
     transition-duration: 0.01ms !important;
   }
 }
+/* MERIDIAN_VISUAL_STRIKE_V1_JUDGE_POLISH */
+
+/* Keep the desktop rail scrollable by wheel/keyboard without advertising a second scrollbar. */
+@media (min-width: 960px) {
+  .meridian-nav {
+    min-height: 0;
+    scrollbar-width: none;
+  }
+
+  .meridian-nav::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+
+  .meridian-rail-footer {
+    flex: 0 0 auto;
+    min-height: 58px;
+    padding: 10px 16px;
+    background: var(--meridian-surface-0);
+  }
+
+  .meridian-rail-footer small {
+    font-size: 9px;
+    white-space: nowrap;
+  }
+}
+
+/* Bring operational evidence further into the first desktop viewport. */
+@media (min-width: 761px) {
+  .meridian-control-room,
+  .meridian-change-queue,
+  .meridian-new-case,
+  .meridian-verified-inspector,
+  .meridian-runtime-page {
+    padding-top: 26px;
+  }
+
+  .meridian-page-header {
+    gap: 18px;
+    padding-bottom: 18px;
+  }
+
+  .meridian-page-header h1 {
+    max-width: 900px;
+    font-size: clamp(30px, 3.3vw, 42px);
+    line-height: 1;
+  }
+
+  .meridian-page-description {
+    margin-top: 8px;
+    line-height: 1.55;
+  }
+
+  .meridian-queue-lifecycle,
+  .meridian-new-case-rail,
+  .meridian-inspector-identity {
+    margin-top: 18px;
+  }
+
+  .meridian-staging-console {
+    grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
+    margin-top: 22px;
+  }
+}
+
+/* Normal desktop widths should not show native horizontal scrollbars on core evidence tables. */
+@media (min-width: 1181px) {
+  .meridian-queue-table,
+  .meridian-preflight-table,
+  .meridian-truth-table,
+  .meridian-impact-table {
+    width: 100%;
+    min-width: 0;
+    table-layout: fixed;
+  }
+
+  .meridian-queue-table th,
+  .meridian-queue-table td {
+    padding-right: 8px;
+    padding-left: 8px;
+    overflow-wrap: anywhere;
+  }
+
+  .meridian-queue-table th:nth-child(1) { width: 9%; }
+  .meridian-queue-table th:nth-child(2) { width: 10%; }
+  .meridian-queue-table th:nth-child(3) { width: 14%; }
+  .meridian-queue-table th:nth-child(4) { width: 8%; }
+  .meridian-queue-table th:nth-child(5) { width: 10%; }
+  .meridian-queue-table th:nth-child(6) { width: 10%; }
+  .meridian-queue-table th:nth-child(7) { width: 10%; }
+  .meridian-queue-table th:nth-child(8) { width: 20%; }
+  .meridian-queue-table th:nth-child(9) { width: 9%; }
+
+  .meridian-queue-table .meridian-code-value-truncate {
+    max-width: 100%;
+  }
+
+  .meridian-preflight-table th:nth-child(1) { width: 42%; }
+  .meridian-preflight-table th:nth-child(2) { width: 38%; }
+  .meridian-preflight-table th:nth-child(3) { width: 20%; }
+
+  .meridian-truth-table th:nth-child(1) { width: 15%; }
+  .meridian-truth-table th:nth-child(2) { width: 24%; }
+  .meridian-truth-table th:nth-child(3) { width: 22%; }
+  .meridian-truth-table th:nth-child(4) { width: 15%; }
+  .meridian-truth-table th:nth-child(5) { width: 24%; }
+
+  .meridian-truth-table td,
+  .meridian-impact-table td,
+  .meridian-preflight-table td {
+    overflow-wrap: anywhere;
+  }
+
+  .meridian-inspector-impact {
+    gap: 16px;
+  }
+}
+
+/* Compact the certified stale-to-converged witness into an evidence matrix. */
+.meridian-convergence-proof {
+  border-radius: 6px !important;
+  box-shadow: none !important;
+}
+
+.meridian-convergence-proof #authorization-proof-title {
+  font-size: clamp(24px, 2.2vw, 34px);
+  line-height: 1.08;
+}
+
+.meridian-convergence-matrix-wrap {
+  margin-top: 18px;
+}
+
+.meridian-convergence-matrix {
+  min-width: 720px;
+}
+
+.meridian-convergence-matrix th:nth-child(1) {
+  width: 34%;
+}
+
+.meridian-convergence-matrix th:not(:first-child) {
+  width: 16.5%;
+}
+
+.meridian-proof-verdict {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--meridian-line-strong);
+  border-radius: 3px;
+  padding: 4px 7px;
+  font-size: 9px;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+}
+
+.meridian-proof-verdict[data-tone="danger"] {
+  border-color: rgba(251, 113, 133, 0.28);
+  background: rgba(251, 113, 133, 0.06);
+  color: #fda4af;
+}
+
+.meridian-proof-verdict[data-tone="success"] {
+  border-color: rgba(74, 222, 128, 0.25);
+  background: rgba(74, 222, 128, 0.05);
+  color: var(--meridian-green);
+}
+
+/* Let live-history and recorded-receipt evidence occupy their own natural heights. */
+.meridian-inspector-history {
+  align-items: start;
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+  gap: 16px;
+  border: 0;
+  background: transparent;
+}
+
+.meridian-inspector-history > div {
+  border: 1px solid var(--meridian-line);
+}
+
+.meridian-inspector-recorded-source .meridian-code-value {
+  display: block;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+  font-size: 9px;
+  line-height: 1.55;
+}
+
+/* Runtime failure codes remain available, but the human explanation leads. */
+.meridian-runtime-page .meridian-authority-callout .meridian-code-value {
+  display: block;
+  margin-top: 8px;
+  color: var(--meridian-text-faint);
+  font-size: 9px;
+}
+
+/* A disabled action should read as deliberately blocked rather than visually missing. */
+.meridian-disabled-action:disabled {
+  border-color: var(--meridian-line-strong);
+  color: var(--meridian-text-faint);
+  opacity: 0.72;
+}
+
+/* Preserve the working mobile rail while hinting that more destinations continue horizontally. */
+@media (max-width: 959px) {
+  .meridian-mobile-nav {
+    box-shadow: inset -18px 0 18px -20px rgba(103, 232, 249, 0.52);
+  }
+}
+
+@media (max-width: 640px) {
+  .meridian-page-header h1 {
+    font-size: clamp(27px, 8.4vw, 34px);
+  }
+
+  .meridian-control-room,
+  .meridian-change-queue,
+  .meridian-new-case,
+  .meridian-verified-inspector,
+  .meridian-runtime-page {
+    padding-top: 20px;
+  }
+
+  .meridian-page-header {
+    gap: 14px;
+    padding-bottom: 16px;
+  }
+}

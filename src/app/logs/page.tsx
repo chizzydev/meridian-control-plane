@@ -91,7 +91,7 @@ export default async function LogsPage(
     <main className="meridian-runtime-page">
       <PageHeader
         eyebrow="Runtime / LOGS"
-        title="Operational evidence without an audit-console shortcut."
+        title="Operational logs under narrow read authority."
         description="NON-AUDIT OPERATIONAL LOGS are read server-side through narrow SQL authority, with source identity, severity, and time filtering."
         actions={
           <>

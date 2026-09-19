@@ -112,7 +112,7 @@ export default async function VerifiedReceiptPage() {
           <StatusBadge tone="success">Recorded certified receipt</StatusBadge>
           <StatusBadge>Read-only demo evidence</StatusBadge>
           <StatusBadge tone={persistent ? "success" : "warning"}>
-            {persistent ? "Persistent IRIS history live" : "Persistent IRIS history unavailable"}
+            {persistent ? "Persistent IRIS history live" : <span aria-label="Persistent IRIS history unavailable">Live history check unavailable</span>}
           </StatusBadge>
         </div>
 
@@ -494,7 +494,7 @@ export default async function VerifiedReceiptPage() {
         <SectionHeader
           eyebrow="Durable evidence"
           title="Persistent IRIS history + recorded source"
-          detail="The dynamic server component attempts a live authenticated IRIS history read while keeping credentials out of the browser."
+          detail="Recorded receipt evidence remains independently visible; this server-owned check verifies whether the same receipt is currently readable from persistent IRIS history."
         />
 
         <div className="meridian-inspector-history">
@@ -531,9 +531,9 @@ export default async function VerifiedReceiptPage() {
               </>
             ) : (
               <>
-                <StatusBadge tone="warning">Persistent IRIS history unavailable</StatusBadge>
+                <StatusBadge tone="warning"><span aria-label="Persistent IRIS history unavailable">Live history check unavailable</span></StatusBadge>
                 <p className="meridian-inspector-history-proof">
-                  This request did not verify the live persistent history source. The recorded certified receipt remains visible as frozen evidence, but it is not presented as a substitute for a successful live IRIS history read.
+                  The certified recorded receipt remains frozen and visible. This request could not complete the additional live durability check, so Meridian does not imply successful live persistence.
                 </p>
               </>
             )}

@@ -23,7 +23,7 @@ export default async function TasksPage() {
     <main className="meridian-runtime-page">
       <PageHeader
         eyebrow="Runtime / TASK MANAGEMENT"
-        title="Scheduled work, current state, and execution history in one operator view."
+        title="Scheduled work, state, and execution history."
         description="Meridian reads official IRIS Task Manager metadata through narrow server-owned escalation. Permissions remains the centerpiece; task mutation and broad operational authority stay absent."
         actions={
           <>

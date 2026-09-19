@@ -68,7 +68,7 @@ export default async function SystemPage() {
     <main className="meridian-runtime-page">
       <PageHeader
         eyebrow="Runtime / OS / SYSTEM"
-        title="Runtime health without an operations console."
+        title="Runtime evidence under read-only authority."
         description="Live IRIS resource, memory, lock, and process evidence stays server-read and operator-visible without exposing runtime mutation controls."
         actions={
           <>

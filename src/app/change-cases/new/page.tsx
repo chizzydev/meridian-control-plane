@@ -54,13 +54,13 @@ const preflightGates = [
   },
   {
     gate: "Authoritative IRIS impact",
-    evidence: "Live security read not connected",
+    evidence: "Requires server-owned live security read",
     status: "PENDING",
     tone: "warning",
   },
   {
     gate: "Counterfactual authorization",
-    evidence: "No authoritative evaluation yet",
+    evidence: "Requires authoritative evaluation",
     status: "PENDING",
     tone: "warning",
   },
@@ -71,8 +71,8 @@ export default function NewChangeCasePage() {
     <main className="meridian-new-case">
       <PageHeader
         eyebrow="Change control / Stage access change"
-        title="Define the mutation. Prove the impact next."
-        description="This staging surface is intentionally constrained to one controlled user and one direct-role operation. No impact numbers are invented before the authoritative IRIS preflight exists."
+        title="Review the mutation. Prove the impact next."
+        description="This staging surface is intentionally constrained to one controlled user and one direct-role operation. Impact remains unclaimed until authoritative IRIS evidence is bound."
         actions={
           <>
             <Link href="/change-cases" className="meridian-action">
@@ -173,15 +173,15 @@ export default function NewChangeCasePage() {
 
           <AuthorityCallout
             eyebrow="Preflight boundary"
-            title="Authoritative preflight not connected yet"
-            detail="The next implementation checkpoint connects this staged change to live IRIS security reads and native counterfactual evaluation. No impact numbers are invented in this staging surface."
+            title="Authoritative impact is intentionally unclaimed"
+            detail="This public staging view does not initiate privileged IRIS reads. Impact stays pending until server-owned live security evidence and counterfactual evaluation are available."
             tone="warning"
           />
 
           <div className="meridian-staging-action-row">
             <div>
               <span className="meridian-record-label">Apply boundary</span>
-              <strong>Blocked until authoritative preflight is available</strong>
+              <strong>Browser apply authority intentionally absent</strong>
             </div>
 
             <button

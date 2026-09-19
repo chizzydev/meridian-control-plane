@@ -197,7 +197,7 @@ export default function ChangeQueuePage() {
         <SectionHeader
           eyebrow="Authorization convergence"
           title="Certified stale-to-converged witness"
-          detail="This existing proof remains read-only and derived from the certified authorization closure model. D2C changes its presentation context, not its authority."
+          detail="This read-only witness is derived from the certified authorization-closure model and preserves its original evidence and authority boundary."
         />
 
         <div className="meridian-queue-proof">

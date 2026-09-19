@@ -145,6 +145,9 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="meridian-shell">
+      <a className="meridian-skip-link" href="#meridian-workspace">
+        Skip to workspace
+      </a>
       <aside className="meridian-rail">
         <Link href="/" className="meridian-brand" aria-label="Meridian control room">
           <BrandMark />
@@ -163,6 +166,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 return (
                   <Link
                     className="meridian-nav-link"
+                    aria-current={active ? "page" : undefined}
                     data-active={active ? "true" : "false"}
                     href={item.href}
                     key={item.href}
@@ -183,7 +187,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         </nav>
 
         <div className="meridian-rail-footer">
-          <span className="meridian-live-dot" />
+          <span className="meridian-live-dot" aria-hidden="true" />
           <span>
             <strong>IRIS-backed</strong>
             <small>Evidence authority</small>
@@ -214,20 +218,25 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <div className="meridian-mobile-nav" aria-label="Mobile navigation">
-          {navGroups.flatMap((group) => group.items).map((item) => (
-            <Link
-              href={item.href}
-              key={item.href}
-              data-active={isActive(pathname, item.href) ? "true" : "false"}
-            >
-              <Glyph kind={item.glyph} />
-              <span>{item.label}</span>
-            </Link>
-          ))}
-        </div>
+        <nav className="meridian-mobile-nav" aria-label="Mobile navigation">
+          {navGroups.flatMap((group) => group.items).map((item) => {
+            const active = isActive(pathname, item.href);
 
-        <div className="meridian-workspace">{children}</div>
+            return (
+              <Link
+                aria-current={active ? "page" : undefined}
+                data-active={active ? "true" : "false"}
+                href={item.href}
+                key={item.href}
+              >
+                <Glyph kind={item.glyph} />
+                <span>{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div id="meridian-workspace" className="meridian-workspace" tabIndex={-1}>{children}</div>
       </div>
     </div>
   );

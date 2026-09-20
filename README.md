@@ -76,9 +76,11 @@ APPLY
     ↓
 CONVERGE
     ↓
-VERIFIED
+VERIFY
     ↓
 DURABLE RECEIPT
+    ↓
+VERIFIED
 ```
 
 The important separation is between **intent**, **configuration**, **runtime truth**, and **evidence**.
@@ -174,6 +176,10 @@ RUNTIME CHECKED
 CONVERGED
   ↓
 NATIVE AUDIT BOUND
+  ↓
+RECEIPT PERSISTED
+  ↓
+RECEIPT READBACK VERIFIED
   ↓
 VERIFIED
 ```

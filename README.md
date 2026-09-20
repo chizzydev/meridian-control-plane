@@ -14,6 +14,8 @@ Meridian is an evidence-bound control plane for InterSystems IRIS. It treats a s
 
 **[Watch the 4:24 product demo](https://youtu.be/AtTjQKhURbg)** · **[See the 30-second thing to notice](#the-30-second-thing-to-notice)** · **[Inspect the Maya centerpiece](#centerpiece--maya-patel-supervisor-removal)** · **[View the architecture](#architecture)** · **[Run Meridian locally](#local-reproduction)** · **[Read the authority model](#authority-boundaries)**
 
+> **Viewing note:** For the clearest UI text and evidence tables, watch the product demo in **1080p HD**.
+
 Built for the **InterSystems Programming Contest — Build Your Own Management Portal**.
 
 ### The 30-second thing to notice

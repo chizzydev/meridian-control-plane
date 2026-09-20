@@ -1,0 +1,224 @@
+.page {
+  width: min(100%, 1540px);
+  margin: 0 auto;
+  padding: 26px 34px 56px;
+}
+
+.lookup,
+.architecture,
+.section {
+  margin-top: 30px;
+  border-top: 1px solid var(--meridian-line);
+  padding-top: 18px;
+}
+
+.lookupForm {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.lookupForm label {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.lookupForm label > span,
+.closureGrid > div > span {
+  color: var(--meridian-text-faint);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.lookupForm input {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--meridian-line);
+  border-radius: 3px;
+  background: var(--meridian-surface-1);
+  color: var(--meridian-text);
+  padding: 0 11px;
+  font-family:
+    "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    Menlo,
+    monospace;
+  font-size: 10px;
+}
+
+.lookupForm input:focus-visible {
+  border-color: var(--meridian-cyan);
+  outline: 2px solid var(--meridian-cyan);
+  outline-offset: 2px;
+}
+
+.lookup :global(.meridian-authority-callout) {
+  margin-top: 14px;
+}
+
+.receiptPanel {
+  margin-top: 30px;
+}
+
+.receiptHero {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.75fr) minmax(0, 1.25fr);
+  gap: 28px;
+  border-top: 1px solid var(--meridian-line);
+  border-bottom: 1px solid var(--meridian-line);
+  padding: 20px 0;
+}
+
+.receiptHeroCopy h2 {
+  margin: 14px 0 0;
+  color: var(--meridian-text);
+  font-size: clamp(24px, 2.4vw, 34px);
+  line-height: 1.06;
+}
+
+.receiptHeroCopy p {
+  max-width: 720px;
+  margin: 10px 0 0;
+  color: var(--meridian-text-muted);
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.lifecycle {
+  margin-top: 22px;
+  border-bottom: 1px solid var(--meridian-line);
+  padding-bottom: 10px;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 24px;
+}
+
+.proofTable {
+  min-width: 1180px;
+  margin-top: 16px;
+}
+
+.proofTable td {
+  vertical-align: top;
+}
+
+.proofTable small {
+  display: block;
+  margin-top: 4px;
+  color: var(--meridian-text-faint);
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.closureGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin-top: 16px;
+  border: 1px solid var(--meridian-line);
+  background: var(--meridian-line);
+}
+
+.closureGrid > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+  background: var(--meridian-surface-0);
+  padding: 15px;
+}
+
+.closureGrid :global(.meridian-code-value) {
+  overflow-wrap: anywhere;
+  white-space: normal;
+  word-break: break-all;
+}
+
+.section :global(.meridian-authority-callout) {
+  margin-top: 16px;
+}
+
+.section :global(.meridian-kv) {
+  margin-top: 16px;
+}
+
+.section :global(.meridian-kv dd) {
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+.authorityTable {
+  min-width: 720px;
+  margin-top: 16px;
+}
+
+.stateGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 16px;
+}
+
+.planeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin-top: 16px;
+  border: 1px solid var(--meridian-line);
+  background: var(--meridian-line);
+}
+
+.planeGrid > div {
+  min-width: 0;
+  background: var(--meridian-surface-0);
+  padding: 11px;
+}
+
+.architecture :global(.meridian-authority-callout) {
+  margin-top: 16px;
+}
+
+@media (max-width: 1100px) {
+  .metrics,
+  .planeGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .receiptHero {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .page {
+    padding: 20px 16px 42px;
+  }
+
+  .lookupForm,
+  .metrics,
+  .closureGrid,
+  .planeGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .lookupForm button {
+    width: 100%;
+  }
+}

@@ -67,6 +67,25 @@ describe(
     );
 
     it(
+      "orders object keys by deterministic UTF-16 code units rather than host locale",
+      () => {
+        expect(
+          canonicalJson({
+            "\u03a9":
+              4,
+            "\u00e9":
+              3,
+            a:
+              2,
+            Z:
+              1,
+          }),
+        ).toBe(
+          "{\"Z\":1,\"a\":2,\"\u00e9\":3,\"\u03a9\":4}",
+        );
+      },
+    );
+    it(
       "preserves array order",
       () => {
         expect(

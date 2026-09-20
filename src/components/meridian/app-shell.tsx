@@ -8,7 +8,7 @@ type NavItem = {
   href: string;
   label: string;
   detail: string;
-  glyph: "control" | "cases" | "new" | "system" | "tasks" | "logs" | "web" | "secrets";
+  glyph: "control" | "cases" | "proof" | "new" | "system" | "tasks" | "logs" | "web" | "secrets";
 };
 
 type NavGroup = {
@@ -22,6 +22,7 @@ const navGroups: NavGroup[] = [
     items: [
       { href: "/", label: "Control room", detail: "Operational overview", glyph: "control" },
       { href: "/change-cases", label: "Change cases", detail: "Queue and evidence", glyph: "cases" },
+      { href: "/proof", label: "Proof", detail: "Verified receipts", glyph: "proof" },
       { href: "/change-cases/new", label: "New case", detail: "Preflight a request", glyph: "new" },
     ],
   },
@@ -72,6 +73,15 @@ function Glyph({ kind }: { kind: NavItem["glyph"] }) {
     );
   }
 
+  if (kind === "proof") {
+    return (
+      <svg {...common}>
+        <path d="M3 2.75h10v10.5H3z" />
+        <path d="M5 5.25h6M5 8h3.5M5 10.75h3" />
+        <path d="M9.75 10.25l1 1 2-2.25" />
+      </svg>
+    );
+  }
   if (kind === "new") {
     return (
       <svg {...common}>

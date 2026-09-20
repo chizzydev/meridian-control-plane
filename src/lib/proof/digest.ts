@@ -278,15 +278,7 @@ function canonicalValue(
     const keys =
       Object.keys(
         value,
-      ).sort(
-        (
-          left,
-          right,
-        ) =>
-          left.localeCompare(
-            right,
-          ),
-      );
+      ).sort();
 
     const parts:
       string[] = [];

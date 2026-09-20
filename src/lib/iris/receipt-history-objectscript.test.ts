@@ -40,6 +40,9 @@ describe(
             '<Route Url="/receipts" Method="POST" Call="PersistReceipt"/>',
             '<Route Url="/receipts/:receiptId" Method="GET" Call="GetReceipt"/>',
             '<Route Url="/history/:username" Method="GET" Call="ListHistory"/>',
+            '<Route Url="/action-receipts" Method="POST" Call="PersistActionReceipt"/>',
+            '<Route Url="/action-receipts/:receiptId" Method="GET" Call="GetActionReceipt"/>',
+            '<Route Url="/action-history/:targetCanonicalId" Method="GET" Call="ListActionHistory"/>',
             '<Route Url="/cases" Method="POST" Call="CreateCase"/>',
             '<Route Url="/cases/:caseId/events" Method="GET" Call="ListCaseEvents"/>',
             '<Route Url="/cases/:caseId/events" Method="POST" Call="AppendCaseEvent"/>',
@@ -58,7 +61,7 @@ describe(
             /<Route /g,
           ),
         ).toHaveLength(
-          7,
+          10,
         );
       },
     );

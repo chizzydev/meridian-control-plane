@@ -14,6 +14,10 @@ import type {
 } from "@/lib/change-case/receipt-history";
 
 import type {
+  ActionReceiptHistoryRecord,
+} from "@/lib/proof/action-history";
+
+import type {
   ProofResult,
 } from "@/lib/proof/evidence";
 
@@ -115,6 +119,14 @@ function proofTone(
   return "warning";
 }
 
+function isLegacyUserRoleHistory(
+  record:
+    VerifiedReceiptHistoryRecord |
+    ActionReceiptHistoryRecord,
+): record is VerifiedReceiptHistoryRecord {
+  return "nativeAuditIndex" in record;
+}
+
 export function ProofReceiptPanel({
   receipt,
   historyRecord,
@@ -123,7 +135,8 @@ export function ProofReceiptPanel({
     ActionReceiptV2;
 
   historyRecord:
-    VerifiedReceiptHistoryRecord;
+    VerifiedReceiptHistoryRecord |
+    ActionReceiptHistoryRecord;
 }) {
   const passedProofs =
     receipt.proofResults.filter(
@@ -133,6 +146,19 @@ export function ProofReceiptPanel({
         result.status ===
         "PASS",
     ).length;
+
+  const legacyHistory =
+    isLegacyUserRoleHistory(
+      historyRecord,
+    )
+      ? historyRecord
+      : null;
+
+  const genericHistory =
+    legacyHistory ===
+      null
+      ? historyRecord as ActionReceiptHistoryRecord
+      : null;
 
   return (
     <div className={styles.receiptPanel}>
@@ -334,7 +360,7 @@ export function ProofReceiptPanel({
         <SectionHeader
           eyebrow="Durable closure"
           title="Receipt identity is bound twice"
-          detail="The inner Action Receipt V2 has its own digest. The append-only IRIS history envelope has a separate digest and native-audit binding."
+          detail="The inner Action Receipt V2 is persisted in append-only IRIS history. Legacy user-role receipts retain their native-audit envelope; generic actions retain exact receipt identity without inventing role-specific fields."
         />
 
         <div className={styles.closureGrid}>
@@ -349,7 +375,7 @@ export function ProofReceiptPanel({
 
           <div>
             <span>
-              Durable history envelope SHA-256
+              Durable history record SHA-256
             </span>
             <CodeValue>
               {historyRecord.receiptSha256}
@@ -358,19 +384,27 @@ export function ProofReceiptPanel({
 
           <div>
             <span>
-              Native IRIS audit
+              {legacyHistory
+                ? "Native IRIS audit"
+                : "History binding"}
             </span>
             <CodeValue>
-              {historyRecord.nativeAuditEvent} #{historyRecord.nativeAuditIndex}
+              {legacyHistory
+                ? `${legacyHistory.nativeAuditEvent} #${legacyHistory.nativeAuditIndex}`
+                : `GENERIC_ACTION:${genericHistory?.actionType ?? "UNKNOWN"}`}
             </CodeValue>
           </div>
 
           <div>
             <span>
-              Apply process
+              {legacyHistory
+                ? "Apply process"
+                : "Apply actor"}
             </span>
             <CodeValue>
-              PID {historyRecord.applyPid}
+              {legacyHistory
+                ? `PID ${legacyHistory.applyPid}`
+                : genericHistory?.applyActor ?? "UNKNOWN"}
             </CodeValue>
           </div>
         </div>

@@ -11,6 +11,9 @@ XData UrlMap [ XMLNamespace = "http://www.intersystems.com/urlmap" ]
 <Route Url="/receipts" Method="POST" Call="PersistReceipt"/>
 <Route Url="/receipts/:receiptId" Method="GET" Call="GetReceipt"/>
 <Route Url="/history/:username" Method="GET" Call="ListHistory"/>
+<Route Url="/action-receipts" Method="POST" Call="PersistActionReceipt"/>
+<Route Url="/action-receipts/:receiptId" Method="GET" Call="GetActionReceipt"/>
+<Route Url="/action-history/:targetCanonicalId" Method="GET" Call="ListActionHistory"/>
 <Route Url="/cases" Method="POST" Call="CreateCase"/>
 <Route Url="/cases/:caseId/events" Method="GET" Call="ListCaseEvents"/>
 <Route Url="/cases/:caseId/events" Method="POST" Call="AppendCaseEvent"/>
@@ -259,7 +262,295 @@ ClassMethod ListHistory(username As %String) As %Status
     return $$$OK
 }
 
-ClassMethod IsAllowedCaseState(state As %String) As %Boolean
+ClassMethod ActionSummaryFromRecord(record As %DynamicObject) As %DynamicObject
+{
+    set summary={}
+
+    set summary.schemaVersion=record.schemaVersion
+    set summary.receiptId=record.receiptId
+    set summary.actionId=record.actionId
+    set summary.actionType=record.actionType
+    set summary.domain=record.domain
+    set summary.targetKind=record.targetKind
+    set summary.targetCanonicalId=record.targetCanonicalId
+    set summary.targetDisplayName=record.targetDisplayName
+    set summary.lifecycleState=record.lifecycleState
+    set summary.receiptSha256=record.receiptSha256
+    set summary.applyUtc=record.applyUtc
+    set summary.applyActor=record.applyActor
+
+    quit summary
+}
+
+ClassMethod PersistActionReceipt() As %Status
+{
+    set raw=%request.Content.Read()
+
+    if raw="" {
+        return ..WriteError(
+            "400 Bad Request",
+            "ACTION_RECEIPT_HISTORY_BODY_REQUIRED",
+            "A verified generic Action Receipt history record is required."
+        )
+    }
+
+    try {
+        set record={}.%FromJSON(raw)
+    } catch ex {
+        return ..WriteError(
+            "400 Bad Request",
+            "ACTION_RECEIPT_HISTORY_JSON_INVALID",
+            "The generic Action Receipt history body is not valid JSON."
+        )
+    }
+
+    if '$isobject(record) {
+        return ..WriteError(
+            "400 Bad Request",
+            "ACTION_RECEIPT_HISTORY_RECORD_REQUIRED",
+            "The generic Action Receipt history payload must be an object."
+        )
+    }
+
+    set required="schemaVersion,receiptId,actionId,actionType,domain,targetKind,targetCanonicalId,targetDisplayName,lifecycleState,receiptSha256,receiptJson,applyUtc,applyActor"
+
+    for index=1:1:$length(required,",") {
+        set name=$piece(required,",",index)
+        if '..RequiredString(record,name,.value) {
+            return ..WriteError(
+                "400 Bad Request",
+                "ACTION_RECEIPT_HISTORY_FIELD_REQUIRED",
+                "A required generic Action Receipt history field is missing: "_name
+            )
+        }
+    }
+
+    if record.schemaVersion'="meridian.action-receipt-history.v1" {
+        return ..WriteError(
+            "400 Bad Request",
+            "ACTION_RECEIPT_HISTORY_SCHEMA_INVALID",
+            "Unsupported generic Action Receipt history schema."
+        )
+    }
+
+    if record.lifecycleState'="VERIFIED" {
+        return ..WriteError(
+            "400 Bad Request",
+            "ACTION_RECEIPT_HISTORY_NOT_VERIFIED",
+            "Only VERIFIED Action Receipts may enter generic persistent history."
+        )
+    }
+
+    try {
+        set receipt={}.%FromJSON(record.receiptJson)
+    } catch ex {
+        return ..WriteError(
+            "400 Bad Request",
+            "ACTION_RECEIPT_HISTORY_RECEIPT_JSON_INVALID",
+            "The embedded Action Receipt V2 JSON is invalid."
+        )
+    }
+
+    if '$isobject(receipt) {
+        return ..WriteError(
+            "400 Bad Request",
+            "ACTION_RECEIPT_HISTORY_RECEIPT_REQUIRED",
+            "The embedded Action Receipt V2 must be an object."
+        )
+    }
+
+    if receipt.schemaVersion'="meridian.action-receipt.v2" {
+        return ..WriteError(
+            "400 Bad Request",
+            "ACTION_RECEIPT_HISTORY_RECEIPT_SCHEMA_INVALID",
+            "The embedded receipt is not Action Receipt V2."
+        )
+    }
+
+    if (receipt.receiptId'=record.receiptId)!(receipt.actionId'=record.actionId)!(receipt.actionType'=record.actionType)!(receipt.domain'=record.domain) {
+        return ..WriteError(
+            "400 Bad Request",
+            "ACTION_RECEIPT_HISTORY_IDENTITY_MISMATCH",
+            "The embedded Action Receipt V2 identity differs from the history summary."
+        )
+    }
+
+    if '$isobject(receipt.target) {
+        return ..WriteError(
+            "400 Bad Request",
+            "ACTION_RECEIPT_HISTORY_TARGET_INVALID",
+            "The embedded Action Receipt V2 target is missing."
+        )
+    }
+
+    if (receipt.target.kind'=record.targetKind)!(receipt.target.canonicalId'=record.targetCanonicalId)!(receipt.target.displayName'=record.targetDisplayName) {
+        return ..WriteError(
+            "400 Bad Request",
+            "ACTION_RECEIPT_HISTORY_TARGET_MISMATCH",
+            "The embedded Action Receipt V2 target differs from the history summary."
+        )
+    }
+
+    if receipt.receiptSha256'=record.receiptSha256 {
+        return ..WriteError(
+            "400 Bad Request",
+            "ACTION_RECEIPT_HISTORY_DIGEST_MISMATCH",
+            "The embedded Action Receipt V2 digest differs from the history summary."
+        )
+    }
+
+    set receiptId=record.receiptId
+    set targetCanonicalId=record.targetCanonicalId
+
+    lock +^Meridian.ControlPlane.History("action-receipt",receiptId):5
+    if '$test {
+        return ..WriteError(
+            "409 Conflict",
+            "ACTION_RECEIPT_HISTORY_LOCK_TIMEOUT",
+            "The generic Action Receipt history record is busy."
+        )
+    }
+
+    if $data(^Meridian.ControlPlane.History("action-receipt",receiptId,"json")) {
+        set existingJson=^Meridian.ControlPlane.History("action-receipt",receiptId,"json")
+        set existingSha=^Meridian.ControlPlane.History("action-receipt",receiptId,"sha256")
+
+        if (existingJson=record.receiptJson),(existingSha=record.receiptSha256) {
+            set summaryJson=^Meridian.ControlPlane.History("action-receipt",receiptId,"summary")
+            set summary={}.%FromJSON(summaryJson)
+            set out={}
+            set out.ok=1
+            set out.status="IDEMPOTENT"
+            set out.record=summary
+            lock -^Meridian.ControlPlane.History("action-receipt",receiptId)
+            set %response.Status="200 OK"
+            set %response.ContentType="application/json"
+            write out.%ToJSON()
+            return $$$OK
+        }
+
+        lock -^Meridian.ControlPlane.History("action-receipt",receiptId)
+
+        return ..WriteError(
+            "409 Conflict",
+            "ACTION_RECEIPT_HISTORY_ID_CONFLICT",
+            "The generic Action Receipt id already exists with different immutable content."
+        )
+    }
+
+    set summary=..ActionSummaryFromRecord(record)
+    set summaryJson=summary.%ToJSON()
+
+    tstart
+
+    try {
+        set ^Meridian.ControlPlane.History("action-receipt",receiptId,"json")=record.receiptJson
+        set ^Meridian.ControlPlane.History("action-receipt",receiptId,"sha256")=record.receiptSha256
+        set ^Meridian.ControlPlane.History("action-receipt",receiptId,"summary")=summaryJson
+        set ^Meridian.ControlPlane.History("action-by-target",targetCanonicalId,receiptId)=1
+        tcommit
+    } catch ex {
+        trollback
+        lock -^Meridian.ControlPlane.History("action-receipt",receiptId)
+
+        return ..WriteError(
+            "500 Internal Server Error",
+            "ACTION_RECEIPT_HISTORY_WRITE_FAILED",
+            "IRIS could not persist the generic Action Receipt."
+        )
+    }
+
+    lock -^Meridian.ControlPlane.History("action-receipt",receiptId)
+
+    set out={}
+    set out.ok=1
+    set out.status="CREATED"
+    set out.record=summary
+
+    set %response.Status="201 Created"
+    set %response.ContentType="application/json"
+    write out.%ToJSON()
+
+    return $$$OK
+}
+
+ClassMethod GetActionReceipt(receiptId As %String) As %Status
+{
+    if receiptId="" {
+        return ..WriteError(
+            "400 Bad Request",
+            "ACTION_RECEIPT_HISTORY_ID_REQUIRED",
+            "Generic Action Receipt id is required."
+        )
+    }
+
+    if '$data(^Meridian.ControlPlane.History("action-receipt",receiptId,"json")) {
+        return ..WriteError(
+            "404 Not Found",
+            "ACTION_RECEIPT_HISTORY_NOT_FOUND",
+            "The requested generic Action Receipt was not found."
+        )
+    }
+
+    set summaryJson=^Meridian.ControlPlane.History("action-receipt",receiptId,"summary")
+    set record={}.%FromJSON(summaryJson)
+    set record.receiptJson=^Meridian.ControlPlane.History("action-receipt",receiptId,"json")
+
+    set out={}
+    set out.ok=1
+    set out.record=record
+
+    set %response.Status="200 OK"
+    set %response.ContentType="application/json"
+    write out.%ToJSON()
+
+    return $$$OK
+}
+
+ClassMethod ListActionHistory(targetCanonicalId As %String) As %Status
+{
+    if targetCanonicalId="" {
+        return ..WriteError(
+            "400 Bad Request",
+            "ACTION_RECEIPT_HISTORY_TARGET_REQUIRED",
+            "Generic Action Receipt target id is required."
+        )
+    }
+
+    set targetCanonicalId=##class(%CSP.Page).UnescapeURL(targetCanonicalId,"UTF8")
+
+    if targetCanonicalId="" {
+        return ..WriteError(
+            "400 Bad Request",
+            "ACTION_RECEIPT_HISTORY_TARGET_REQUIRED",
+            "Generic Action Receipt target id is required after canonical URL decoding."
+        )
+    }
+
+    set records=[]
+    set receiptId=""
+
+    for {
+        set receiptId=$order(^Meridian.ControlPlane.History("action-by-target",targetCanonicalId,receiptId))
+        quit:receiptId=""
+
+        if $data(^Meridian.ControlPlane.History("action-receipt",receiptId,"summary")) {
+            set summaryJson=^Meridian.ControlPlane.History("action-receipt",receiptId,"summary")
+            set summary={}.%FromJSON(summaryJson)
+            do records.%Push(summary)
+        }
+    }
+
+    set out={}
+    set out.ok=1
+    set out.records=records
+
+    set %response.Status="200 OK"
+    set %response.ContentType="application/json"
+    write out.%ToJSON()
+
+    return $$$OK
+}ClassMethod IsAllowedCaseState(state As %String) As %Boolean
 {
     set allowed=",PROPOSED,PREFLIGHTED,READY,APPLIED,CONVERGING,AUDIT_PENDING,VERIFIED,STALE,APPLY_FAILED,"
     return $find(allowed,","_state_",")>0

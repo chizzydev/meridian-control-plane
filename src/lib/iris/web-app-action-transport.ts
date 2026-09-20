@@ -1,6 +1,7 @@
 import {
   ORDERS_WEB_APP_NAME,
   W01_ORDERS_WEB_APP_CREATE_BODY,
+  W02_ORDERS_WEB_APP_UPDATE_BODY,
   type OrdersWebAppSnapshot,
 } from "../actions/web-app/fixture";
 
@@ -468,6 +469,133 @@ export async function createOrdersWebAppW01(
   });
 }
 
+
+export async function updateOrdersWebAppW02(
+  input: {
+    readonly apiBaseUrl:
+      string;
+
+    readonly accessToken:
+      string;
+
+    readonly fetchImpl?:
+      typeof fetch;
+  },
+): Promise<
+  Readonly<{
+    status:
+      number;
+
+    mutationRequestCount:
+      1;
+  }>
+> {
+  const fetchImpl =
+    input.fetchImpl ??
+    fetch;
+
+  let response:
+    Response;
+
+  try {
+    response =
+      await fetchImpl(
+        endpoint(
+          input.apiBaseUrl,
+        ),
+        {
+          method:
+            "PUT",
+
+          cache:
+            "no-store",
+
+          headers: {
+            Accept:
+              "application/json",
+
+            "Content-Type":
+              "application/json",
+
+            Authorization:
+              `Bearer ${input.accessToken}`,
+          },
+
+          body:
+            JSON.stringify(
+              W02_ORDERS_WEB_APP_UPDATE_BODY,
+            ),
+        },
+      );
+  }
+  catch (
+    error
+  ) {
+    throw new WebAppMutationUnknownAfterDispatchError(
+      (
+        "Official SysAdmin W02 PUT /v2/web-app transport ended without an " +
+        "authoritative response. Automatic retry is forbidden. " +
+        (
+          error instanceof Error
+            ? error.message
+            : "Unknown transport failure."
+        )
+      ),
+    );
+  }
+
+  const text =
+    await response.text();
+
+  if (
+    response.status ===
+      401 ||
+    response.status ===
+      403
+  ) {
+    throw new WebAppMutationRejectedError(
+      response.status,
+      `W02 authority rejected by SysAdmin API with HTTP ${response.status}.`,
+    );
+  }
+
+  if (
+    response.status >=
+      500
+  ) {
+    throw new WebAppMutationUnknownAfterDispatchError(
+      `Official SysAdmin W02 PUT /v2/web-app returned HTTP ${response.status}; mutation outcome requires authoritative reconciliation. Body=${text.slice(0, 500)}`,
+    );
+  }
+
+  if (
+    !response.ok
+  ) {
+    throw new WebAppMutationRejectedError(
+      response.status,
+      `Official SysAdmin PUT /v2/web-app rejected W02 with HTTP ${response.status}. Body=${text.slice(0, 500)}`,
+    );
+  }
+
+  if (
+    response.status !==
+      200 &&
+    response.status !==
+      201
+  ) {
+    throw new WebAppMutationUnknownAfterDispatchError(
+      `Official SysAdmin W02 PUT /v2/web-app returned unexpected success status ${response.status}.`,
+    );
+  }
+
+  return Object.freeze({
+    status:
+      response.status,
+
+    mutationRequestCount:
+      1 as const,
+  });
+}
 export async function deleteOrdersWebApp(
   input: {
     readonly apiBaseUrl:

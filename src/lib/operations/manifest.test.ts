@@ -160,7 +160,7 @@ describe(
     );
 
     it(
-      "binds all 32 required release actions and promotes only live-certified P04 plus W01",
+      "binds all 32 required release actions and promotes only live-certified P04 plus W01 and W02",
       () => {
         const ids =
           sysAdminOperationManifest
@@ -196,6 +196,7 @@ describe(
         ).toEqual([
           "P04_USER_REMOVE_ROLE",
           "W01_WEB_APP_CREATE",
+          "W02_WEB_APP_UPDATE",
         ]);
       },
     );

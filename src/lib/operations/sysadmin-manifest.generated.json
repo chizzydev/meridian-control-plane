@@ -8801,7 +8801,8 @@
         "W03_WEB_APP_ENABLE"
       ],
       "certifiedActionIds": [
-        "W01_WEB_APP_CREATE"
+        "W01_WEB_APP_CREATE",
+        "W02_WEB_APP_UPDATE"
       ],
       "requiredAuthorityExpression": "%Admin_Secure:U",
       "authorityOptions": [

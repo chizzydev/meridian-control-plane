@@ -86,6 +86,7 @@ const ACTIONS:
       certified:
         Object.freeze([
           "W01_WEB_APP_CREATE",
+          "W02_WEB_APP_UPDATE",
         ]),
     },
     "DELETE /v2/web-app": {

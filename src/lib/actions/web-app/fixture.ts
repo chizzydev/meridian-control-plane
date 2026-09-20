@@ -121,6 +121,23 @@ export const W01_ORDERS_WEB_APP_CREATE_BODY =
       false,
   });
 
+export const W02_ORDERS_WEB_APP_EXPECTED:
+  OrdersWebAppSnapshot =
+  Object.freeze({
+    ...W01_ORDERS_WEB_APP_EXPECTED,
+
+    description:
+      ORDERS_WEB_APP_DESCRIPTION_UPDATE,
+  });
+
+export const W02_ORDERS_WEB_APP_UPDATE_BODY =
+  Object.freeze({
+    ...W01_ORDERS_WEB_APP_CREATE_BODY,
+
+    Description:
+      ORDERS_WEB_APP_DESCRIPTION_UPDATE,
+  });
+
 export function ordersWebAppSnapshotMatches(
   observed:
     OrdersWebAppSnapshot,
@@ -156,6 +173,22 @@ export function assertW01OrdersWebAppSnapshot(
   ) {
     throw new Error(
       "W01 web-app snapshot does not match the frozen Meridian orders fixture.",
+    );
+  }
+}
+
+export function assertW02OrdersWebAppSnapshot(
+  observed:
+    OrdersWebAppSnapshot,
+): void {
+  if (
+    !ordersWebAppSnapshotMatches(
+      observed,
+      W02_ORDERS_WEB_APP_EXPECTED,
+    )
+  ) {
+    throw new Error(
+      "W02 web-app snapshot does not match the frozen updated Meridian orders fixture.",
     );
   }
 }

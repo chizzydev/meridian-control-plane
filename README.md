@@ -306,48 +306,9 @@ Declared impact remains distinct from measured permission delta. Meridian does n
 
 Meridian deliberately separates the browser, server-side orchestration, management APIs, narrow escalation boundaries, and persistent evidence.
 
-```mermaid
-flowchart TD
-    BROWSER["Browser\nrendered evidence + bounded operator actions"]
-    NEXT["Next.js UI + server BFF"]
-
-    BROWSER --> NEXT
-
-    subgraph IRIS_AUTH["INTERSYSTEMS IRIS AUTHORITY"]
-        ADMIN["Official SysAdmin REST\n/api/admin"]
-        HELPER["Private helper REST\n/meridian-control-plane-internal"]
-        HISTORY["Receipt history REST\n/meridian-control-plane-history"]
-        API["Tracked Meridian API\n/meridian/api"]
-        AUDIT["Native security audit\nUserChange evidence"]
-        LIVE["Live process / runtime evidence"]
-        STORE[("Persistent receipt history")]
-    end
-
-    NEXT -->|server-owned runtime session| ADMIN
-    NEXT -->|narrow helper boundary| HELPER
-    NEXT -->|server-only authenticated read| HISTORY
-    NEXT -->|deployment / protection proof| API
-
-    ADMIN --> LIVE
-    HELPER --> AUDIT
-    HISTORY --> STORE
-
-    subgraph ROLES["LEAST-PRIVILEGE CAPABILITIES"]
-        RUNTIME["MeridianControlPlaneRuntime"]
-        SECURITY["MeridianSecurityMetadataReader"]
-        TASKS["MeridianTaskMetadataReader"]
-        SYSTEM["MeridianSystemMetadataReader"]
-        HELPERROLE["MeridianControlPlaneHelperExecution"]
-        WRITER["MeridianReceiptHistoryWriter"]
-    end
-
-    NEXT -. authenticated as .-> RUNTIME
-    ADMIN -. explicit metadata escalation .-> SECURITY
-    ADMIN -. explicit metadata escalation .-> TASKS
-    ADMIN -. explicit metadata escalation .-> SYSTEM
-    HELPER -. MatchRoles .-> HELPERROLE
-    HISTORY -. app-scoped writer capability .-> WRITER
-```
+<p align="center">
+  <img src="./docs/assets/meridian-architecture.png" alt="Meridian architecture: evidence-bound change control for InterSystems IRIS" width="100%" />
+</p>
 
 ### Why IRIS is indispensable
 

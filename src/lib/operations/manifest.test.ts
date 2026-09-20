@@ -81,13 +81,13 @@ describe(
             .counts.byStatus,
         ).toEqual({
           CERTIFIED_ACTION:
-            1,
+            2,
           DECLINED_DESTRUCTIVE:
             36,
           EXPLORABLE_READ:
             95,
           OUT_OF_PRODUCT_SCOPE:
-            121,
+            120,
           VERIFIED_READ:
             20,
         });
@@ -160,7 +160,7 @@ describe(
     );
 
     it(
-      "binds all 32 required release actions but certifies only the proven P04 scope at R2",
+      "binds all 32 required release actions and promotes only live-certified P04 plus W01",
       () => {
         const ids =
           sysAdminOperationManifest
@@ -195,6 +195,7 @@ describe(
           certified,
         ).toEqual([
           "P04_USER_REMOVE_ROLE",
+          "W01_WEB_APP_CREATE",
         ]);
       },
     );

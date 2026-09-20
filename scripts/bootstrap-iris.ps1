@@ -12,6 +12,7 @@ $PinnedImage = "intersystems/iris-community@sha256:d4331089a4d19aafa867c26b343eb
 $ExpectedSourceHashes = [ordered]@{
     "iris/Meridian.ControlPlane.Internal.REST.cls" = "FD400F1F6CC3DF778C8A34E7BEF7FC55ADC3C060AD8FD61E544B3AE085025CC1"
     "iris/Meridian.ControlPlane.History.REST.cls" = "B99BDE892570E51F3A1CA8BA14A77EF2E4EE13E9F9E7012E2875573C8B86962D"
+    "iris/Meridian.Lab.Orders.REST.cls" = "F62A0676B65D5D4648996D5F39A76E5A23E1CDAD915F4918073C54A1C6F01999"
     "iris/Meridian.API.spec.cls" = "7787320DBA20C9B996C2D3B7E4E6C19556338435EE78832724CAB454A3CB2E16"
     "iris/Meridian.API.impl.cls" = "41D04211838375D34D99F51329E492507B731D33A781F1BFF8DFB0C5A0B73B12"
 }
@@ -292,6 +293,7 @@ zn "USER"
 write "B1B2_CLASS_NAMESPACE="_$namespace,!
 write "B1B2_CLASS|Meridian.ControlPlane.Internal.REST|EXISTS="_##class(%Dictionary.CompiledClass).%ExistsId("Meridian.ControlPlane.Internal.REST"),!
 write "B1B2_CLASS|Meridian.ControlPlane.History.REST|EXISTS="_##class(%Dictionary.CompiledClass).%ExistsId("Meridian.ControlPlane.History.REST"),!
+write "B1B2_CLASS|Meridian.Lab.Orders.REST|EXISTS="_##class(%Dictionary.CompiledClass).%ExistsId("Meridian.Lab.Orders.REST"),!
 write "B1B2_CLASS|Meridian.API.spec|EXISTS="_##class(%Dictionary.CompiledClass).%ExistsId("Meridian.API.spec"),!
 write "B1B2_CLASS|Meridian.API.impl|EXISTS="_##class(%Dictionary.CompiledClass).%ExistsId("Meridian.API.impl"),!
 write "B1B2_CLASS|Meridian.API.disp|EXISTS="_##class(%Dictionary.CompiledClass).%ExistsId("Meridian.API.disp"),!
@@ -423,6 +425,7 @@ $ExpectedConvergedMarkers = @(
         "B1B2_CLASS_NAMESPACE=USER",
         "B1B2_CLASS|Meridian.ControlPlane.Internal.REST|EXISTS=1",
         "B1B2_CLASS|Meridian.ControlPlane.History.REST|EXISTS=1",
+        "B1B2_CLASS|Meridian.Lab.Orders.REST|EXISTS=1",
         "B1B2_CLASS|Meridian.API.spec|EXISTS=1",
         "B1B2_CLASS|Meridian.API.impl|EXISTS=1",
         "B1B2_CLASS|Meridian.API.disp|EXISTS=1"
@@ -881,6 +884,7 @@ halt
 
     if (-not $PreText.Contains("B1B2_CLASS|Meridian.ControlPlane.Internal.REST|EXISTS=1")) { Copy-And-LoadClass -Relative "iris/Meridian.ControlPlane.Internal.REST.cls" -ContainerPath "/tmp/meridian_internal_rest.cls" -ClassName "Meridian.ControlPlane.Internal.REST" }
     if (-not $PreText.Contains("B1B2_CLASS|Meridian.ControlPlane.History.REST|EXISTS=1")) { Copy-And-LoadClass -Relative "iris/Meridian.ControlPlane.History.REST.cls" -ContainerPath "/tmp/meridian_history_rest.cls" -ClassName "Meridian.ControlPlane.History.REST" }
+    if (-not $PreText.Contains("B1B2_CLASS|Meridian.Lab.Orders.REST|EXISTS=1")) { Copy-And-LoadClass -Relative "iris/Meridian.Lab.Orders.REST.cls" -ContainerPath "/tmp/meridian_lab_orders_rest.cls" -ClassName "Meridian.Lab.Orders.REST" }
 
     $ApiAbsent = -not $PreText.Contains("B1B2_CLASS|Meridian.API.spec|EXISTS=1")
     if ($ApiAbsent) {

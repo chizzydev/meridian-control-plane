@@ -84,7 +84,9 @@ const ACTIONS:
           "W03_WEB_APP_ENABLE",
         ]),
       certified:
-        Object.freeze([]),
+        Object.freeze([
+          "W01_WEB_APP_CREATE",
+        ]),
     },
     "DELETE /v2/web-app": {
       phase:

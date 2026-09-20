@@ -10,6 +10,9 @@ export const ORDERS_WEB_APP_FIXTURE_ID =
 export const ORDERS_WEB_APP_GENERATION =
   "r3b-web-app-v1" as const;
 
+export const ORDERS_WEB_APP_HELPER_EXECUTION_ROLE =
+  "MeridianControlPlaneHelperExecution" as const;
+
 export const ORDERS_WEB_APP_NAMESPACE =
   "USER" as const;
 
@@ -138,6 +141,39 @@ export const W02_ORDERS_WEB_APP_UPDATE_BODY =
       ORDERS_WEB_APP_DESCRIPTION_UPDATE,
   });
 
+export const W03_ORDERS_WEB_APP_EXPECTED:
+  OrdersWebAppSnapshot =
+  Object.freeze({
+    ...W02_ORDERS_WEB_APP_EXPECTED,
+
+    enabled:
+      true,
+  });
+
+export const W03_ORDERS_WEB_APP_ENABLE_BODY =
+  Object.freeze({
+    ...W02_ORDERS_WEB_APP_UPDATE_BODY,
+
+    Enabled:
+      true,
+
+    CSPZENEnabled:
+      true,
+
+    MatchRoles:
+      Object.freeze([
+        Object.freeze({
+          MatchRole:
+            "",
+
+          TargetRoles:
+            Object.freeze([
+              ORDERS_WEB_APP_HELPER_EXECUTION_ROLE,
+            ]),
+        }),
+      ]),
+  });
+
 export function ordersWebAppSnapshotMatches(
   observed:
     OrdersWebAppSnapshot,
@@ -189,6 +225,22 @@ export function assertW02OrdersWebAppSnapshot(
   ) {
     throw new Error(
       "W02 web-app snapshot does not match the frozen updated Meridian orders fixture.",
+    );
+  }
+}
+
+export function assertW03OrdersWebAppSnapshot(
+  observed:
+    OrdersWebAppSnapshot,
+): void {
+  if (
+    !ordersWebAppSnapshotMatches(
+      observed,
+      W03_ORDERS_WEB_APP_EXPECTED,
+    )
+  ) {
+    throw new Error(
+      "W03 web-app snapshot does not match the frozen enabled Meridian orders fixture.",
     );
   }
 }

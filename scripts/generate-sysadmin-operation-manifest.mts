@@ -87,6 +87,7 @@ const ACTIONS:
         Object.freeze([
           "W01_WEB_APP_CREATE",
           "W02_WEB_APP_UPDATE",
+          "W03_WEB_APP_ENABLE",
         ]),
     },
     "DELETE /v2/web-app": {

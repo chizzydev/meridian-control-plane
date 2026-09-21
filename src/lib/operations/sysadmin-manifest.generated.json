@@ -38,10 +38,10 @@
       "WEB_REST": 10
     },
     "byStatus": {
-      "CERTIFIED_ACTION": 2,
+      "CERTIFIED_ACTION": 3,
       "DECLINED_DESTRUCTIVE": 36,
       "EXPLORABLE_READ": 95,
-      "OUT_OF_PRODUCT_SCOPE": 120,
+      "OUT_OF_PRODUCT_SCOPE": 119,
       "VERIFIED_READ": 20
     }
   },
@@ -1314,13 +1314,15 @@
         "/v2/web-app"
       ],
       "family": "WEB_REST",
-      "supportStatus": "OUT_OF_PRODUCT_SCOPE",
-      "scopeNote": "Reserved for R3; not certified at R2. No generic mutation dispatch is exposed.",
+      "supportStatus": "CERTIFIED_ACTION",
+      "scopeNote": "At least one bounded semantic action using this transport is live-certified; the endpoint is not exposed as a generic mutation proxy.",
       "releaseTrack": "R3",
       "plannedActionIds": [
         "W04_WEB_APP_DELETE"
       ],
-      "certifiedActionIds": [],
+      "certifiedActionIds": [
+        "W04_WEB_APP_DELETE"
+      ],
       "requiredAuthorityExpression": "%Admin_Secure:U",
       "authorityOptions": [
         [

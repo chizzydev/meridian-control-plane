@@ -98,7 +98,9 @@ const ACTIONS:
           "W04_WEB_APP_DELETE",
         ]),
       certified:
-        Object.freeze([]),
+        Object.freeze([
+          "W04_WEB_APP_DELETE",
+        ]),
     },
     "PUT /v2/security/role": {
       phase:

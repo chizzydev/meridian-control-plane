@@ -163,7 +163,9 @@ const ACTIONS:
           "T02_TASK_UPDATE",
         ]),
       certified:
-        Object.freeze([]),
+        Object.freeze([
+          "T02_TASK_UPDATE",
+        ]),
     },
     "POST /v2/task/run": {
       phase:

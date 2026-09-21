@@ -81,13 +81,13 @@ describe(
             .counts.byStatus,
         ).toEqual({
           CERTIFIED_ACTION:
-            6,
+            7,
           DECLINED_DESTRUCTIVE:
             36,
           EXPLORABLE_READ:
             95,
           OUT_OF_PRODUCT_SCOPE:
-            116,
+            115,
           VERIFIED_READ:
             20,
         });
@@ -160,7 +160,7 @@ describe(
     );
 
     it(
-      "binds all 32 required release actions and promotes live-certified P01, P02, P03, P04, P05, P06, T01, and W01 through W04",
+      "binds all 32 required release actions and freezes the R5-B0 candidate promotion for P01, P02, P03, P04, P05, P06, T01, T02, and W01 through W04",
       () => {
         const ids =
           sysAdminOperationManifest
@@ -202,6 +202,7 @@ describe(
           "P04_USER_REMOVE_ROLE",
           "P05_USER_ENABLE",
           "P06_USER_DISABLE",
+          "T02_TASK_UPDATE",
           "W01_WEB_APP_CREATE",
           "W02_WEB_APP_UPDATE",
           "W03_WEB_APP_ENABLE",

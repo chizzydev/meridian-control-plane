@@ -24,7 +24,7 @@ export default async function WebRestPage() {
       <PageHeader
         eyebrow="Surfaces / WEB APPS / REST"
         title="Deployment identity and endpoint proof."
-        description="Permissions remains the centerpiece. Meridian joins live application inventory and Native emitted Swagger to Authoritative OpenAPI protection metadata without widening browser authority."
+        description="Permissions remains the centerpiece. Meridian joins live inventory, deployed REST truth, durable verified receipts, and a fresh current-state recheck without widening browser authority."
         actions={
           <>
             <Link href="/" className="meridian-action">
@@ -38,7 +38,7 @@ export default async function WebRestPage() {
       <section className="meridian-runtime-section">
         <SectionHeader
           eyebrow="Provenance"
-          title="Three evidence sources, one joined operator surface"
+          title="Five evidence sources, one joined operator surface"
           detail="Deployment truth and declared protection are kept distinct so Meridian never implies code authorization it did not prove."
         />
 
@@ -66,6 +66,16 @@ export default async function WebRestPage() {
                 <td>Protection metadata</td>
                 <td>Authoritative OpenAPI</td>
                 <td><StatusBadge tone="success">PROVEN DECLARED METADATA</StatusBadge></td>
+              </tr>
+              <tr>
+                <td>Verified action history</td>
+                <td>Durable hash-bound receipts</td>
+                <td><StatusBadge tone="success">CANONICAL HASH VALIDATED</StatusBadge></td>
+              </tr>
+              <tr>
+                <td>Current-state recheck</td>
+                <td>Official SysAdmin + live HTTP</td>
+                <td><StatusBadge tone="success">FRESH READBACK</StatusBadge></td>
               </tr>
             </tbody>
           </table>
@@ -98,15 +108,76 @@ export default async function WebRestPage() {
               detail="deployed + declared join"
             />
             <MetricCell
-              label="Runtime API"
-              value={`v${surface.runtime.apiVersion}`}
-              detail={surface.runtime.username}
+              label="Verified receipts"
+              value={surface.verifiedLifecycle.historyCount}
+              detail="durable lifecycle history"
             />
             <MetricCell
-              label="Mutation controls"
-              value="NONE"
-              detail="read-only surface"
+              label="Current target"
+              value={surface.verifiedLifecycle.currentApplicationState}
+              detail={`HTTP ${surface.verifiedLifecycle.currentHttpStatus}`}
             />
+          </section>
+
+          <section className="meridian-runtime-section">
+            <SectionHeader
+              eyebrow="Verified lifecycle"
+              title="Historical proof is not current state"
+              detail="Meridian keeps immutable VERIFIED receipts separate from a fresh SysAdmin and HTTP recheck, so history is never rewritten to match the present."
+            />
+
+            <AuthorityCallout
+              eyebrow="Current-state recheck"
+              title={`${surface.verifiedLifecycle.targetDisplayName}: ${surface.verifiedLifecycle.currentApplicationState}`}
+              detail="This state is freshly re-read on the server. It is not inferred from the last receipt."
+              tone={surface.verifiedLifecycle.currentApplicationState === "ABSENT" && surface.verifiedLifecycle.currentHttpStatus === 404 ? "success" : "warning"}
+            >
+              <CodeValue>{surface.verifiedLifecycle.targetCanonicalId}</CodeValue>
+              <StatusBadge tone={surface.verifiedLifecycle.currentHttpStatus === 404 ? "success" : "warning"}>
+                HTTP {surface.verifiedLifecycle.currentHttpStatus}
+              </StatusBadge>
+              <p>
+                History integrity: {surface.verifiedLifecycle.historyIntegrity}. Current-state source: {surface.verifiedLifecycle.currentStateSource}.
+              </p>
+            </AuthorityCallout>
+
+            <div className="meridian-table-wrap">
+              <table className="meridian-data-table meridian-runtime-table">
+                <thead>
+                  <tr>
+                    <th>Step</th>
+                    <th>Action</th>
+                    <th>Type</th>
+                    <th>State</th>
+                    <th>Proof planes</th>
+                    <th>Receipt SHA-256</th>
+                    <th>Applied UTC</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {surface.verifiedLifecycle.receipts.map((receipt, index) => (
+                    <tr key={receipt.receiptId}>
+                      <td>{String(index + 1).padStart(2, "0")}</td>
+                      <td>
+                        <CodeValue>{receipt.actionId}</CodeValue>
+                        <small>{receipt.receiptId}</small>
+                      </td>
+                      <td><CodeValue>{receipt.actionType}</CodeValue></td>
+                      <td><StatusBadge tone="success">{receipt.lifecycleState}</StatusBadge></td>
+                      <td>
+                        {receipt.proofResults.map((proof) => (
+                          <small key={`${receipt.receiptId}:${proof.plane}`}>
+                            {proof.plane}: {proof.status}
+                          </small>
+                        ))}
+                      </td>
+                      <td><CodeValue>{receipt.receiptSha256}</CodeValue></td>
+                      <td>{receipt.applyUtc}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </section>
 
           <section className="meridian-runtime-section">

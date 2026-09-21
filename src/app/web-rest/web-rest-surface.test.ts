@@ -34,6 +34,13 @@ describe(
             'import "server-only"',
             "readMeridianWebApplications",
             "readMeridianDeployedRestInventory",
+            "readTargetActionHistory",
+            "readActionReceiptHistory",
+            "actionReceiptV2FromGenericHistory",
+            "readOrdersWebAppState",
+            "probeOrdersWebAppHealth",
+            "buildSafeWebRestLifecycleView",
+            "ORDERS_WEB_APP_TARGET_CANONICAL_ID",
             "meridian-api-declaration.json",
             "NATIVE_EMITTED_SWAGGER",
             "AUTHORITATIVE_SOURCE_OPENAPI",
@@ -92,6 +99,14 @@ describe(
             "REST / OpenAPI exploration",
             "PROVEN DEPLOYMENT",
             "PROVEN DECLARED METADATA",
+            "Verified lifecycle",
+            "Historical proof is not current state",
+            "Current-state recheck",
+            "Verified receipts",
+            "Receipt SHA-256",
+            "Proof planes",
+            "CANONICAL HASH VALIDATED",
+            "FRESH READBACK",
             "Required resources",
             "Browser credential",
             "NOT EXPOSED",
@@ -200,6 +215,18 @@ describe(
           server,
         ).not.toContain(
           'method: "DELETE"',
+        );
+
+        expect(
+          server,
+        ).not.toContain(
+          "persistActionReceiptHistory",
+        );
+
+        expect(
+          server,
+        ).not.toContain(
+          "buildActionReceiptHistoryWritePlan",
         );
       },
     );

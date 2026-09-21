@@ -4,9 +4,32 @@ import declaration
   from "./meridian-api-declaration.json";
 
 import {
+  ORDERS_WEB_APP_TARGET_CANONICAL_ID,
+} from "../actions/web-app/fixture";
+
+import {
+  actionReceiptV2FromGenericHistory,
+} from "../proof/action-history";
+
+import {
+  readActionReceiptHistory,
+  readTargetActionHistory,
+} from "./action-history-server";
+
+import {
   readMeridianDeployedRestInventory,
   readMeridianWebApplications,
 } from "./impact";
+
+import {
+  probeOrdersWebAppHealth,
+  readOrdersWebAppState,
+} from "./web-app-action-transport";
+
+import {
+  buildSafeWebRestLifecycleView,
+  type SafeWebRestLifecycleView,
+} from "./web-rest-history-view";
 
 import {
   loginIris,
@@ -71,6 +94,9 @@ export interface AvailableWebRestProductSurface {
 
   readonly operations:
     readonly SafeRestOperationDetail[];
+
+  readonly verifiedLifecycle:
+    SafeWebRestLifecycleView;
 
   readonly boundaries: {
     readonly readOnly:
@@ -147,6 +173,12 @@ const DEFAULT_API_BASE =
 
 const DEFAULT_HELPER_BASE =
   "http://localhost:52773/meridian-control-plane-internal";
+
+const DEFAULT_HISTORY_BASE =
+  "http://localhost:52773/meridian-control-plane-history";
+
+const DEFAULT_WEB_BASE =
+  "http://localhost:52773";
 
 const DEFAULT_RUNTIME_USER =
   "meridian.runtime";
@@ -486,6 +518,12 @@ export async function readWebRestProductSurface(
     readonly helperBaseUrl:
       string;
 
+    readonly historyBaseUrl:
+      string;
+
+    readonly webBaseUrl:
+      string;
+
     readonly username:
       string;
 
@@ -512,6 +550,9 @@ export async function readWebRestProductSurface(
       runtime,
       applications,
       deployed,
+      targetHistory,
+      currentOrdersState,
+      currentOrdersHealth,
     ] =
       await Promise.all([
         readRuntimeInfo({
@@ -537,7 +578,67 @@ export async function readWebRestProductSurface(
           accessToken:
             session.accessToken,
         }),
+
+        readTargetActionHistory({
+          baseUrl:
+            config.historyBaseUrl,
+
+          accessToken:
+            session.accessToken,
+
+          targetCanonicalId:
+            ORDERS_WEB_APP_TARGET_CANONICAL_ID,
+        }),
+
+        readOrdersWebAppState({
+          apiBaseUrl:
+            config.apiBaseUrl,
+
+          accessToken:
+            session.accessToken,
+        }),
+
+        probeOrdersWebAppHealth({
+          webBaseUrl:
+            config.webBaseUrl,
+        }),
       ]);
+
+    const historyRecords =
+      await Promise.all(
+        targetHistory.map(
+          (
+            summary,
+          ) =>
+            readActionReceiptHistory({
+              baseUrl:
+                config.historyBaseUrl,
+
+              accessToken:
+                session.accessToken,
+
+              receiptId:
+                summary.receiptId,
+            }),
+        ),
+      );
+
+    const verifiedLifecycle =
+      buildSafeWebRestLifecycleView({
+        summaries:
+          targetHistory,
+
+        receipts:
+          historyRecords.map(
+            actionReceiptV2FromGenericHistory,
+          ),
+
+        currentState:
+          currentOrdersState,
+
+        currentHealth:
+          currentOrdersHealth,
+      });
 
     const deployedView =
       deployed as {
@@ -590,6 +691,8 @@ export async function readWebRestProductSurface(
         joinOperationMetadata(
           deployedView.operations,
         ),
+
+      verifiedLifecycle,
 
       boundaries,
     });
@@ -644,6 +747,16 @@ export async function readWebRestProductSurfaceFromEnvironment():
         process.env
           .MERIDIAN_IRIS_HELPER_BASE_URL ??
         DEFAULT_HELPER_BASE,
+
+      historyBaseUrl:
+        process.env
+          .MERIDIAN_IRIS_HISTORY_BASE_URL ??
+        DEFAULT_HISTORY_BASE,
+
+      webBaseUrl:
+        process.env
+          .MERIDIAN_IRIS_WEB_BASE_URL ??
+        DEFAULT_WEB_BASE,
 
       username:
         process.env

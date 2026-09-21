@@ -138,6 +138,7 @@ const ACTIONS:
         ]),
       certified:
         Object.freeze([
+          "P03_USER_ADD_ROLE",
           "P04_USER_REMOVE_ROLE",
         ]),
     },

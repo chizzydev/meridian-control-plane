@@ -8619,6 +8619,7 @@
         "P06_USER_DISABLE"
       ],
       "certifiedActionIds": [
+        "P03_USER_ADD_ROLE",
         "P04_USER_REMOVE_ROLE"
       ],
       "requiredAuthorityExpression": "%Admin_Secure:U",

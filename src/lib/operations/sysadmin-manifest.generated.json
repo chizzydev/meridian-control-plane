@@ -38,10 +38,10 @@
       "WEB_REST": 10
     },
     "byStatus": {
-      "CERTIFIED_ACTION": 5,
+      "CERTIFIED_ACTION": 6,
       "DECLINED_DESTRUCTIVE": 36,
       "EXPLORABLE_READ": 95,
-      "OUT_OF_PRODUCT_SCOPE": 117,
+      "OUT_OF_PRODUCT_SCOPE": 116,
       "VERIFIED_READ": 20
     }
   },
@@ -7333,13 +7333,15 @@
         "/v2/task"
       ],
       "family": "TASKS",
-      "supportStatus": "OUT_OF_PRODUCT_SCOPE",
-      "scopeNote": "Reserved for R5; not certified at R2. No generic mutation dispatch is exposed.",
+      "supportStatus": "CERTIFIED_ACTION",
+      "scopeNote": "At least one bounded semantic action using this transport is live-certified; the endpoint is not exposed as a generic mutation proxy.",
       "releaseTrack": "R5",
       "plannedActionIds": [
         "T01_TASK_CREATE"
       ],
-      "certifiedActionIds": [],
+      "certifiedActionIds": [
+        "T01_TASK_CREATE"
+      ],
       "requiredAuthorityExpression": "%Admin_Operate:U or %Admin_Task:U",
       "authorityOptions": [
         [

@@ -152,7 +152,8 @@ const ACTIONS:
           "T01_TASK_CREATE",
         ]),
       certified:
-        Object.freeze([]),
+        Object.freeze([
+          "T01_TASK_CREATE",]),
     },
     "PUT /v2/task": {
       phase:

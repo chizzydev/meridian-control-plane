@@ -160,7 +160,7 @@ describe(
     );
 
     it(
-      "binds all 32 required release actions and promotes live-certified P01, P02, P03, P04, and W01 through W04",
+      "binds all 32 required release actions and promotes live-certified P01, P02, P03, P04, P05, and W01 through W04",
       () => {
         const ids =
           sysAdminOperationManifest
@@ -199,6 +199,7 @@ describe(
           "P01_ROLE_CREATE",
           "P03_USER_ADD_ROLE",
           "P04_USER_REMOVE_ROLE",
+          "P05_USER_ENABLE",
           "W01_WEB_APP_CREATE",
           "W02_WEB_APP_UPDATE",
           "W03_WEB_APP_ENABLE",

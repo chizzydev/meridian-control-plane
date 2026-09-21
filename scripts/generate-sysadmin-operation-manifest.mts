@@ -140,6 +140,7 @@ const ACTIONS:
         Object.freeze([
           "P03_USER_ADD_ROLE",
           "P04_USER_REMOVE_ROLE",
+          "P05_USER_ENABLE",
         ]),
     },
     "POST /v2/task": {

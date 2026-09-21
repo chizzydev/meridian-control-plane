@@ -38,10 +38,10 @@
       "WEB_REST": 10
     },
     "byStatus": {
-      "CERTIFIED_ACTION": 3,
+      "CERTIFIED_ACTION": 4,
       "DECLINED_DESTRUCTIVE": 36,
       "EXPLORABLE_READ": 95,
-      "OUT_OF_PRODUCT_SCOPE": 119,
+      "OUT_OF_PRODUCT_SCOPE": 118,
       "VERIFIED_READ": 20
     }
   },
@@ -8475,13 +8475,15 @@
         "/v2/security"
       ],
       "family": "PERMISSIONS",
-      "supportStatus": "OUT_OF_PRODUCT_SCOPE",
-      "scopeNote": "Reserved for R4; not certified at R2. No generic mutation dispatch is exposed.",
+      "supportStatus": "CERTIFIED_ACTION",
+      "scopeNote": "At least one bounded semantic action using this transport is live-certified; the endpoint is not exposed as a generic mutation proxy.",
       "releaseTrack": "R4",
       "plannedActionIds": [
         "P01_ROLE_CREATE"
       ],
-      "certifiedActionIds": [],
+      "certifiedActionIds": [
+        "P01_ROLE_CREATE"
+      ],
       "requiredAuthorityExpression": "%Admin_Secure:U",
       "authorityOptions": [
         [

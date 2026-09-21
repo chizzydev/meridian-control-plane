@@ -110,7 +110,9 @@ const ACTIONS:
           "P01_ROLE_CREATE",
         ]),
       certified:
-        Object.freeze([]),
+        Object.freeze([
+          "P01_ROLE_CREATE",
+        ]),
     },
     "DELETE /v2/security/role": {
       phase:

@@ -678,3 +678,345 @@ export async function createR4PermissionRole(
       1 as const,
   });
 }
+export interface R4PermissionRoleOwner {
+  readonly name:
+    string;
+
+  readonly type:
+    "User" |
+    "Role" |
+    "User (escalation)";
+
+  readonly adminOption:
+    boolean;
+}
+
+function roleOwnersEndpoint(
+  apiBaseUrl:
+    string,
+): string {
+  return (
+    apiBaseUrl.replace(
+      /\/+$/,
+      "",
+    ) +
+    "/v2/security/role/owners?name=" +
+    encodeURIComponent(
+      R4_PERMISSION_ROLE_NAME,
+    )
+  );
+}
+
+function booleanValue(
+  value:
+    unknown,
+  label:
+    string,
+): boolean {
+  if (
+    typeof value ===
+      "boolean"
+  ) {
+    return value;
+  }
+
+  if (
+    value ===
+      0 ||
+    value ===
+      "0" ||
+    value ===
+      "false"
+  ) {
+    return false;
+  }
+
+  if (
+    value ===
+      1 ||
+    value ===
+      "1" ||
+    value ===
+      "true"
+  ) {
+    return true;
+  }
+
+  throw new Error(
+    `${label} is not a supported boolean representation.`,
+  );
+}
+
+export async function readR4PermissionRoleOwners(
+  input: {
+    readonly apiBaseUrl:
+      string;
+
+    readonly accessToken:
+      string;
+
+    readonly fetchImpl?:
+      typeof fetch;
+  },
+): Promise<
+  readonly R4PermissionRoleOwner[] |
+  null
+> {
+  const fetchImpl =
+    input.fetchImpl ??
+    fetch;
+
+  const response =
+    await fetchImpl(
+      roleOwnersEndpoint(
+        input.apiBaseUrl,
+      ),
+      {
+        method:
+          "GET",
+
+        cache:
+          "no-store",
+
+        headers:
+          authorityHeaders(
+            input.accessToken,
+          ),
+      },
+    );
+
+  const text =
+    await response.text();
+
+  if (
+    response.status ===
+      404
+  ) {
+    return null;
+  }
+
+  if (
+    response.status ===
+      401 ||
+    response.status ===
+      403
+  ) {
+    throw new SecurityRoleAuthorityDeniedError(
+      `Official SysAdmin role-owner read denied with HTTP ${response.status}.`,
+    );
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      `Official SysAdmin role-owner read returned HTTP ${response.status}. Body=${text.slice(0, 500)}`,
+    );
+  }
+
+  const parsed =
+    parsedJson(
+      text,
+      "Official SysAdmin role-owner read",
+    );
+
+  const result =
+    isRecord(
+      parsed,
+    ) &&
+    Object.prototype
+      .hasOwnProperty
+      .call(
+        parsed,
+        "result",
+      )
+      ? parsed.result
+      : parsed;
+
+  if (!Array.isArray(result)) {
+    throw new Error(
+      "Official SysAdmin role-owner result is not an array.",
+    );
+  }
+
+  return Object.freeze(
+    result.map(
+      (
+        item,
+      ) => {
+        if (!isRecord(item)) {
+          throw new Error(
+            "Official SysAdmin role-owner row is not an object.",
+          );
+        }
+
+        const name =
+          stringValue(
+            first(
+              item,
+              [
+                "Name",
+                "name",
+              ],
+            ),
+          );
+
+        const type =
+          stringValue(
+            first(
+              item,
+              [
+                "Type",
+                "type",
+              ],
+            ),
+          );
+
+        if (
+          name.length ===
+            0 ||
+          (
+            type !==
+              "User" &&
+            type !==
+              "Role" &&
+            type !==
+              "User (escalation)"
+          )
+        ) {
+          throw new Error(
+            "Official SysAdmin role-owner identity is invalid.",
+          );
+        }
+
+        return Object.freeze({
+          name,
+
+          type,
+
+          adminOption:
+            booleanValue(
+              first(
+                item,
+                [
+                  "AdminOption",
+                  "adminOption",
+                ],
+              ),
+              "Role owner AdminOption",
+            ),
+        });
+      },
+    ),
+  );
+}
+
+export async function deleteR4PermissionRole(
+  input: {
+    readonly apiBaseUrl:
+      string;
+
+    readonly accessToken:
+      string;
+
+    readonly fetchImpl?:
+      typeof fetch;
+  },
+): Promise<
+  Readonly<{
+    status:
+      number;
+
+    mutationRequestCount:
+      1;
+  }>
+> {
+  const fetchImpl =
+    input.fetchImpl ??
+    fetch;
+
+  let response:
+    Response;
+
+  try {
+    response =
+      await fetchImpl(
+        roleEndpoint(
+          input.apiBaseUrl,
+        ),
+        {
+          method:
+            "DELETE",
+
+          cache:
+            "no-store",
+
+          headers:
+            authorityHeaders(
+              input.accessToken,
+            ),
+        },
+      );
+  }
+  catch (
+    error
+  ) {
+    throw new SecurityRoleMutationUnknownAfterDispatchError(
+      (
+        "Official SysAdmin DELETE /v2/security/role transport ended without an " +
+        "authoritative response. Automatic retry is forbidden. " +
+        (
+          error instanceof Error
+            ? error.message
+            : "Unknown transport failure."
+        )
+      ),
+    );
+  }
+
+  const text =
+    await response.text();
+
+  if (
+    response.status ===
+      401 ||
+    response.status ===
+      403
+  ) {
+    throw new SecurityRoleMutationRejectedError(
+      response.status,
+      `P02 authority rejected by SysAdmin API with HTTP ${response.status}.`,
+    );
+  }
+
+  if (
+    response.status >=
+      500
+  ) {
+    throw new SecurityRoleMutationUnknownAfterDispatchError(
+      `Official SysAdmin DELETE /v2/security/role returned HTTP ${response.status}; mutation outcome requires authoritative reconciliation. Body=${text.slice(0, 500)}`,
+    );
+  }
+
+  if (!response.ok) {
+    throw new SecurityRoleMutationRejectedError(
+      response.status,
+      `Official SysAdmin DELETE /v2/security/role rejected P02 with HTTP ${response.status}. Body=${text.slice(0, 500)}`,
+    );
+  }
+
+  if (
+    response.status !==
+      200
+  ) {
+    throw new SecurityRoleMutationUnknownAfterDispatchError(
+      `Official SysAdmin DELETE /v2/security/role returned unexpected success status ${response.status}.`,
+    );
+  }
+
+  return Object.freeze({
+    status:
+      response.status,
+
+    mutationRequestCount:
+      1 as const,
+  });
+}

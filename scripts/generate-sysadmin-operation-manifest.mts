@@ -122,7 +122,9 @@ const ACTIONS:
           "P02_ROLE_DELETE",
         ]),
       certified:
-        Object.freeze([]),
+        Object.freeze([
+          "P02_ROLE_DELETE",
+        ]),
     },
     "PUT /v2/security/user": {
       phase:

@@ -81,13 +81,13 @@ describe(
             .counts.byStatus,
         ).toEqual({
           CERTIFIED_ACTION:
-            4,
+            5,
           DECLINED_DESTRUCTIVE:
             36,
           EXPLORABLE_READ:
             95,
           OUT_OF_PRODUCT_SCOPE:
-            118,
+            117,
           VERIFIED_READ:
             20,
         });
@@ -160,7 +160,7 @@ describe(
     );
 
     it(
-      "binds all 32 required release actions and promotes live-certified P01, P04, and W01 through W04",
+      "binds all 32 required release actions and promotes live-certified P01, P02, P04, and W01 through W04",
       () => {
         const ids =
           sysAdminOperationManifest
@@ -194,6 +194,7 @@ describe(
         expect(
           certified,
         ).toEqual([
+          "P02_ROLE_DELETE",
           "W04_WEB_APP_DELETE",
           "P01_ROLE_CREATE",
           "P04_USER_REMOVE_ROLE",

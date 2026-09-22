@@ -199,7 +199,9 @@ const ACTIONS:
           "T05_TASK_RESUME",
         ]),
       certified:
-        Object.freeze([]),
+        Object.freeze([
+          "T05_TASK_RESUME",
+        ]),
     },
     "DELETE /v2/task": {
       phase:

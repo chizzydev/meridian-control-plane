@@ -211,7 +211,9 @@ const ACTIONS:
           "T06_TASK_DELETE",
         ]),
       certified:
-        Object.freeze([]),
+        Object.freeze([
+          "T06_TASK_DELETE",
+        ]),
     },
     "PUT /v2/security/oauth2/client/client-configuration": {
       phase:

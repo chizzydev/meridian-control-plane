@@ -187,7 +187,9 @@ const ACTIONS:
           "T04_TASK_SUSPEND",
         ]),
       certified:
-        Object.freeze([]),
+        Object.freeze([
+          "T04_TASK_SUSPEND",
+        ]),
     },
     "POST /v2/task/resume": {
       phase:

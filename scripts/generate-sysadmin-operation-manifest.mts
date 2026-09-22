@@ -175,7 +175,9 @@ const ACTIONS:
           "T03_TASK_RUN_NOW",
         ]),
       certified:
-        Object.freeze([]),
+        Object.freeze([
+          "T03_TASK_RUN_NOW",
+        ]),
     },
     "POST /v2/task/suspend": {
       phase:

@@ -81,13 +81,13 @@ describe(
             .counts.byStatus,
         ).toEqual({
           CERTIFIED_ACTION:
-            7,
+            8,
           DECLINED_DESTRUCTIVE:
             36,
           EXPLORABLE_READ:
             95,
           OUT_OF_PRODUCT_SCOPE:
-            115,
+            114,
           VERIFIED_READ:
             20,
         });
@@ -160,7 +160,7 @@ describe(
     );
 
     it(
-      "binds all 32 required release actions and freezes the R5-B0 candidate promotion for P01, P02, P03, P04, P05, P06, T01, T02, and W01 through W04",
+      "binds all 32 required release actions and freezes the R5-C4A candidate promotion for P01, P02, P03, P04, P05, P06, T01, T02, T03, and W01 through W04",
       () => {
         const ids =
           sysAdminOperationManifest
@@ -197,6 +197,7 @@ describe(
           "P02_ROLE_DELETE",
           "W04_WEB_APP_DELETE",
           "T01_TASK_CREATE",
+          "T03_TASK_RUN_NOW",
           "P01_ROLE_CREATE",
           "P03_USER_ADD_ROLE",
           "P04_USER_REMOVE_ROLE",

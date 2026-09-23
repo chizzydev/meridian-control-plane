@@ -38,10 +38,10 @@
       "WEB_REST": 10
     },
     "byStatus": {
-      "CERTIFIED_ACTION": 13,
+      "CERTIFIED_ACTION": 14,
       "DECLINED_DESTRUCTIVE": 36,
       "EXPLORABLE_READ": 95,
-      "OUT_OF_PRODUCT_SCOPE": 109,
+      "OUT_OF_PRODUCT_SCOPE": 108,
       "VERIFIED_READ": 20
     }
   },
@@ -6128,13 +6128,15 @@
         "/v2/process"
       ],
       "family": "SYSTEM_OS",
-      "supportStatus": "OUT_OF_PRODUCT_SCOPE",
-      "scopeNote": "Reserved for R7; not certified at R2. No generic mutation dispatch is exposed.",
+      "supportStatus": "CERTIFIED_ACTION",
+      "scopeNote": "At least one bounded semantic action using this transport is live-certified; the endpoint is not exposed as a generic mutation proxy.",
       "releaseTrack": "R7",
       "plannedActionIds": [
         "O03_PROCESS_TERMINATE"
       ],
-      "certifiedActionIds": [],
+      "certifiedActionIds": [
+        "O03_PROCESS_TERMINATE"
+      ],
       "requiredAuthorityExpression": "%Admin_Operate:U",
       "authorityOptions": [
         [

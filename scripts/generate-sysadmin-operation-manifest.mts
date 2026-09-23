@@ -356,8 +356,9 @@ const ACTIONS:
         Object.freeze([
           "O03_PROCESS_TERMINATE",
         ]),
-      certified:
-        Object.freeze([]),
+      certified: Object.freeze([
+          "O03_PROCESS_TERMINATE",
+        ]),
     },
   });
 

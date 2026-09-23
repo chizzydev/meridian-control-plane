@@ -334,8 +334,9 @@ const ACTIONS:
         Object.freeze([
           "O01_PROCESS_SUSPEND",
         ]),
-      certified:
-        Object.freeze([]),
+      certified: Object.freeze([
+          "O01_PROCESS_SUSPEND",
+        ]),
     },
     "POST /v2/process/resume": {
       phase:

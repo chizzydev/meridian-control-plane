@@ -48,6 +48,10 @@ function snapshot(
   return {
     capturedAtUtc:
       "2026-09-20T16:00:00.000Z",
+    generation:
+      "a5-test-generation",
+    purposeMarker:
+      "meridian:process-witness:a5-test-generation",
     username:
       "meridian.demo.witness",
     namespace:
@@ -80,6 +84,14 @@ function processRow(
       "127.0.0.1",
     startupClientIPAddress:
       "127.0.0.1",
+    purposeMarker:
+      "meridian:process-witness:a5-test-generation",
+    canBeSuspended:
+      true,
+    canBeTerminated:
+      true,
+    state:
+      "RUN",
   };
 }
 

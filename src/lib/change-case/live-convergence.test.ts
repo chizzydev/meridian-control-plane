@@ -28,6 +28,7 @@ import {
   buildPostApplyWitnessObservation,
   buildPreApplyWitnessBaseline,
   recordStaleLiveWitnessCore,
+  liveWitnessProcessPurposeMarker,
   type LiveWitnessProcessRow,
   type LiveWitnessSelfSnapshot,
 } from "./live-convergence";
@@ -193,6 +194,16 @@ function processRow(
       "127.0.0.1",
     startupClientIPAddress:
       "127.0.0.1",
+    purposeMarker:
+      liveWitnessProcessPurposeMarker(
+        GENERATION,
+      ),
+    canBeSuspended:
+      true,
+    canBeTerminated:
+      true,
+    state:
+      "RUN",
   };
 }
 
@@ -233,6 +244,12 @@ function self(
     capturedAtUtc:
       iso(
         2,
+      ),
+    generation:
+      GENERATION,
+    purposeMarker:
+      liveWitnessProcessPurposeMarker(
+        GENERATION,
       ),
     username:
       DEMO_FIXTURE_USERNAME,
@@ -796,6 +813,119 @@ describe(
               "ALLOW",
           });
         }
+      },
+    );
+  },
+);
+
+describe(
+  "live witness process-purpose identity binding",
+  () => {
+    it(
+      "fails closed when the independent process purpose marker drifts",
+      () => {
+        const row =
+          processRow(
+            7101,
+            beforeRoles(),
+          );
+
+        expect(
+          () =>
+            buildPreApplyWitnessBaseline({
+              record:
+                readyRecord(),
+              observationId:
+                "obs-purpose-drift",
+              self:
+                self(
+                  7101,
+                  "ALLOW_ALL",
+                ),
+              processRows: [
+                {
+                  ...row,
+                  purposeMarker:
+                    "meridian:process-witness:wrong-generation",
+                },
+              ],
+            }),
+        ).toThrow(
+          "start identity or purpose marker drifted",
+        );
+      },
+    );
+
+    it(
+      "fails closed when the direct witness generation binding drifts",
+      () => {
+        const direct =
+          self(
+            7101,
+            "ALLOW_ALL",
+          );
+
+        expect(
+          () =>
+            buildPreApplyWitnessBaseline({
+              record:
+                readyRecord(),
+              observationId:
+                "obs-generation-drift",
+              self: {
+                ...direct,
+                generation:
+                  "wrong-generation",
+                purposeMarker:
+                  liveWitnessProcessPurposeMarker(
+                    "wrong-generation",
+                  ),
+              },
+              processRows: [
+                processRow(
+                  7101,
+                  beforeRoles(),
+                ),
+              ],
+            }),
+        ).toThrow(
+          "generation or process purpose marker drifted",
+        );
+      },
+    );
+
+    it(
+      "fails closed when independent StartTimeUTC is blank",
+      () => {
+        const row =
+          processRow(
+            7101,
+            beforeRoles(),
+          );
+
+        expect(
+          () =>
+            buildPreApplyWitnessBaseline({
+              record:
+                readyRecord(),
+              observationId:
+                "obs-start-time-blank",
+              self:
+                self(
+                  7101,
+                  "ALLOW_ALL",
+                ),
+              processRows: [
+                {
+                  ...row,
+                  startTimeUtc:
+                    "",
+                },
+              ],
+            }),
+        ).toThrow(
+          "start identity or purpose marker drifted",
+        );
       },
     );
   },

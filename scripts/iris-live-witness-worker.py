@@ -12,6 +12,13 @@ HOST = "127.0.0.1"
 PORT = 1972
 NAMESPACE = "USER"
 
+PURPOSE_MARKER_PREFIX = "meridian:process-witness:"
+PURPOSE_MARKER_MAX_BYTES = 64
+GENERATION_MAX_UTF8_BYTES = (
+    PURPOSE_MARKER_MAX_BYTES
+    - len(PURPOSE_MARKER_PREFIX.encode("utf-8"))
+)
+
 BUSINESS = [
     ("Meridian_Admin", "USE"),
     ("%Admin_Task", "USE"),
@@ -43,6 +50,17 @@ if not isinstance(password, str) or not password:
 
 if not isinstance(generation, str) or not generation:
     raise SystemExit("fixture generation missing")
+
+if generation != generation.strip():
+    raise SystemExit("fixture generation must be canonical")
+
+if len(generation.encode("utf-8")) > GENERATION_MAX_UTF8_BYTES:
+    raise SystemExit("fixture generation exceeds purpose-marker capacity")
+
+purpose_marker = PURPOSE_MARKER_PREFIX + generation
+
+if len(purpose_marker.encode("utf-8")) > PURPOSE_MARKER_MAX_BYTES:
+    raise SystemExit("process purpose marker exceeds 64-byte UserInfo capacity")
 
 payload.clear()
 
@@ -134,6 +152,28 @@ def snapshot(label):
         row = cursor.fetchone()
         result["sqlCurrentPid"] = int(row[0])
 
+        result["failureStage"] = "purpose-marker"
+        process = irispy.classMethodObject(
+            "%SYS.ProcessQuery",
+            "%OpenId",
+            result["sqlCurrentPid"],
+        )
+
+        if process is None:
+            raise RuntimeError("self ProcessQuery object open failed")
+
+        observed_user_info = process.get("UserInfo")
+        result["purposeMarker"] = purpose_marker
+        result["selfUserInfo"] = (
+            ""
+            if observed_user_info is None
+            else str(observed_user_info)
+        )
+
+        if result["selfUserInfo"] != purpose_marker:
+            raise RuntimeError("self UserInfo purpose marker drifted")
+
+        result["failureStage"] = "cursor"
         cursor.execute("SELECT $NAMESPACE AS CurrentNamespace")
         row = cursor.fetchone()
         result["sqlCurrentNamespace"] = str(row[0])
@@ -162,6 +202,51 @@ def snapshot(label):
     return result
 
 
+def bind_process_purpose_marker():
+    cursor = None
+
+    try:
+        if conn is None or irispy is None:
+            raise RuntimeError("native connection is not open")
+
+        cursor = conn.cursor()
+        cursor.execute("SELECT $JOB AS CurrentPid")
+        row = cursor.fetchone()
+
+        if row is None:
+            raise RuntimeError("self PID query returned no row")
+
+        pid = int(row[0])
+
+        if pid < 1:
+            raise RuntimeError("self PID is not positive")
+
+        process = irispy.classMethodObject(
+            "%SYS.ProcessQuery",
+            "%OpenId",
+            pid,
+        )
+
+        if process is None:
+            raise RuntimeError("self ProcessQuery object open failed")
+
+        process.set("UserInfo", purpose_marker)
+        observed = process.get("UserInfo")
+        observed_text = "" if observed is None else str(observed)
+
+        if observed_text != purpose_marker:
+            raise RuntimeError("self UserInfo purpose-marker readback drifted")
+
+        return pid
+
+    finally:
+        if cursor is not None:
+            try:
+                cursor.close()
+            except Exception:
+                pass
+
+
 def connect():
     global conn, irispy
 
@@ -179,6 +264,7 @@ def connect():
     )
 
     irispy = iris.createIRIS(conn)
+    bind_process_purpose_marker()
 
 
 def close_connection():

@@ -19,6 +19,45 @@ export const LIVE_CONVERGENCE_SCHEMA_VERSION =
 export const LIVE_WITNESS_OBSERVATION_SCHEMA_VERSION =
   "meridian.live-witness-observation.v1" as const;
 
+export const LIVE_WITNESS_PROCESS_PURPOSE_PREFIX =
+  "meridian:process-witness:" as const;
+
+export const LIVE_WITNESS_PROCESS_PURPOSE_MAX_BYTES =
+  64 as const;
+
+export function liveWitnessProcessPurposeMarker(
+  generation:
+    string,
+): string {
+  const canonical =
+    generation.trim();
+
+  if (
+    canonical.length ===
+      0 ||
+    canonical !==
+      generation
+  ) {
+    throw new Error(
+      "Live witness generation must be nonblank canonical text.",
+    );
+  }
+
+  const marker =
+    `${LIVE_WITNESS_PROCESS_PURPOSE_PREFIX}${canonical}`;
+
+  if (
+    marker.length >
+      LIVE_WITNESS_PROCESS_PURPOSE_MAX_BYTES
+  ) {
+    throw new Error(
+      "Live witness process purpose marker exceeds the frozen 64-byte ASCII envelope.",
+    );
+  }
+
+  return marker;
+}
+
 export const LIVE_WITNESS_LOST_PERMISSION_KEYS =
   Object.freeze([
     "Meridian_Admin:USE",
@@ -62,6 +101,12 @@ export type LiveWitnessClassification =
 
 export interface LiveWitnessSelfSnapshot {
   readonly capturedAtUtc:
+    string;
+
+  readonly generation:
+    string;
+
+  readonly purposeMarker:
     string;
 
   readonly username:
@@ -108,6 +153,18 @@ export interface LiveWitnessProcessRow {
     string;
 
   readonly startupClientIPAddress:
+    string;
+
+  readonly purposeMarker:
+    string;
+
+  readonly canBeSuspended:
+    boolean;
+
+  readonly canBeTerminated:
+    boolean;
+
+  readonly state:
     string;
 }
 
@@ -565,6 +622,26 @@ function assertRawWitnessBinding(
   processRows:
     readonly LiveWitnessProcessRow[],
 ): LiveWitnessProcessRow {
+  const expectedGeneration =
+    record.fixture.expectedGeneration;
+
+  const expectedPurposeMarker =
+    liveWitnessProcessPurposeMarker(
+      expectedGeneration,
+    );
+
+  if (
+    self.generation !==
+      expectedGeneration ||
+    self.purposeMarker !==
+      expectedPurposeMarker
+  ) {
+    throw new LiveConvergenceRefusalError(
+      "LIVE_WITNESS_INVALID",
+      "Direct live witness generation or process purpose marker drifted.",
+    );
+  }
+
   if (
     self.username.toLowerCase() !==
       DEMO_FIXTURE_USERNAME.toLowerCase() ||
@@ -614,6 +691,18 @@ function assertRawWitnessBinding(
     throw new LiveConvergenceRefusalError(
       "LIVE_WITNESS_INVALID",
       "Independent ProcessQuery witness namespace drifted.",
+    );
+  }
+
+  if (
+    row.startTimeUtc.trim().length ===
+      0 ||
+    row.purposeMarker !==
+      expectedPurposeMarker
+  ) {
+    throw new LiveConvergenceRefusalError(
+      "LIVE_WITNESS_INVALID",
+      "Independent ProcessQuery witness start identity or purpose marker drifted.",
     );
   }
 

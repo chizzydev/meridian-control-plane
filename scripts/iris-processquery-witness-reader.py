@@ -12,6 +12,10 @@ EXPECTED_COLUMNS = [
     "StartTimeUTC",
     "ClientIPAddress",
     "StartupClientIPAddress",
+    "UserInfo",
+    "CanBeSuspended",
+    "CanBeTerminated",
+    "State",
 ]
 
 payload = json.load(sys.stdin)
@@ -42,7 +46,8 @@ try:
 
     cursor.execute(
         "SELECT Pid, UserName, LoginRoles, Roles, NameSpace, StartTimeUTC, "
-        "ClientIPAddress, StartupClientIPAddress FROM %SYS.ProcessQuery"
+        "ClientIPAddress, StartupClientIPAddress, UserInfo, "
+        "CanBeSuspended, CanBeTerminated, State FROM %SYS.ProcessQuery"
     )
 
     actual_columns = [
@@ -78,6 +83,10 @@ try:
                 "startTimeUtc": "" if row[5] is None else str(row[5]),
                 "clientIPAddress": "" if row[6] is None else str(row[6]),
                 "startupClientIPAddress": "" if row[7] is None else str(row[7]),
+                "purposeMarker": "" if row[8] is None else str(row[8]),
+                "canBeSuspended": bool(row[9]),
+                "canBeTerminated": bool(row[10]),
+                "state": "" if row[11] is None else str(row[11]),
             }
         )
 

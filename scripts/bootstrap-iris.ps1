@@ -151,6 +151,20 @@ if $SYSTEM.Status.IsOK(sc) write "B1B2_ROLE|"_roleName_"|RESOURCES="_$get(role("
 if $SYSTEM.Status.IsOK(sc) write "B1B2_ROLE|"_roleName_"|GRANTED="_$get(role("GrantedRoles"),"__MISSING__"),!
 if $SYSTEM.Status.IsOK(sc) write "B1B2_ROLE|"_roleName_"|ESCALATION="_$get(role("EscalationOnly"),"__MISSING__"),!
 kill role
+set roleName="MeridianTaskActionExecutor"
+set sc=##class(Security.Roles).Get(roleName,.role)
+write "B1B2_ROLE|"_roleName_"|GET_OK="_$SYSTEM.Status.IsOK(sc),!
+if $SYSTEM.Status.IsOK(sc) write "B1B2_ROLE|"_roleName_"|RESOURCES="_$get(role("Resources"),"__MISSING__"),!
+if $SYSTEM.Status.IsOK(sc) write "B1B2_ROLE|"_roleName_"|GRANTED="_$get(role("GrantedRoles"),"__MISSING__"),!
+if $SYSTEM.Status.IsOK(sc) write "B1B2_ROLE|"_roleName_"|ESCALATION="_$get(role("EscalationOnly"),"__MISSING__"),!
+kill role
+set roleName="MeridianProcessActionExecutor"
+set sc=##class(Security.Roles).Get(roleName,.role)
+write "B1B2_ROLE|"_roleName_"|GET_OK="_$SYSTEM.Status.IsOK(sc),!
+if $SYSTEM.Status.IsOK(sc) write "B1B2_ROLE|"_roleName_"|RESOURCES="_$get(role("Resources"),"__MISSING__"),!
+if $SYSTEM.Status.IsOK(sc) write "B1B2_ROLE|"_roleName_"|GRANTED="_$get(role("GrantedRoles"),"__MISSING__"),!
+if $SYSTEM.Status.IsOK(sc) write "B1B2_ROLE|"_roleName_"|ESCALATION="_$get(role("EscalationOnly"),"__MISSING__"),!
+kill role
 set roleName="MeridianTaskMetadataReader"
 set sc=##class(Security.Roles).Get(roleName,.role)
 write "B1B2_ROLE|"_roleName_"|GET_OK="_$SYSTEM.Status.IsOK(sc),!
@@ -337,6 +351,14 @@ $ExpectedConvergedMarkers = @(
         "B1B2_ROLE|MeridianSecurityMetadataReader|RESOURCES=%Admin_OAuth2_Client:U,%Admin_OAuth2_Registration:U,%Admin_Secure:U,%Admin_Wallet:U,%DB_IRISSYS:R",
         "B1B2_ROLE|MeridianSecurityMetadataReader|GRANTED=",
         "B1B2_ROLE|MeridianSecurityMetadataReader|ESCALATION=1",
+        "B1B2_ROLE|MeridianTaskActionExecutor|GET_OK=1",
+        "B1B2_ROLE|MeridianTaskActionExecutor|RESOURCES=%Admin_Task:U",
+        "B1B2_ROLE|MeridianTaskActionExecutor|GRANTED=",
+        "B1B2_ROLE|MeridianTaskActionExecutor|ESCALATION=1",
+        "B1B2_ROLE|MeridianProcessActionExecutor|GET_OK=1",
+        "B1B2_ROLE|MeridianProcessActionExecutor|RESOURCES=%Admin_Operate:U,%DB_IRISSYS:RW",
+        "B1B2_ROLE|MeridianProcessActionExecutor|GRANTED=",
+        "B1B2_ROLE|MeridianProcessActionExecutor|ESCALATION=1",
         "B1B2_ROLE|MeridianTaskMetadataReader|GET_OK=1",
         "B1B2_ROLE|MeridianTaskMetadataReader|RESOURCES=%Admin_Task:U",
         "B1B2_ROLE|MeridianTaskMetadataReader|GRANTED=",
@@ -358,7 +380,7 @@ $ExpectedConvergedMarkers = @(
         "B1B2_USER|meridian.runtime|FULLNAME=Meridian Control Plane Runtime",
         "B1B2_USER|meridian.runtime|NAMESPACE=%SYS",
         "B1B2_USER|meridian.runtime|ROLES=MeridianControlPlaneRuntime",
-        "B1B2_USER|meridian.runtime|ESCALATION=MeridianSecurityMetadataReader,MeridianSystemMetadataReader,MeridianTaskMetadataReader",
+        "B1B2_USER|meridian.runtime|ESCALATION=MeridianProcessActionExecutor,MeridianSecurityMetadataReader,MeridianSystemMetadataReader,MeridianTaskActionExecutor,MeridianTaskMetadataReader",
         "B1B2_USER|meridian.runtime|ACCOUNT_NEVER_EXPIRES=1",
         "B1B2_USER|meridian.runtime|PASSWORD_NEVER_EXPIRES=1",
         "B1B2_RESOURCE|Meridian_Portal|GET_OK=1",
@@ -533,6 +555,24 @@ function Assert-NoUnexpectedDrift {
 
     Assert-ExistingObjectExact `
         -Text $Text `
+        -ExistsMarker "B1B2_ROLE|MeridianTaskActionExecutor|GET_OK=1" `
+        -ExpectedMarkers @(
+            "B1B2_ROLE|MeridianTaskActionExecutor|RESOURCES=%Admin_Task:U",
+            "B1B2_ROLE|MeridianTaskActionExecutor|GRANTED=",
+            "B1B2_ROLE|MeridianTaskActionExecutor|ESCALATION=1"
+        )
+
+    Assert-ExistingObjectExact `
+        -Text $Text `
+        -ExistsMarker "B1B2_ROLE|MeridianProcessActionExecutor|GET_OK=1" `
+        -ExpectedMarkers @(
+            "B1B2_ROLE|MeridianProcessActionExecutor|RESOURCES=%Admin_Operate:U,%DB_IRISSYS:RW",
+            "B1B2_ROLE|MeridianProcessActionExecutor|GRANTED=",
+            "B1B2_ROLE|MeridianProcessActionExecutor|ESCALATION=1"
+        )
+
+    Assert-ExistingObjectExact `
+        -Text $Text `
         -ExistsMarker "B1B2_ROLE|MeridianTaskMetadataReader|GET_OK=1" `
         -ExpectedMarkers @(
             "B1B2_ROLE|MeridianTaskMetadataReader|RESOURCES=%Admin_Task:U",
@@ -570,7 +610,7 @@ function Assert-NoUnexpectedDrift {
             "B1B2_USER|meridian.runtime|FULLNAME=Meridian Control Plane Runtime",
             "B1B2_USER|meridian.runtime|NAMESPACE=%SYS",
             "B1B2_USER|meridian.runtime|ROLES=MeridianControlPlaneRuntime",
-            "B1B2_USER|meridian.runtime|ESCALATION=MeridianSecurityMetadataReader,MeridianSystemMetadataReader,MeridianTaskMetadataReader",
+            "B1B2_USER|meridian.runtime|ESCALATION=MeridianProcessActionExecutor,MeridianSecurityMetadataReader,MeridianSystemMetadataReader,MeridianTaskActionExecutor,MeridianTaskMetadataReader",
             "B1B2_USER|meridian.runtime|ACCOUNT_NEVER_EXPIRES=1",
             "B1B2_USER|meridian.runtime|PASSWORD_NEVER_EXPIRES=1"
         )
@@ -861,6 +901,16 @@ if '$SYSTEM.Status.IsOK(gsc) set csc=##class(Security.Roles).Create("MeridianSec
 if '$SYSTEM.Status.IsOK(gsc) write "B1B2_CREATE_ROLE|MeridianSecurityMetadataReader|OK="_$SYSTEM.Status.IsOK(csc),!
 if '$SYSTEM.Status.IsOK(gsc),'$SYSTEM.Status.IsOK(csc) write "B1B2_CREATE_ROLE_ERROR|MeridianSecurityMetadataReader="_$SYSTEM.Status.GetErrorText(csc),!
 kill current
+set gsc=##class(Security.Roles).Get("MeridianTaskActionExecutor",.current)
+if '$SYSTEM.Status.IsOK(gsc) set csc=##class(Security.Roles).Create("MeridianTaskActionExecutor","Meridian task least-privilege action escalation","%Admin_Task:U","",1)
+if '$SYSTEM.Status.IsOK(gsc) write "B1B2_CREATE_ROLE|MeridianTaskActionExecutor|OK="_$SYSTEM.Status.IsOK(csc),!
+if '$SYSTEM.Status.IsOK(gsc),'$SYSTEM.Status.IsOK(csc) write "B1B2_CREATE_ROLE_ERROR|MeridianTaskActionExecutor="_$SYSTEM.Status.GetErrorText(csc),!
+kill current
+set gsc=##class(Security.Roles).Get("MeridianProcessActionExecutor",.current)
+if '$SYSTEM.Status.IsOK(gsc) set csc=##class(Security.Roles).Create("MeridianProcessActionExecutor","Meridian process-control least-privilege action escalation","%Admin_Operate:U,%DB_IRISSYS:RW","",1)
+if '$SYSTEM.Status.IsOK(gsc) write "B1B2_CREATE_ROLE|MeridianProcessActionExecutor|OK="_$SYSTEM.Status.IsOK(csc),!
+if '$SYSTEM.Status.IsOK(gsc),'$SYSTEM.Status.IsOK(csc) write "B1B2_CREATE_ROLE_ERROR|MeridianProcessActionExecutor="_$SYSTEM.Status.GetErrorText(csc),!
+kill current
 set gsc=##class(Security.Roles).Get("MeridianTaskMetadataReader",.current)
 if '$SYSTEM.Status.IsOK(gsc) set csc=##class(Security.Roles).Create("MeridianTaskMetadataReader","Meridian task read-only product escalation","%Admin_Task:U","",1)
 if '$SYSTEM.Status.IsOK(gsc) write "B1B2_CREATE_ROLE|MeridianTaskMetadataReader|OK="_$SYSTEM.Status.IsOK(csc),!
@@ -879,7 +929,7 @@ halt
         Create-MissingUser -UserName "maya.patel" -FullName "Maya Patel" -NameSpace "USER" -Roles "MeridianEmployee" -EscalationRoles "" -Comment "Meridian Operations controlled convergence fixture"
     }
     if (-not $PreText.Contains("B1B2_USER|meridian.runtime|GET_OK=1")) {
-        Create-MissingUser -UserName "meridian.runtime" -FullName "Meridian Control Plane Runtime" -NameSpace "%SYS" -Roles "MeridianControlPlaneRuntime" -EscalationRoles "MeridianSecurityMetadataReader,MeridianSystemMetadataReader,MeridianTaskMetadataReader" -Comment "Dedicated least-privilege runtime identity for Meridian Control Plane"
+        Create-MissingUser -UserName "meridian.runtime" -FullName "Meridian Control Plane Runtime" -NameSpace "%SYS" -Roles "MeridianControlPlaneRuntime" -EscalationRoles "MeridianProcessActionExecutor,MeridianSecurityMetadataReader,MeridianSystemMetadataReader,MeridianTaskActionExecutor,MeridianTaskMetadataReader" -Comment "Dedicated least-privilege runtime identity for Meridian Control Plane"
     }
 
     if (-not $PreText.Contains("B1B2_CLASS|Meridian.ControlPlane.Internal.REST|EXISTS=1")) { Copy-And-LoadClass -Relative "iris/Meridian.ControlPlane.Internal.REST.cls" -ContainerPath "/tmp/meridian_internal_rest.cls" -ClassName "Meridian.ControlPlane.Internal.REST" }

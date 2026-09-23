@@ -34,6 +34,7 @@ import {
 
 import {
   LIVE_WITNESS_REQUIRED_PERMISSION_KEYS,
+  liveWitnessProcessPurposeMarker,
   type LiveWitnessPermissionKey,
   type LiveWitnessProcessRow,
   type LiveWitnessSelfSnapshot,
@@ -58,6 +59,12 @@ interface WorkerSnapshotJson {
     string;
 
   readonly generation:
+    string;
+
+  readonly purposeMarker:
+    string;
+
+  readonly selfUserInfo:
     string;
 
   readonly usingSharedMemory:
@@ -251,6 +258,28 @@ function parseWorkerSnapshot(
     );
   }
 
+  const expectedPurposeMarker =
+    liveWitnessProcessPurposeMarker(
+      expectedGeneration,
+    );
+
+  if (
+    stringValue(
+      object,
+      "purposeMarker",
+    ) !==
+      expectedPurposeMarker ||
+    stringValue(
+      object,
+      "selfUserInfo",
+    ) !==
+      expectedPurposeMarker
+  ) {
+    throw new Error(
+      "Native witness process purpose marker drifted.",
+    );
+  }
+
   const username =
     stringValue(
       object,
@@ -288,6 +317,12 @@ function parseWorkerSnapshot(
         object,
         "capturedAtUtc",
       ),
+
+    generation:
+      expectedGeneration,
+
+    purposeMarker:
+      expectedPurposeMarker,
 
     username:
       DEMO_FIXTURE_USERNAME,
@@ -1065,6 +1100,30 @@ export async function readLiveWitnessProcessRows(
             stringValue(
               row,
               "startupClientIPAddress",
+            ),
+
+          purposeMarker:
+            stringValue(
+              row,
+              "purposeMarker",
+            ),
+
+          canBeSuspended:
+            boolValue(
+              row,
+              "canBeSuspended",
+            ),
+
+          canBeTerminated:
+            boolValue(
+              row,
+              "canBeTerminated",
+            ),
+
+          state:
+            stringValue(
+              row,
+              "state",
             ),
         });
       },

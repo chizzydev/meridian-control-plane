@@ -814,7 +814,7 @@ function supportFor(
         "OUT_OF_PRODUCT_SCOPE",
       scopeNote:
         (
-          `Reserved for ${action.phase}; not certified at R2. ` +
+          "Registered mutation action outside the current certified product boundary. " +
           "No generic mutation dispatch is exposed."
         ),
     };
@@ -837,7 +837,7 @@ function supportFor(
     status:
       "OUT_OF_PRODUCT_SCOPE",
     scopeNote:
-      "Not exposed by the R2 product surface; no generic mutation dispatch is exposed.",
+      "Visible in the pinned source atlas but outside the current product boundary; no generic mutation dispatch is exposed.",
   };
 }
 
@@ -1063,7 +1063,7 @@ if (
     SOURCE.blobSha
 ) {
   throw new Error(
-    `Pinned organizer spec blob mismatch: ${sourceBlobSha}.`,
+    `Pinned public SysAdmin specification blob mismatch: ${sourceBlobSha}.`,
   );
 }
 
@@ -1167,7 +1167,7 @@ for (
         supportStatus:
           "EXPLORABLE_READ",
         scopeNote:
-          "Protocol companion declared by the pinned organizer spec; tracked separately from the 273 primary-operation contract.",
+          "Protocol companion present in the pinned public SysAdmin specification; tracked separately from the 273 primary-operation contract.",
         releaseTrack:
           null,
         plannedActionIds:
@@ -1245,7 +1245,7 @@ if (
 ) {
   throw new Error(
     (
-      "Pinned organizer spec operation count changed: " +
+      "Pinned public SysAdmin specification operation count changed: " +
       `source=${sourceOperationCount}, primary=${operations.length}, ` +
       `companions=${companions.length}.`
     ),
@@ -1314,7 +1314,7 @@ const manifest =
       countRule:
         (
           "The 273-operation contract counts GET/POST/PUT/DELETE. " +
-          "Three organizer-declared HEAD checks are retained separately as protocol companions."
+          "Three HEAD checks present in the pinned public SysAdmin specification are retained separately as protocol companions."
         ),
     },
     counts: {

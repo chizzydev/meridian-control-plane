@@ -328,12 +328,38 @@ export default async function ProofCoveragePage({
     sysAdminOperationManifest
       .counts;
 
+  const certifiedActionOperations =
+    sysAdminOperationManifest
+      .operations
+      .filter(
+        (
+          operation,
+        ) =>
+          operation.supportStatus ===
+            "CERTIFIED_ACTION",
+      );
+
+  const certifiedSemanticActionCount =
+    new Set(
+      certifiedActionOperations
+        .flatMap(
+          (
+            operation,
+          ) =>
+            operation.plannedActionIds,
+        ),
+    ).size;
+
+  const certifiedMutationEndpointCount =
+    certifiedActionOperations
+      .length;
+
   return (
     <main className={styles.page}>
       <PageHeader
         eyebrow="Meridian Control Plane / Proof coverage"
         title="273 operations. No silent gaps."
-        description="The pinned organizer SysAdmin specification is compiled into an explicit coverage contract. Runtime availability is kept separate from Meridian support, and generic mutation dispatch remains impossible."
+        description="The pinned public InterSystems Community SysAdmin API specification is compiled into an explicit coverage contract. Runtime availability is kept separate from Meridian support, and generic mutation dispatch remains impossible."
         actions={
           <>
             <StatusBadge tone="success">
@@ -371,22 +397,21 @@ export default async function ProofCoveragePage({
         />
 
         <MetricCell
-          label="Read operations"
+          label="Certified semantic actions"
           value={
-            counts.byMethod.GET ??
-            0
+            certifiedSemanticActionCount
           }
-          detail="bounded explorer candidates"
+          detail={`${certifiedMutationEndpointCount} certified mutation endpoints`}
         />
 
         <MetricCell
-          label="Required mutation actions"
+          label="Mutation registry scope"
           value={
             sysAdminOperationManifest
               .mutationRegistry
               .requiredActionCount
           }
-          detail="R3-R7 proof-contract registry"
+          detail={`${sysAdminOperationManifest.mutationRegistry.requiredActionCount - certifiedSemanticActionCount} Security/Secrets IDs remain out of scope`}
         />
       </section>
 
@@ -428,12 +453,19 @@ export default async function ProofCoveragePage({
             </CodeValue>
           </div>
         </div>
+
+        <AuthorityCallout
+          eyebrow="Certified breadth vs registry scope"
+          title={`${certifiedSemanticActionCount} certified semantic actions on ${certifiedMutationEndpointCount} mutation endpoints`}
+          detail={`${sysAdminOperationManifest.mutationRegistry.requiredActionCount} mutation registry action IDs exist in the generated registry. The remaining ${sysAdminOperationManifest.mutationRegistry.requiredActionCount - certifiedSemanticActionCount} Security/Secrets IDs are OUT_OF_PRODUCT_SCOPE and are not certified product breadth.`}
+          tone="info"
+        />
       </section>
 
       <section className={styles.section}>
         <SectionHeader
           eyebrow="Coverage contract"
-          title="Six contest families, explicit current status"
+          title="Six SysAdmin families, explicit current status"
           detail="EXPLORABLE_READ means the operation is present in the safe read contract; it does not imply the current runtime possesses the authority required to execute it."
         />
 
@@ -598,7 +630,7 @@ export default async function ProofCoveragePage({
                 <th>Path</th>
                 <th>Current support</th>
                 <th>Authority</th>
-                <th>Release track</th>
+                <th>Certified action binding</th>
                 <th>Summary</th>
                 <th aria-label="Inspect operation" />
               </tr>
@@ -652,17 +684,17 @@ export default async function ProofCoveragePage({
                     </td>
 
                     <td>
-                      {operation.releaseTrack ? (
+                      {operation.certifiedActionIds.length > 0 ? (
                         <>
-                          <CodeValue>
-                            {operation.releaseTrack}
-                          </CodeValue>
-                          <small>
-                            {operation.plannedActionIds.join(", ")}
-                          </small>
+                          {operation.certifiedActionIds.map((actionId) => (
+                            <CodeValue key={actionId}>
+                              {actionId}
+                            </CodeValue>
+                          ))}
+                          <small>Fixed-purpose certified semantic action</small>
                         </>
                       ) : (
-                        "—"
+                        <small>No certified mutation action</small>
                       )}
                     </td>
 
@@ -859,7 +891,7 @@ export default async function ProofCoveragePage({
           <AuthorityCallout
             eyebrow="Non-deviation boundary"
             title="No arbitrary URL. No arbitrary method. No generic mutation body."
-            detail="GET requires a declared GET operation. HEAD requires one of the three organizer-declared HEAD companions. OPTIONS is restricted to paths present in the pinned spec."
+            detail="GET requires a declared GET operation. HEAD requires one of the three HEAD companions present in the pinned public SysAdmin specification. OPTIONS is restricted to paths present in the pinned spec."
             tone="info"
           />
 
@@ -979,8 +1011,8 @@ export default async function ProofCoveragePage({
             <span>arbitrary mutation proxies</span>
           </div>
           <div>
-            <strong>32</strong>
-            <span>required bounded mutation actions mapped to R3-R7</span>
+            <strong>{certifiedSemanticActionCount}</strong>
+            <span>{`certified semantic actions across ${certifiedMutationEndpointCount} mutation endpoints`}</span>
           </div>
         </div>
       </section>

@@ -120,23 +120,39 @@ describe(
           const marker of [
             "TASK MANAGEMENT",
             "READ ONLY",
-            "EXPLICIT TASK ESCALATION",
-            "Permissions remains the centerpiece",
+            "BOUNDED SERVER AUTHORITY",
+            "T01-T06 are certified fixed-purpose server actions",
+            "T01-T06 cover the task-management lifecycle",
+            "T01",
+            "CREATE",
+            "T02",
+            "UPDATE",
+            "T03",
+            "RUN NOW",
+            "T04",
+            "SUSPEND",
+            "T05",
+            "RESUME",
+            "T06",
+            "DELETE",
+            "Certification witness history",
+            "retained Meridian witness rows",
             "MeridianTaskMetadataReader",
-            "%Admin_Task:U only. No %Admin_Operate grant.",
+            "%Admin_Task:U only for the metadata surface",
             "Task Manager",
+            "Current Task Manager inventory;",
             "Task inventory",
             "configured tasks",
             "Next scheduled",
             "Last finished",
             "Upcoming schedule",
             "upcoming executions",
-            "Execution history",
+            "Raw execution history",
             "recent history rows",
-            "Task mutation controls",
+            "Browser task mutation controls",
             "%Admin_Operate",
             "NOT GRANTED",
-            "Public task proxy",
+            "Generic task mutation proxy",
             "Browser credential",
             "NOT EXPOSED",
             "Default runtime role",
@@ -182,6 +198,14 @@ describe(
         ).not.toContain(
           "<button",
         );
+
+        expect(
+          page.match(
+            /style=\{\{ minWidth: 0, tableLayout: "fixed" \}\}/g,
+          )?.length,
+        ).toBe(
+          4,
+        );
       },
     );
 
@@ -195,9 +219,9 @@ describe(
 
         for (
           const marker of [
-            "Security changes are not finished when configuration changes.",
+            "Every privileged operation, under proof.",
             "Open Change Queue",
-            "Inspect verified receipt",
+            "Exact durable readback",
             'href="/web-rest"',
             "Explore Web Apps / REST",
             'href="/security-secrets"',

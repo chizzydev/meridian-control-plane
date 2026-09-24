@@ -1,123 +1,99 @@
 # Meridian
 
-**Security change, under proof.**
+**Every privileged operation, under proof.**
 
-Meridian is an evidence-bound control plane for InterSystems IRIS. It treats a security change as complete only when **configured state, live runtime authority, native IRIS audit evidence, and durable receipt history agree**.
+Meridian is an evidence-bound management control plane for InterSystems IRIS. Selected administrative actions become typed proof contracts: **preflighted, freshly revalidated, executed through bounded server authority, reconciled when dispatch is ambiguous, verified on action-specific evidence planes, and sealed into durable hash-bound Action Receipt V2 records**.
 
-> **Configuration is not closure.**
+> **APPLIED is not closure. VERIFIED requires the evidence chain.**
 
 <p align="center">
-  <img src="./docs/assets/control-room.png" alt="Meridian Control Room showing the verified Maya Patel supervisor-removal case" width="100%" />
+  <img src="./docs/assets/control-room.png" alt="Meridian Control Room" width="100%" />
 </p>
-
-## Judge fast path
-
-**[Watch the 4:24 product demo](https://youtu.be/AtTjQKhURbg)** · **[See the 30-second thing to notice](#the-30-second-thing-to-notice)** · **[Inspect the Maya centerpiece](#centerpiece--maya-patel-supervisor-removal)** · **[View the architecture](#architecture)** · **[Run Meridian locally](#local-reproduction)** · **[Read the authority model](#authority-boundaries)**
-
-> **Viewing note:** For the clearest UI text and evidence tables, watch the product demo in **1080p HD**.
 
 Built for the **InterSystems Programming Contest — Build Your Own Management Portal**.
 
-### The 30-second thing to notice
+## Judge fast path
 
-A successful security write is not the same thing as proven closure.
+**[See the 30-second judge view](#30-second-judge-view)** · **[Inspect the 273-operation coverage atlas](#coverage-atlas)** · **[Read Proof Contract V2](#proof-contract-v2)** · **[See the certified action breadth](#certified-mutation-breadth)** · **[Inspect the case studies](#case-studies)** · **[Run Meridian locally](#reproducibility)** · **[Read the authority boundary](#authority-boundaries)**
 
-Meridian keeps four evidence planes separate:
+The final post-R8 demo video is intentionally frozen separately from this README. The previous pre-Remontada recording is **not** presented as the final product demo.
 
-1. **CONFIGURATION** — what IRIS security configuration now says;
-2. **LIVE ACCESS** — what active runtime authority actually shows;
-3. **NATIVE AUDIT** — the exact IRIS `UserChange` event bound to the change; and
-4. **PERSISTENT HISTORY** — the durable receipt read back from IRIS.
-
-The centerpiece case is not marked **VERIFIED** merely because the role change was applied.
-
-It closes only when those evidence planes agree.
-
-> **Configured state is evidence. Live state is evidence. Audit is evidence. Persistence is evidence. Closure requires the chain.**
+**[Watch the 3:08 final product demo](https://youtu.be/w6Jxmg8Zkpw)**
 
 ---
 
-## The problem
+## 30-second judge view
 
-Administrative security tools often make one moment visually dominant: **the write succeeded**.
+A successful management API response is not the same thing as verified operational closure.
 
-That is useful, but it is not the whole operational question.
+Meridian makes five things immediately visible:
 
-For a sensitive authorization change, an operator may also need to know:
+1. **No silent API gaps.** The pinned public InterSystems Community SysAdmin API specification is compiled into an explicit **273-operation support atlas**.
+2. **Bounded mutation, not a generic proxy.** Fourteen certified mutation endpoints represent **nineteen fixed-purpose semantic actions** across permissions, tasks, processes, and web applications.
+3. **Freshness before dispatch.** Reviewed intent is revalidated immediately before execution so stale state cannot silently inherit approval.
+4. **Ambiguity is modeled, not retried away.** `UNKNOWN_AFTER_DISPATCH` is a first-class state with reconciliation instead of blind automatic retry.
+5. **APPLIED is not VERIFIED.** Required evidence must complete and the durable receipt must persist before the action reaches `VERIFIED`.
 
-- what authority the change is expected to remove;
-- what protected applications or REST operations depend on that authority;
-- whether the intended configuration was actually applied;
-- whether live process authority has converged to the intended state;
-- which native audit event proves the change happened;
-- whether the evidence can still be read back durably later; and
-- which parts of the system were allowed to read or mutate each piece of evidence.
+| Final certified surface | Count |
+| --- | ---: |
+| Primary SysAdmin operations in the pinned atlas | **273** |
+| Source operations including HEAD companions | **276** |
+| `CERTIFIED_ACTION` endpoints | **14** |
+| Fixed-purpose certified semantic actions | **19** |
+| `VERIFIED_READ` operations | **20** |
+| `EXPLORABLE_READ` operations | **95** |
+| `DECLINED_DESTRUCTIVE` operations | **36** |
+| `OUT_OF_PRODUCT_SCOPE` operations | **108** |
 
-Meridian turns those questions into one explicit **Change Case lifecycle**.
-
-The product does not assume that every IRIS role change produces stale live authority, and it does not claim that IRIS security is broken. Its claim is narrower:
-
-> **A security change should not be called complete until the evidence required by the Change Case is complete.**
-
----
-
-## Why Meridian is different
-
-Meridian is not a replacement skin for the full IRIS Management Portal.
-
-It is also not a generic dashboard that puts every management operation behind one privileged browser session.
-
-The product is intentionally opinionated around a smaller primitive:
-
-```text
-PRE-FLIGHT
-    ↓
-APPLY
-    ↓
-CONVERGE
-    ↓
-VERIFY
-    ↓
-DURABLE RECEIPT
-    ↓
-VERIFIED
-```
-
-The important separation is between **intent**, **configuration**, **runtime truth**, and **evidence**.
-
-That creates a different operating model:
-
-- preview impact before mutation;
-- revalidate immediately before applying the change;
-- keep configured state and live access as separate evidence planes;
-- refuse premature verification;
-- bind a native IRIS audit event;
-- persist a stable receipt identity;
-- read that receipt back through a server-only authenticated boundary; and
-- keep operational inspection surfaces read-only unless a narrowly scoped action genuinely needs more authority.
+**Why 14 endpoints but 19 actions?** Some official API operations carry more than one bounded semantic contract. For example, `PUT /v2/security/user` backs four separately certified user actions, and `PUT /v2/web-app` backs three separately certified web-application actions. Meridian certifies the semantic action, not a generic mutation transport.
 
 ---
 
-## Built and verified
+## Problem: API success is not proof
+
+Administrative tooling often makes one moment visually dominant:
+
+> **The write returned success.**
+
+That matters, but it does not answer the harder operational questions:
+
+- Was the intended target still the reviewed target at dispatch time?
+- Did the reviewed pre-state remain unchanged?
+- If transport failed after dispatch, did the mutation happen or not?
+- What authoritative state proves the result?
+- Which evidence planes are required for this particular action?
+- Is the action reversible, compensatable, irreversible, or manual-recovery only?
+- Can a durable receipt prove later what was reviewed, executed, observed, and closed?
+- Did the browser receive only the authority it actually needed?
+
+Meridian treats those questions as part of the action contract instead of post-hoc explanation.
+
+> **A privileged change is not complete when an API call succeeds. It is complete when its contract closes under the required evidence and a durable receipt is persisted.**
+
+---
+
+## What shipped
 
 Meridian is a working local prototype against a pinned InterSystems IRIS Community runtime, not a static mockup.
 
-The current build includes:
+The final build includes:
 
-- a **Next.js operator interface** with a control room, Change Queue, verified-case inspector, and five additional management surfaces;
-- **official InterSystems SysAdmin REST** integration for supported management data;
-- tracked IRIS REST classes for Meridian-specific application, helper, and durable-history boundaries;
-- a least-privilege runtime identity: `meridian.runtime`;
-- dedicated escalation-only metadata roles instead of one broad browser authority;
-- a bounded role-mutation path with preflight and immediate revalidation;
-- live authorization convergence evidence;
-- exact native `UserChange` audit binding;
-- persistent IRIS receipt history;
-- a safe, repeatable demo fixture lifecycle;
-- a masked runtime-password startup path; and
-- automated tests, typechecking, linting, and production build gates.
+- a **Next.js operator interface** with Control Room, Change Cases, Proof Console, Proof Coverage, System, Tasks, Logs, Security, and Web + REST surfaces;
+- a generated **273-operation SysAdmin support atlas** derived from the pinned public `intersystems-community/sysadmin-api-specification` source at commit `f764aea427e5c0b1dd08a4c18a0457e0ff7b3b34`;
+- **Proof Contract V2**, a typed lifecycle for heterogeneous privileged actions;
+- **Action Receipt V2**, a canonical hash-bound durable receipt model;
+- **19 certified semantic actions** across permissions, tasks, processes, and web applications;
+- fixed-purpose server-side action transports rather than one generic privileged mutation proxy;
+- fresh target/state revalidation immediately before dispatch;
+- explicit risk and reversibility metadata;
+- `UNKNOWN_AFTER_DISPATCH` reconciliation instead of blind retry;
+- action-specific evidence planes for configuration, runtime, HTTP, permission, task, process, audit, log, and receipt truth;
+- durable IRIS-backed action history;
+- a least-privilege standing runtime identity with bounded server-held authority boundaries;
+- pinned local reproduction around Docker, PowerShell, Node.js, Python, and IRIS; and
+- automated tests, typechecking, linting, and production-build gates.
 
-The normal quality gate is:
+The normal quality wall is:
 
 ```powershell
 npm test
@@ -126,236 +102,320 @@ npm run lint
 npm run build
 ```
 
-The published demo build was also exercised through live browser-route and persistent-history checks before submission packaging.
+The final judge-surface certification passed **99 test files / 534 tests**, TypeScript checking, lint with **0 errors / 20 warnings**, and the production build.
 
 ---
 
-## What Meridian does
+## Proof Contract V2
 
-For a bounded security role change, Meridian can:
+The central product primitive is not a button or an endpoint. It is a typed action contract.
 
-1. identify the target user and direct/effective role state;
-2. compute the expected authorization delta;
-3. map that delta to declared application and REST impact;
-4. present a reviewable preflight before mutation;
-5. revalidate the target state immediately before applying;
-6. execute the approved role mutation through the IRIS management boundary;
-7. verify the resulting configuration;
-8. inspect live process authority separately from configuration;
-9. wait for the Change Case to converge instead of declaring premature success;
-10. bind the exact native IRIS audit event;
-11. freeze a stable receipt identity;
-12. persist and read back receipt history from IRIS; and
-13. expose runtime, task, log, security, web-application, and REST evidence under narrow authority.
-
----
-
-## Centerpiece — Maya Patel supervisor removal
-
-The certified centerpiece removes `MeridianSupervisor` from `maya.patel`.
+The generic lifecycle distinguishes review, execution, reconciliation, evidence, receipt persistence, and closure:
 
 ```text
-REMOVE MeridianSupervisor FROM maya.patel
-```
-
-Lifecycle:
-
-```text
-PROPOSED
+CREATED
+  ↓
+PREFLIGHTING
   ↓
 PREFLIGHTED
   ↓
-REVALIDATED
+APPROVED
+  ↓
+REVALIDATING ───────────────→ STALE / DENIED
+  ↓
+READY
+  ↓
+APPLYING ──────────────────→ APPLY_FAILED
+  │
+  ├────────────────────────→ UNKNOWN_AFTER_DISPATCH
+  │                              ↓
+  │                         RECONCILING
+  │                              ├────────→ APPLIED
+  │                              ├────────→ APPLY_FAILED
+  │                              └────────→ UNKNOWN_AFTER_DISPATCH
   ↓
 APPLIED
   ↓
-CONFIG VERIFIED
+VERIFYING ─────────────────→ VERIFY_FAILED / UNKNOWN_AFTER_DISPATCH
   ↓
-RUNTIME CHECKED
+EVIDENCE_COMPLETE
   ↓
-CONVERGED
-  ↓
-NATIVE AUDIT BOUND
-  ↓
-RECEIPT PERSISTED
-  ↓
-RECEIPT READBACK VERIFIED
+RECEIPT_PERSISTING ────────→ RECEIPT_WRITE_FAILED
   ↓
 VERIFIED
 ```
 
-At closure, Meridian presents four independent evidence planes:
+### Fresh revalidation
+
+Approval belongs to a reviewed preflight, not to an arbitrary future state.
+
+Before execution, the contract computes a fresh preflight digest. If the target or relevant pre-state changed, the action becomes `STALE` or `DENIED` before mutation.
+
+### Dispatch ambiguity is explicit
+
+Once a request may have crossed the dispatch boundary, retry can be more dangerous than failure.
+
+Meridian therefore models `UNKNOWN_AFTER_DISPATCH` explicitly. The contract may reconcile authoritative state and classify the result as applied, not applied, or still unknown. It does not silently resend a consequential mutation.
+
+### Risk and reversibility are contract data
+
+Each Proof Contract declares:
+
+- management domain;
+- risk class: `LOW`, `MEDIUM`, or `HIGH`;
+- reversibility: `REVERSIBLE`, `COMPENSATABLE`, `IRREVERSIBLE`, or `MANUAL_RECOVERY`;
+- exact target identity;
+- required authority;
+- expected delta;
+- safety predicates;
+- evidence requirements; and
+- recovery metadata.
+
+That matters for actions such as process termination, where pretending that recreation is a rollback would be operationally false.
+
+### Evidence is action-specific
+
+The proof engine has explicit evidence planes including:
+
+- `CONFIGURATION_READBACK`
+- `LIVE_RUNTIME`
+- `HTTP_BEHAVIOR`
+- `PERMISSION_EFFECT`
+- `TASK_STATE`
+- `TASK_HISTORY`
+- `PROCESS_STATE`
+- `SECURITY_METADATA`
+- `SECRET_INVENTORY`
+- `X509_METADATA`
+- `TLS_TEST`
+- `NATIVE_AUDIT`
+- `JOURNAL`
+- `OPERATIONAL_LOG`
+- `PERSISTENT_RECEIPT`
+
+A contract selects which planes are required. Agreement from a correlated source does not magically become authoritative evidence.
+
+Each proof result also carries an explicit provenance class:
+
+- `AUTHORITATIVE_IRIS`
+- `AUTHORITATIVE_EXTERNAL_PROBE`
+- `MERIDIAN_DERIVED`
+- `CORRELATED`
+- `NOT_APPLICABLE`
+
+Required evidence closes only when its matching result is `PASS`. `CORRELATED` evidence can support the narrative, but it is never silently promoted to authoritative proof; `NOT_APPLICABLE` is explicit rather than treated as missing success.
+
+### Action Receipt V2
+
+A verified receipt binds the evidence needed to reconstruct the action later:
+
+- action and contract identity;
+- exact target identity;
+- actor and IRIS runtime identity;
+- required authority;
+- intent digest;
+- reviewed preflight digest;
+- fresh revalidation digest;
+- execution digest;
+- evidence digest;
+- proof results;
+- lifecycle timestamps;
+- reversibility/recovery metadata;
+- terminal evidence-complete event hash; and
+- canonical `receiptSha256`.
 
 <p align="center">
-  <img src="./docs/assets/state-truth.png" alt="Meridian State Truth table showing configuration, live access, native audit, and persistent history" width="100%" />
+  <img src="./docs/assets/proof-receipt.png" alt="Meridian Proof Console showing a durable Action Receipt V2" width="100%" />
 </p>
 
-### State truth
+---
 
-| Evidence plane | Expected | Observed | Closure state |
-| --- | --- | --- | --- |
-| **Configuration** | `MeridianSupervisor` absent | `MeridianEmployee` remains | Applied and verified |
-| **Live access** | No target process retaining removed authority | Target process absent; residual access none | Converged |
-| **Native Audit** | One exact native change event | `UserChange #481` | Bound |
-| **Persistent history** | Canonical receipt identity | Matching persisted receipt | Exact match |
+## Coverage atlas
 
-The UI states the invariant directly:
+The `/proof-coverage` route makes the pinned SysAdmin surface judgeable instead of hiding unsupported operations.
 
-> **Configuration is not closure by itself.**
+<p align="center">
+  <img src="./docs/assets/proof-coverage.png" alt="Meridian Proof Coverage atlas showing explicit support classifications across the pinned SysAdmin API" width="100%" />
+</p>
 
-### Permission delta
+The atlas is generated from the pinned public `intersystems-community/sysadmin-api-specification` source at commit `f764aea427e5c0b1dd08a4c18a0457e0ff7b3b34`, not hand-counted.
 
-The recorded permission delta makes removed and retained authority explicit.
+The generated mutation registry contains **32 action IDs**, but that is registry scope—not certified breadth. The final certification set is **19 semantic actions**; the other **13 Security/Secrets action IDs** remain `OUT_OF_PRODUCT_SCOPE` and are not presented as certified product capabilities.
 
-**Lost**
+Every primary operation receives an explicit support classification:
 
-- `%Admin_Task : USE`
-- `Meridian_Admin : USE`
-- `Meridian_Jobs : USE`
-- `Meridian_Orders : WRITE`
+| Classification | Meaning | Count |
+| --- | --- | ---: |
+| `CERTIFIED_ACTION` | At least one fixed-purpose semantic action using this transport is live-certified | **14** |
+| `VERIFIED_READ` | Read behavior is directly verified for the product | **20** |
+| `EXPLORABLE_READ` | Present in the bounded safe-read explorer contract | **95** |
+| `DECLINED_DESTRUCTIVE` | Deliberately refused rather than casually exposed | **36** |
+| `OUT_OF_PRODUCT_SCOPE` | Visible in the atlas but not claimed as a product capability | **108** |
 
-**Retained**
+The distinction is intentional:
 
-- `Meridian_Orders : READ`
-- `Meridian_Portal : USE`
+> **Coverage means every operation has an explicit product decision. It does not mean every operation is executable.**
 
-This matters because a role name is only a shorthand. The operator needs to see the authority consequences that role change actually implies.
+The browser does not receive a generic mutation dispatcher.
 
-### Native audit closure
+---
 
-The certified receipt binds one exact IRIS audit event:
+## Certified mutation breadth
+
+The final certification set contains **19 semantic actions on 14 official mutation endpoints**.
+
+### Permissions — 6 actions
+
+- `P01_ROLE_CREATE`
+- `P02_ROLE_DELETE`
+- `P03_USER_ADD_ROLE`
+- `P04_USER_REMOVE_ROLE`
+- `P05_USER_ENABLE`
+- `P06_USER_DISABLE`
+
+### Tasks — 6 actions
+
+- `T01_TASK_CREATE`
+- `T02_TASK_UPDATE`
+- `T03_TASK_RUN_NOW`
+- `T04_TASK_SUSPEND`
+- `T05_TASK_RESUME`
+- `T06_TASK_DELETE`
+
+### System / processes — 3 actions
+
+- `O01_PROCESS_SUSPEND`
+- `O02_PROCESS_RESUME`
+- `O03_PROCESS_TERMINATE`
+
+### Web applications — 4 actions
+
+- `W01_WEB_APP_CREATE`
+- `W02_WEB_APP_UPDATE`
+- `W03_WEB_APP_ENABLE`
+- `W04_WEB_APP_DELETE`
+
+### Exact endpoint-to-action map
+
+| Official SysAdmin mutation endpoint | Certified semantic action(s) |
+| --- | --- |
+| `POST /v2/process/suspend` | `O01_PROCESS_SUSPEND` |
+| `POST /v2/process/resume` | `O02_PROCESS_RESUME` |
+| `POST /v2/process/terminate` | `O03_PROCESS_TERMINATE` |
+| `PUT /v2/security/role` | `P01_ROLE_CREATE` |
+| `DELETE /v2/security/role` | `P02_ROLE_DELETE` |
+| `PUT /v2/security/user` | `P03_USER_ADD_ROLE`, `P04_USER_REMOVE_ROLE`, `P05_USER_ENABLE`, `P06_USER_DISABLE` |
+| `POST /v2/task` | `T01_TASK_CREATE` |
+| `PUT /v2/task` | `T02_TASK_UPDATE` |
+| `POST /v2/task/run` | `T03_TASK_RUN_NOW` |
+| `POST /v2/task/suspend` | `T04_TASK_SUSPEND` |
+| `POST /v2/task/resume` | `T05_TASK_RESUME` |
+| `DELETE /v2/task` | `T06_TASK_DELETE` |
+| `PUT /v2/web-app` | `W01_WEB_APP_CREATE`, `W02_WEB_APP_UPDATE`, `W03_WEB_APP_ENABLE` |
+| `DELETE /v2/web-app` | `W04_WEB_APP_DELETE` |
+
+Each action remains fixed-purpose and contract-bound even when multiple actions share an official SysAdmin endpoint.
+
+Meridian does **not** claim certified mutation breadth for Logs or Security/Secrets. Those families remain evidence/read surfaces in the submitted product.
+
+---
+
+## Case studies
+
+The generic proof engine matters because very different administrative actions should not be forced into the same verification story.
+
+### 1. Process identity safety — suspend, resume, terminate
+
+The O01/O02/O03 trilogy demonstrates the high-risk end of the model.
+
+A process action is not authorized by PID alone. The certified target identity binds the reviewed process generation and other identity evidence so PID reuse cannot silently redirect authority.
+
+The trilogy proved three different semantics:
+
+- **Suspend** — reversible bounded process state transition;
+- **Resume** — bounded restoration of the same reviewed process identity;
+- **Terminate** — `HIGH` risk and `IRREVERSIBLE`.
+
+For terminate, an HTTP 200 was not treated as proof of closure. Meridian required authoritative absence of the exact reviewed identity. Once dispatch occurred, automatic retry was forbidden. The final durable receipt truthfully records irreversible recovery metadata rather than pretending witness recreation is rollback.
+
+That is the design principle in its strongest form:
+
+> **The more consequential the action, the less Meridian relies on optimistic transport success.**
+
+<p align="center">
+  <img src="./docs/assets/system-process-actions.png" alt="Meridian System surface showing O01 suspend, O02 resume, and O03 terminate proof contracts" width="100%" />
+</p>
+
+### 2. Task-management lifecycle — create through delete
+
+The T01-T06 family demonstrates that scheduled-work administration is not treated as one generic scheduler payload:
+
+- `T01_TASK_CREATE`
+- `T02_TASK_UPDATE`
+- `T03_TASK_RUN_NOW`
+- `T04_TASK_SUSPEND`
+- `T05_TASK_RESUME`
+- `T06_TASK_DELETE`
+
+The `/tasks` route keeps the browser read-only while surfacing live inventory, upcoming schedule, raw Task Manager history, and retained certification-witness rows. Certified execution stays behind fixed-purpose server contracts.
+
+<p align="center">
+  <img src="./docs/assets/task-actions.png" alt="Meridian Tasks surface showing T01 through T06 certified task actions and retained Task Manager evidence" width="100%" />
+</p>
+
+### 3. Maya Patel supervisor removal
+
+The original Maya case remains a useful permissions example, but it is now one concrete case inside the broader proof engine.
+
+The recorded operation removes:
 
 ```text
-Audit index: 481
-Event:       %System / %Security / UserChange
-Actor:       meridian.runtime
-Old roles:   MeridianEmployee, MeridianSupervisor
-New roles:   MeridianEmployee
-Apply→audit: 0.008s
+MeridianSupervisor FROM maya.patel
 ```
 
-The dashboard is therefore not asking the operator to trust its own success message. It shows the native evidence used to close the audit side of the receipt.
+The case keeps several truths separate:
 
-### Durable receipt history
-
-The same receipt is read back through the server-owned history boundary:
-
-<p align="center">
-  <img src="./docs/assets/durable-evidence.png" alt="Meridian Persistent IRIS history and recorded evidence source" width="100%" />
-</p>
-
-The verified surface exposes:
-
-- `Persistent IRIS history live`;
-- source `PERSISTENT_IRIS`;
-- the durable receipt SHA-256;
-- `Exact canonical receipt match: PASS`; and
-- the explicit browser boundary: **Rendered evidence only**.
-
-The public browser never receives the privileged IRIS runtime credential used for that server-side read.
-
----
-
-## The Meridian invariant
-
-The product can be summarized as four questions:
-
-```text
-Did configuration change?
-        +
-Did live authority converge?
-        +
-Can native IRIS audit prove the change?
-        +
-Can the same receipt be read back durably?
-        =
-VERIFIED
-```
-
-A partial answer is still useful evidence.
-
-It is not automatically closure.
-
----
-
-## Evidence model
-
-Meridian keeps different kinds of evidence separate because they answer different questions.
-
-### 1. Reviewed intent
-
-What is the operator trying to change, and what impact is expected before any mutation occurs?
-
-### 2. Configured state
-
-What does authoritative IRIS configuration say after the mutation?
-
-### 3. Live access
-
-Does observed runtime authority agree with the intended post-change state?
-
-### 4. Native audit
-
-Which exact IRIS event proves the underlying change occurred, who performed it, and when?
-
-### 5. Durable history
-
-Can the canonical receipt still be read from persistent IRIS history through the server-owned boundary?
-
-### 6. Declared impact
-
-Which protected application and REST operations are declared to depend on the changed authority?
-
-Declared impact remains distinct from measured permission delta. Meridian does not claim arbitrary application-code authorization inference.
-
----
-
-## Architecture
-
-Meridian deliberately separates the browser, server-side orchestration, management APIs, narrow escalation boundaries, and persistent evidence.
-
-<p align="center">
-  <img src="./docs/assets/meridian-architecture.png" alt="Meridian architecture: evidence-bound change control for InterSystems IRIS" width="100%" />
-</p>
-
-### Why IRIS is indispensable
-
-IRIS is not just a database behind the demo.
-
-It is the authority from which Meridian derives the evidence that closes the Change Case:
-
-- security configuration;
-- live process/runtime state;
-- protected application metadata;
-- task metadata;
-- operational log metadata;
-- native `UserChange` audit evidence;
-- application and REST deployment truth; and
+- reviewed intent;
+- direct/effective role state;
+- expected permission delta;
+- authoritative configuration readback;
+- live process authority;
+- native `UserChange` audit evidence; and
 - durable receipt history.
 
-Remove IRIS and Meridian can no longer establish the evidence chain its core invariant requires.
+<p align="center">
+  <img src="./docs/assets/state-truth.png" alt="Meridian State Truth evidence for the certified Maya Patel permissions case" width="100%" />
+</p>
+
+The verified case route is:
+
+```text
+/change-cases/verified/maya-patel-supervisor-removal
+```
+
+It is a recorded certified receipt plus a live server-side persistent-history check. Visiting the page does **not** re-execute the role mutation.
 
 ---
 
 ## Authority boundaries
 
-Meridian does not treat one authenticated session as unlimited administrative authority.
+Meridian does not equate “server authenticated” with “server may do anything.”
 
-### Default runtime
+### Standing runtime
 
-The server authenticates as:
+The application authenticates to IRIS as:
 
 ```text
 meridian.runtime
 ```
 
-Its standing role is:
+with standing role:
 
 ```text
 MeridianControlPlaneRuntime
 ```
 
-The default runtime remains without broad administrative grants such as:
+The standing runtime remains without broad grants such as:
 
 - `%Admin_Manage`;
 - `%Admin_Task`;
@@ -363,165 +423,179 @@ The default runtime remains without broad administrative grants such as:
 - `%Admin_Journal`; and
 - `%DB_USER WRITE`.
 
-### Explicit metadata readers
+### Bounded server authority
 
-Additional read capabilities are isolated into dedicated escalation-only roles:
+Read capabilities and action execution are isolated behind dedicated bounded server-held roles and fixed-purpose contracts rather than added permanently to the standing runtime.
+
+Examples include:
 
 - `MeridianSecurityMetadataReader`
 - `MeridianTaskMetadataReader`
 - `MeridianSystemMetadataReader`
+- fixed-purpose action executor roles
+- `MeridianReceiptHistoryWriter`
+- `MeridianControlPlaneHelperExecution`
 
-The product uses those boundaries to read the required metadata without permanently broadening the standing runtime identity.
+The exact authority expression required by each official operation is preserved in the generated coverage manifest.
 
-### Helper execution
+### Browser boundary
 
-The private helper route is protected by:
-
-```text
-MeridianControlPlaneHelperExecution
-```
-
-It is a server-owned boundary, not a generic browser mutation proxy.
-
-### Receipt history
-
-Durable history writing is isolated behind:
-
-```text
-MeridianReceiptHistoryWriter
-```
-
-and the history application's `MatchRoles` boundary rather than adding database-write authority to the default runtime role.
-
-### Browser authority
-
-The browser receives rendered evidence and fixed-purpose controls.
+The browser receives rendered evidence and supported intent selectors.
 
 It does **not** receive:
 
 - the privileged runtime password;
 - bearer credentials used by server-owned sessions;
-- a generic management proxy;
-- arbitrary IRIS security mutation; or
-- unrestricted task/runtime mutation controls.
+- arbitrary role or task payload authority;
+- an unrestricted process control surface;
+- a generic SysAdmin mutation proxy; or
+- secret/private-key material from the Security surface.
+
+The action contracts live on the server side. The browser does not get to invent a different target, authority expression, transport, or proof standard.
 
 ---
 
 ## IRIS management surfaces
 
-Meridian covers the contest's management families without collapsing them into one over-privileged interface.
+Meridian covers the pinned SysAdmin management families without flattening them into one over-privileged dashboard.
 
-| Surface | Judge-facing purpose | Authority model |
+| Family | Judge-facing surface | Certified product boundary |
 | --- | --- | --- |
-| **Change Control** | Preflight, apply, convergence, native audit, durable receipt | Bounded mutation + evidence closure |
-| **System** | Resource, shared-memory, lock, and process evidence | Read-only server authority; narrow system metadata escalation |
-| **Tasks** | Inventory, schedule, state, execution history | `MeridianTaskMetadataReader`; no broad `%Admin_Operate` |
-| **Logs** | Operational records by source, severity, and time | Narrow SELECT-only authority |
-| **Security** | Approved security metadata without secret material | `MeridianSecurityMetadataReader`; metadata only |
-| **Web + REST** | Application identity, deployed endpoints, protection metadata | Read-only joined evidence planes |
+| **Permissions** | Change Cases, impact, configuration, live access, audit, receipts | 6 fixed-purpose certified actions |
+| **Web + REST** | Application inventory, deployed REST truth, protection metadata, receipt/current-state join | 4 fixed-purpose certified web-app actions |
+| **Security / Secrets** | Approved metadata, secret boundary, certificate/TLS evidence where applicable | Evidence/read surface; no certified mutation breadth claimed |
+| **Tasks** | Inventory, schedule, state, execution history | 6 fixed-purpose certified task actions |
+| **System / OS** | Resource, memory, locks, process evidence | 3 fixed-purpose certified process actions |
+| **Logs** | Operational records by source, severity, and time | Evidence/read surface; no certified mutation breadth claimed |
 
 ### Browser routes
 
 | Route | Purpose |
 | --- | --- |
-| `/` | Control Room and centerpiece entry point |
-| `/change-cases` | Change Queue and recorded receipt |
-| `/change-cases/new` | Reviewed preflight proposal |
-| `/change-cases/verified/maya-patel-supervisor-removal` | Certified Maya Patel case inspector |
-| `/system` | Runtime / OS / system evidence |
-| `/tasks` | Task-management evidence |
+| `/` | Control Room |
+| `/change-cases` | Change Queue and recorded evidence |
+| `/change-cases/new` | Read-only Action Preflight / Proof Contract inspector |
+| `/change-cases/verified/maya-patel-supervisor-removal` | Certified permissions case |
+| `/proof` | Durable Action Receipt V2 inspector and proof lifecycle |
+| `/proof-coverage` | 273-operation support atlas and bounded read explorer |
+| `/system` | Runtime / OS / process evidence |
+| `/tasks` | Task evidence |
 | `/logs` | Operational-log evidence |
 | `/security-secrets` | Security metadata and secret boundary |
-| `/web-rest` | Web-application and REST evidence |
+| `/web-rest` | Web application + REST evidence |
+
+A route being evidence-first does not imply the server exposes a generic action console. Certified mutations remain fixed-purpose contracts.
+
+---
+
+## Architecture
+
+Meridian separates browser intent, server orchestration, bounded authority, authoritative IRIS state, and durable evidence.
+
+<p align="center">
+  <img src="./docs/assets/meridian-architecture.png" alt="Meridian architecture: Proof Contract V2, bounded IRIS action transports, evidence planes, and durable receipts" width="100%" />
+</p>
+
+Conceptually:
+
+```text
+Browser
+  │
+  │ reviewed intent / rendered evidence
+  ▼
+Next.js server BFF
+  │
+  ▼
+Proof Contract V2 runner
+  ├─ preflight + impact
+  ├─ safety predicates
+  ├─ fresh revalidation
+  ├─ fixed-purpose action transport
+  ├─ unknown-dispatch reconciliation
+  ├─ action-specific verification
+  └─ Action Receipt V2
+        │
+        ├──────────────► durable IRIS history
+        │
+        ▼
+Bounded IRIS authority
+  ├─ official SysAdmin REST
+  ├─ narrow private helper where required
+  ├─ native/runtime evidence
+  └─ authoritative readback
+```
+
+### Why IRIS is indispensable
+
+IRIS is not merely a persistence layer behind the UI.
+
+It supplies the authoritative management and evidence surfaces used to close contracts:
+
+- security configuration;
+- task state/history;
+- process/runtime state;
+- web-application configuration;
+- deployed REST evidence;
+- operational metadata;
+- native audit evidence;
+- permission effects; and
+- durable receipt history.
+
+Remove IRIS and Meridian loses the authority needed to prove the state transitions it claims.
 
 ---
 
 ## Web + REST proof model
 
-One of Meridian's most important evidence separations appears on the Web + REST surface.
+Meridian deliberately keeps different kinds of Web + REST truth separate.
 
 <p align="center">
-  <img src="./docs/assets/web-rest.png" alt="Meridian Web and REST evidence plane showing SysAdmin REST, native emitted Swagger, and Authoritative OpenAPI" width="100%" />
+  <img src="./docs/assets/web-rest.png" alt="Meridian Web and REST evidence joining live SysAdmin inventory, deployed Swagger truth, and declared protection metadata" width="100%" />
 </p>
 
-The surface joins three evidence sources:
-
-| Evidence plane | Source | What Meridian is allowed to claim |
+| Evidence plane | Source | Claim |
 | --- | --- | --- |
 | Web application inventory | Official SysAdmin REST | Live application identity and configuration |
-| Deployed REST truth | Native emitted Swagger | **PROVEN DEPLOYMENT** |
-| Protection metadata | Authoritative OpenAPI | **PROVEN DECLARED METADATA** |
+| Deployed REST truth | Native emitted Swagger | Proven deployment |
+| Protection metadata | Authoritative OpenAPI | Proven declared metadata |
+| Verified action history | Durable hash-bound receipts | Historical certified mutation evidence |
+| Current-state recheck | Official SysAdmin + live HTTP | Fresh current state |
 
-That distinction is intentional.
-
-A deployed route does not automatically prove its authorization policy, and declared authorization metadata does not by itself prove a route is deployed.
-
-Meridian keeps both truths visible instead of flattening them into one optimistic status.
+Historical proof is not rewritten to match current state. A durable receipt remains historical evidence; current state is re-read separately.
 
 ---
 
 ## Reliability model
 
-Meridian is built around explicit invariants rather than optimistic UI state.
+Meridian prefers explicit failure states over optimistic UI state.
 
-- **Configuration success is not closure.**
-- **Expected, configured, and live state remain distinct.**
-- **The target is revalidated immediately before mutation.**
-- **Live convergence is checked separately after configuration changes.**
-- **The receipt binds an exact native audit event.**
-- **Persistent history must match the canonical receipt identity.**
-- **The public browser never receives privileged IRIS credentials.**
-- **Read-only management surfaces do not expose hidden mutation controls.**
-- **Dedicated escalation roles remain narrower than broad standing authority.**
-- **No arbitrary process termination is part of the supported product workflow.**
-- **The demo fixture lifecycle is bounded rather than a general security reset.**
-- **Empty operational logs remain visibly empty rather than being populated with synthetic records for appearance.**
-- **Deployment truth and declared protection metadata remain separate claims.**
+Key invariants include:
 
-A successful API response is useful.
-
-The application still has to prove the state transition Meridian says has completed.
-
----
-
-## Operational evidence instead of optimistic status
-
-Meridian's UI is designed around evidence an operator can inspect rather than a single green success banner.
-
-The verified case exposes:
-
-- the reviewed operation;
-- target identity;
-- direct/effective authorization impact;
-- configuration result;
-- live-access result;
-- native audit identity;
-- apply-to-audit timing;
-- permission delta;
-- affected protected assets;
-- affected REST operations;
-- receipt lifecycle;
-- receipt SHA-256;
-- durable-history source; and
-- browser/server authority boundary.
-
-That makes the result reconstructable after the mutation itself is over.
-
-> **Evidence should explain why the case is closed. The status badge should only summarize it.**
+- **APPLIED is not VERIFIED.**
+- **Reviewed state is revalidated before mutation.**
+- **PID alone is not sufficient process identity.**
+- **Transport ambiguity does not authorize blind retry.**
+- **Required proof results must close before durable verification.**
+- **Receipt persistence is part of closure, not an afterthought.**
+- **Historical receipt truth and current-state readback remain separate.**
+- **A successful API response is never promoted into stronger evidence than it actually provides.**
+- **Risk and reversibility remain explicit.**
+- **The browser never owns generic privileged IRIS authority.**
+- **Unsupported operations stay visibly unsupported.**
 
 ---
 
 ## Technology
 
-- **InterSystems IRIS Community 2026.2 Build 221U** — authoritative management, security, audit, runtime, and persistence substrate;
-- **InterSystems SysAdmin REST** — supported management surfaces;
-- **ObjectScript REST classes** — Meridian API, private helper, and durable-history boundary;
+- **InterSystems IRIS Community 2026.2 Build 221U** — authoritative management, runtime, audit, and persistence substrate;
+- **InterSystems SysAdmin REST** — primary official management surface;
+- **ObjectScript REST classes** — Meridian private helper and durable-history boundaries;
 - **`intersystems-irispython==5.4.0`** — pinned local DB-API dependency used by the certified reproduction path;
 - **Next.js 16.3.3** — operator application and server BFF;
 - **React 19.2.8**;
 - **TypeScript**;
 - **Vitest 4.1.11**;
-- **Docker** — pinned IRIS Community runtime;
+- **Docker** — pinned IRIS Community runtime; and
 - **Windows PowerShell 5.1** — certified local setup/reproduction wrapper.
 
 Dependency versions in `package.json`, `package-lock.json`, and `requirements-iris.txt` remain authoritative.
@@ -534,28 +608,33 @@ Dependency versions in `package.json`, `package-lock.json`, and `requirements-ir
 meridian-control-plane/
 ├─ src/
 │  ├─ app/
-│  │  ├─ change-cases/        Change Queue, preflight, verified case inspector
+│  │  ├─ change-cases/        Change Cases and recorded case evidence
+│  │  ├─ proof/               durable receipt inspector + Proof Contract V2
+│  │  ├─ proof-coverage/      generated SysAdmin support atlas
 │  │  ├─ system/              runtime / OS / process evidence
-│  │  ├─ tasks/               task-management evidence
+│  │  ├─ tasks/               task evidence
 │  │  ├─ logs/                operational-log evidence
-│  │  ├─ security-secrets/    metadata-only security surface
-│  │  └─ web-rest/            web app + REST deployment/protection proof
+│  │  ├─ security-secrets/    metadata-only security/secret boundary
+│  │  └─ web-rest/            web app + REST evidence
 │  └─ lib/
-│     ├─ change-case/         Change Case and receipt domain logic
-│     └─ iris/                IRIS adapters, sessions, transports, live reads
+│     ├─ actions/             fixed-purpose semantic action contracts
+│     ├─ proof/               generic proof engine + Action Receipt V2
+│     ├─ operations/          generated coverage manifest
+│     └─ iris/                IRIS transports, sessions, readers, writers
 ├─ iris/
 │  ├─ Meridian.API.spec.cls
 │  ├─ Meridian.API.impl.cls
 │  ├─ Meridian.ControlPlane.Internal.REST.cls
 │  └─ Meridian.ControlPlane.History.REST.cls
 ├─ scripts/
-│  ├─ bootstrap-iris.ps1      declarative fresh-instance bootstrap
-│  ├─ meridian-repro.ps1      setup/readiness/cycle/start wrapper
-│  ├─ iris-*-witness-*.py     bounded live-process evidence helpers
-│  └─ verify-iris-*.mts       focused IRIS verification surfaces
+│  ├─ bootstrap-iris.ps1
+│  ├─ meridian-repro.ps1
+│  ├─ generate-sysadmin-operation-manifest.mts
+│  ├─ iris-*-witness-*.py
+│  └─ verify-*.mts
 ├─ docs/
-│  ├─ PRODUCT_CONTRACT.md
-│  └─ assets/                 judge-facing screenshots
+│  ├─ PRODUCT_CONTRACT.md      frozen product / claim boundary
+│  └─ assets/                  judge-facing final visuals
 ├─ .env.example
 ├─ requirements-iris.txt
 └─ package.json
@@ -563,7 +642,7 @@ meridian-control-plane/
 
 ---
 
-## Local reproduction
+## Reproducibility
 
 ### Requirements
 
@@ -572,7 +651,7 @@ The certified path currently assumes:
 - Docker with Linux containers;
 - Node.js and npm;
 - Python 3 available as `python.exe` or `py.exe`;
-- Windows PowerShell 5.1 through `powershell.exe`;
+- Windows PowerShell 5.1 through `powershell.exe`; and
 - free host ports `1972`, `52773`, and `3000`.
 
 The IRIS runtime is pinned to:
@@ -613,7 +692,15 @@ Expected:
 healthy
 ```
 
-### 3. Set up Meridian
+### 3. Check setup without applying changes
+
+```powershell
+npm run demo:setup:check
+```
+
+This read-only check validates the container, local dependencies, helper surface, and frozen bootstrap convergence.
+
+### 4. Set up Meridian on a fresh instance
 
 ```powershell
 npm run demo:setup
@@ -622,42 +709,58 @@ npm run demo:setup
 `demo:setup`:
 
 - runs `npm ci`;
-- creates the repository-local `.venv-iris` environment when necessary;
+- creates the repository-local `.venv-iris` environment when needed;
 - installs the pinned `intersystems-irispython==5.4.0` dependency;
 - applies the declarative IRIS bootstrap; and
 - verifies convergence.
 
-On a fresh IRIS instance, setup prompts for the local passwords required to create the bounded runtime identities. Real passwords are not committed to the repository or passed on the command line.
+On a fresh IRIS instance, setup prompts for the local passwords required to create bounded runtime identities. Real passwords are not committed to the repository or passed on the command line.
 
-### 4. Check readiness
+### 5. Check readiness
 
 ```powershell
 npm run demo:readiness
 ```
 
-### 5. Normalize the bounded demo fixture when needed
+### 6. Normalize the bounded demo fixture when needed
 
 ```powershell
 npm run demo:cycle
 ```
 
-`demo:cycle` is the supported repeatable fixture lifecycle.
+`demo:cycle` is the supported repeatable fixture lifecycle. It is **not** an arbitrary process-kill mechanism and it is **not** a generic security reset.
 
-It is **not** an arbitrary PID-kill mechanism and it is **not** a generic security reset.
+The sealed O01/O02/O03 process certifications are historical evidence. Reproduction does not require physically rerunning those exact process actions.
 
-### 6. Start Meridian
+### 7. Start Meridian
 
 ```powershell
 npm run demo:start
 ```
 
-The startup wrapper prompts for the `meridian.runtime` password using a masked `SecureString`, passes the plaintext only to the child server process environment, and zero-frees the temporary BSTR afterward.
+The startup wrapper prompts for the `meridian.runtime` password using a masked `SecureString`, passes plaintext only to the child server process environment, and zero-frees the temporary BSTR afterward.
 
 Open:
 
 ```text
 http://localhost:3000
 ```
+
+### Quality wall
+
+```powershell
+npm test
+npm run typecheck
+npm run lint
+npm run build
+```
+
+Final certified result:
+
+- **99 test files / 535 tests: PASS**
+- **TypeScript typecheck: PASS**
+- **ESLint: 0 errors / 20 warnings**
+- **Production build: PASS**
 
 ---
 
@@ -685,180 +788,79 @@ The certified startup path supplies the real password only to the running server
 | --- | --- |
 | `npm run demo:bootstrap:check` | Read-only declarative IRIS bootstrap convergence check |
 | `npm run demo:bootstrap` | Apply only missing frozen bootstrap state; privilege drift fails closed |
-| `npm run demo:setup:check` | Check container, DB-API dependency, helper app, and bootstrap convergence |
+| `npm run demo:setup:check` | Read-only setup/convergence check |
 | `npm run demo:setup` | Install dependencies, apply bootstrap, and verify setup |
 | `npm run demo:readiness` | Read bounded fixture readiness |
 | `npm run demo:cycle` | Run the safe repeatable fixture lifecycle |
 | `npm run demo:start` | Start production Meridian with a masked runtime-password prompt |
 
-Focused engineering verification commands also remain available through the `verify:iris-*` scripts in `package.json`.
+Focused engineering verification commands remain available through the `verify:*` scripts in `package.json`.
 
 ---
 
-## Security choices
+## Security and claim boundaries
 
-Meridian intentionally keeps privileged IRIS authority behind server-owned boundaries.
+Meridian's claims are intentionally narrower than “full management portal replacement.”
 
-Current choices include:
+### Security choices
 
-- no runtime password committed to Git;
-- `.env.example` contains the password name but no password value;
-- the password is not placed in a CLI argument;
-- the production start wrapper prompts with `Read-Host -AsSecureString`;
-- the runtime credential is passed only to the child server environment;
-- browser HTML is checked for runtime credential names and token-shaped bearer leaks;
-- dedicated metadata escalation roles replace broad default authority;
-- durable-history writing is application-scoped;
-- browser management routes do not expose an arbitrary IRIS mutation proxy;
-- task, system, log, security, and Web + REST surfaces are read-only;
-- security pages expose approved metadata, never secret values or private-key material; and
-- process evidence uses a bounded fallback on the certified build rather than widening runtime administration authority.
+- No runtime password is committed to Git.
+- `.env.example` contains the password variable but no password value.
+- The production start wrapper uses `Read-Host -AsSecureString`.
+- Privileged runtime credentials stay on the server side.
+- Browser management routes do not expose an arbitrary IRIS mutation proxy.
+- Dedicated metadata readers and fixed-purpose action executors avoid broad standing authority.
+- Durable-history writing is application-scoped.
+- Security pages expose approved metadata, never secret values or private-key material.
+- Process operations require bounded target identity; PID alone is insufficient.
+- Unknown-after-dispatch paths reconcile instead of automatically retrying.
+- Irreversible actions remain labeled irreversible.
 
----
-
-## Troubleshooting
-
-### IRIS is not converged
-
-Inspect first:
-
-```powershell
-npm run demo:bootstrap:check
-```
-
-If only frozen bootstrap objects are missing:
-
-```powershell
-npm run demo:bootstrap
-```
-
-Existing privilege drift intentionally fails closed. Do not fix drift by simply broadening roles.
-
-### Docker or IRIS is not ready
-
-```powershell
-docker ps --filter "name=^/iris-cert$"
-docker inspect --format "{{.State.Running}}|{{.State.Health.Status}}|{{.Config.Image}}" iris-cert
-```
-
-The supported management base is:
-
-```text
-http://localhost:52773/api/admin
-```
-
-### Fixture readiness is blocked
-
-```powershell
-npm run demo:readiness
-npm run demo:cycle
-```
-
-Do not substitute arbitrary `Stop-Process`, `taskkill`, or unbounded security resets.
-
-### Meridian cannot authenticate to IRIS
-
-Start through:
-
-```powershell
-npm run demo:start
-```
-
-and provide the local `meridian.runtime` password at the masked prompt.
-
-Do not put the password in the README, `.env.example`, Git, or a command-line argument.
-
----
-
-## Claim boundaries
-
-Meridian's core claim is deliberately specific:
-
-> **A security change is not finished when configuration changes; it is finished when the evidence required by the Change Case demonstrates configured state, live convergence, native audit closure, and durable receipt identity.**
-
-Meridian does **not** claim:
+### Meridian does not claim
 
 - that IRIS security is broken;
-- that every role change produces stale live authority;
-- that restarting processes is always required;
-- that an API success response alone proves live authorization convergence;
+- that every management endpoint is implemented;
+- that all 273 primary operations are executable;
+- that Logs has certified mutation breadth;
+- that Security/Secrets has certified mutation breadth;
 - that declared OpenAPI protection metadata proves arbitrary application-code authorization behavior;
-- that native Swagger proves anything beyond the deployment evidence it actually contains;
-- that the public browser owns privileged IRIS mutation authority;
-- that the default runtime has `%All` or `%Admin_Manage`; or
-- that the recorded Maya page re-executes the role mutation on every visit.
-
-The verified Maya route is a **recorded certified receipt plus a live server-side persistent-history check**.
-
-That distinction is part of the product contract.
+- that native Swagger proves anything beyond deployment evidence it actually contains;
+- that an HTTP success code alone proves an administrative action closed;
+- that the public browser owns privileged IRIS credentials;
+- that the default runtime has `%All` or `%Admin_Manage`;
+- that recreating a terminated process is rollback of the same identity; or
+- that visiting a recorded case page re-executes its historical mutation.
 
 ---
 
-## Prototype scope and production path
+## Prototype limits
 
-Meridian is a competition prototype designed to make one evidence-bound security-change lifecycle deeply judgeable while also demonstrating breadth across the requested management families.
+Meridian is a competition prototype with a deliberately strong evidence core.
 
-The current certified path is Windows/PowerShell-oriented and pinned to the submission IRIS build for reproducibility.
+Current limitations include:
 
-A production evolution would likely add:
+- the certified reproduction path is Windows/PowerShell-oriented;
+- it targets the pinned submission IRIS build;
+- operator authentication/approval is not a production multi-user IAM system;
+- certified server actions remain fixed-purpose contracts rather than a generic browser action console;
+- Logs and Security/Secrets are evidence/read surfaces rather than certified mutation families;
+- 108 primary operations are explicitly out of product scope;
+- 36 destructive operations are explicitly declined; and
+- clean-room setup is optimized for a local Docker-backed judge environment rather than fleet deployment.
 
-- authenticated multi-operator identities and approval policy;
-- durable multi-case queues rather than one seeded centerpiece;
-- configurable Change Case policy by environment;
-- richer convergence strategies for long-lived processes;
-- Linux/macOS reproduction wrappers;
-- deployment packaging such as Docker Compose or a supported IRIS deployment manifest;
-- external observability and alerting;
-- multi-instance / multi-environment IRIS inventory;
-- policy-driven approval workflows for higher-risk mutations; and
-- longer-term receipt retention and search.
+A production evolution could add multi-operator policy, durable multi-case queues, multi-instance inventory, additional platform wrappers, external observability, and environment-specific approval policy without weakening the core invariant.
 
-Those additions should not weaken Meridian's central invariant.
-
-> **New operational breadth should add evidence—not erase the distinction between configuration, runtime truth, audit, and durable closure.**
+> **New breadth should add evidence, not erase the distinction between dispatch, authoritative state, proof, and durable closure.**
 
 ---
 
-## What's next for Meridian
+## Final demo video
 
-The immediate product opportunity is broader than role removal.
+The final demo must reflect the post-R8 product, including Proof Contract V2, the Coverage atlas, durable receipts, certified action breadth, authority boundaries, and reproducibility.
 
-The same Change Case primitive could support other IRIS administrative changes where operators need to know more than whether an API call returned success:
+<!-- FJ3_FINAL_VIDEO_LINK_WILL_REPLACE_THIS_PARAGRAPH -->
 
-- user and role lifecycle changes;
-- protected application changes;
-- REST deployment/protection drift;
-- task configuration changes;
-- security-metadata changes;
-- environment-to-environment policy drift; and
-- other bounded administrative mutations that benefit from preflight, live verification, audit binding, and durable receipts.
-
-The long-term goal remains simple:
-
-> **Make consequential IRIS changes inspectable before, during, and after mutation—without giving the browser more authority than it needs.**
-
----
-
-## Demo video
-
-**Meridian — Evidence-Bound Security Change Control for InterSystems IRIS**
-
-[Watch on YouTube](https://youtu.be/AtTjQKhURbg)
-
-The demo walks through:
-
-- the Control Room;
-- Change Queue;
-- Maya Patel's verified case;
-- State Truth;
-- permission and declared-impact evidence;
-- native IRIS audit binding;
-- persistent receipt history;
-- system/runtime evidence;
-- task management;
-- operational logs;
-- security metadata boundaries; and
-- Web + REST deployment/protection proof.
+The previous pre-Remontada recording is intentionally not used as the final judge video.
 
 ---
 

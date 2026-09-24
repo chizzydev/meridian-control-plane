@@ -15,32 +15,94 @@ import {
 export const dynamic =
   "force-dynamic";
 
+const taskActions = [
+  ["T01", "CREATE", "Create a bounded task fixture"],
+  ["T02", "UPDATE", "Update the reviewed task configuration"],
+  ["T03", "RUN NOW", "Dispatch one reviewed task execution"],
+  ["T04", "SUSPEND", "Suspend the reviewed task"],
+  ["T05", "RESUME", "Resume the reviewed task"],
+  ["T06", "DELETE", "Delete the reviewed task"],
+] as const;
+
 export default async function TasksPage() {
   const surface =
     await readTaskManagementSurfaceFromEnvironment();
+
+  const certificationWitnessRows =
+    surface.status === "unavailable"
+      ? []
+      : surface.history
+          .filter((row) => {
+            const name = row.name ?? "";
+            const result = row.result ?? "";
+
+            return (
+              name.includes("Meridian R5") ||
+              name.includes("MeridianLab.") ||
+              result.includes("Meridian R5") ||
+              result.includes("MeridianLab.")
+            );
+          })
+          .slice(0, 16);
 
   return (
     <main className="meridian-runtime-page">
       <PageHeader
         eyebrow="Runtime / TASK MANAGEMENT"
         title="Scheduled work, state, and execution history."
-        description="Meridian reads official IRIS Task Manager metadata through narrow server-owned escalation. Permissions remains the centerpiece; task mutation and broad operational authority stay absent."
+        description="This route presents official IRIS Task Manager evidence through narrow server-owned reads. T01-T06 are certified fixed-purpose server actions; the browser exposes no generic task scheduler or mutation proxy."
         actions={
           <>
             <Link href="/" className="meridian-action">
               Control room
             </Link>
             <StatusBadge tone="success">READ ONLY</StatusBadge>
-            <StatusBadge>EXPLICIT TASK ESCALATION</StatusBadge>
+            <StatusBadge>BOUNDED SERVER AUTHORITY</StatusBadge>
           </>
         }
       />
 
       <section className="meridian-runtime-section">
         <SectionHeader
-          eyebrow="Authority"
-          title="Task metadata boundary"
-          detail="Official SysAdmin REST reads are separated from task mutation authority."
+          eyebrow="Certified task actions"
+          title="T01-T06 cover the task-management lifecycle"
+          detail="Six semantic actions are certified as fixed-purpose contracts. This evidence page does not become a generic browser scheduler."
+        />
+
+        <div className="meridian-table-wrap">
+          <table className="meridian-data-table meridian-authority-table">
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>Semantic operation</th>
+                <th>Contract intent</th>
+              </tr>
+            </thead>
+            <tbody>
+              {taskActions.map(([id, action, detail]) => (
+                <tr key={id}>
+                  <td><CodeValue>{id}</CodeValue></td>
+                  <td><strong>{action}</strong></td>
+                  <td>{detail}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <AuthorityCallout
+          eyebrow="Task proof boundary"
+          title="Task state and Task Manager history remain evidence, not browser authority"
+          detail="T01-T06 execute through separate fixed-purpose server contracts with fresh revalidation, action-specific proof, and durable receipt closure. No generic scheduler payload is exposed."
+          tone="info"
+        />
+      </section>
+
+      <section className="meridian-runtime-section">
+        <SectionHeader
+          eyebrow="Authority boundary"
+          title="Task evidence reads and certified execution remain separate"
+          detail="MeridianTaskMetadataReader reads inventory and history. Certified task actions use their own fixed-purpose server contracts."
         />
 
         <div className="meridian-table-wrap">
@@ -54,19 +116,34 @@ export default async function TasksPage() {
             </thead>
             <tbody>
               <tr>
-                <td>Escalation role</td>
+                <td>Evidence-read role</td>
                 <td><CodeValue>MeridianTaskMetadataReader</CodeValue></td>
-                <td>%Admin_Task:U only. No %Admin_Operate grant.</td>
+                <td>%Admin_Task:U only for the metadata surface; no broad %Admin_Operate grant.</td>
               </tr>
               <tr>
-                <td>Source</td>
+                <td>Evidence source</td>
                 <td>Official SysAdmin REST</td>
                 <td>Task inventory, manager state, upcoming schedule, and execution history.</td>
               </tr>
               <tr>
-                <td>Task mutation controls</td>
+                <td>Browser task mutation controls</td>
                 <td><StatusBadge tone="success">NONE</StatusBadge></td>
-                <td>No run, suspend, resume, create, edit, or delete controls.</td>
+                <td>No run, suspend, resume, create, edit, or delete controls on this page.</td>
+              </tr>
+              <tr>
+                <td>Generic task mutation proxy</td>
+                <td><StatusBadge tone="success">NONE</StatusBadge></td>
+                <td>Only fixed-purpose T01-T06 contracts are certified.</td>
+              </tr>
+              <tr>
+                <td>Browser credential</td>
+                <td><StatusBadge tone="success">NOT EXPOSED</StatusBadge></td>
+                <td>Authority remains server-held.</td>
+              </tr>
+              <tr>
+                <td>Certified execution</td>
+                <td><CodeValue>T01-T06</CodeValue></td>
+                <td>Fresh revalidation + action-specific evidence + durable receipt closure.</td>
               </tr>
             </tbody>
           </table>
@@ -99,7 +176,7 @@ export default async function TasksPage() {
                   <td>NONE</td>
                 </tr>
                 <tr>
-                  <td>Public task proxy</td>
+                  <td>Generic task proxy</td>
                   <td>NONE</td>
                 </tr>
                 <tr>
@@ -118,36 +195,78 @@ export default async function TasksPage() {
         <>
           <section className="meridian-runtime-metrics" aria-label="Task runtime summary">
             <MetricCell
-              label={`Task Manager ${surface.managerStatus}`}
+              label="Configured tasks"
               value={surface.tasks.length}
-              detail="configured tasks"
+              detail={`Current Task Manager inventory; ${surface.managerStatus}`}
             />
             <MetricCell
-              label="Upcoming schedule"
+              label="Upcoming executions"
               value={surface.upcoming.length}
-              detail="upcoming executions"
+              detail="live schedule rows"
             />
             <MetricCell
               label="Execution history"
               value={surface.history.length}
-              detail="recent history rows"
+              detail="recent Task Manager history rows"
             />
             <MetricCell
               label="%Admin_Operate"
               value={surface.authority.adminOperateGranted ? "GRANTED" : "NOT GRANTED"}
-              detail="broad authority remains absent"
+              detail="broad evidence-reader authority remains absent"
             />
+          </section>
+
+          <section className="meridian-runtime-section">
+            <SectionHeader
+              eyebrow="Certification witness history"
+              title={`${certificationWitnessRows.length} retained Meridian witness rows in the current history window`}
+              detail="These are raw Task Manager history records created during bounded task certification work. The names remain historical evidence; the action catalog above is the judge-facing semantic map."
+            />
+
+            {certificationWitnessRows.length === 0 ? (
+              <AuthorityCallout
+                eyebrow="Current history window"
+                title="No Meridian certification witness row is visible in the current slice"
+                detail="The certified T01-T06 contracts remain product claims backed by their frozen certification evidence. This live page does not invent a witness row when Task Manager history has rolled forward."
+                tone="warning"
+              />
+            ) : (
+              <div className="meridian-table-wrap">
+                <table className="meridian-data-table meridian-task-table" style={{ minWidth: 0, tableLayout: "fixed" }}>
+                  <thead>
+                    <tr>
+                      <th>Historical witness</th>
+                      <th>Namespace</th>
+                      <th>Started</th>
+                      <th>Result</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {certificationWitnessRows.map((row, index) => (
+                      <tr key={`${row.taskId}:${row.lastStart}:${index}`}>
+                        <td><strong>{row.name || `Task #${row.taskId}`}</strong></td>
+                        <td>{row.namespace || "Unknown namespace"}</td>
+                        <td><CodeValue>{row.lastStart || "UNKNOWN"}</CodeValue></td>
+                        <td>{row.result || "No result text"}</td>
+                        <td>{row.status || "UNKNOWN"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </section>
 
           <section className="meridian-runtime-section">
             <SectionHeader
               eyebrow="Task inventory"
               title={`${surface.tasks.length} configured tasks`}
-              detail="Current suspension state, Last finished, and Next scheduled remain visible as repeatable operational records."
+              detail="Current suspension state, last finished, and next scheduled remain visible as repeatable operational records."
             />
 
             <div className="meridian-table-wrap">
-              <table className="meridian-data-table meridian-task-table">
+              <table className="meridian-data-table meridian-task-table" style={{ minWidth: 0, tableLayout: "fixed" }}>
                 <thead>
                   <tr>
                     <th>ID</th>
@@ -197,7 +316,7 @@ export default async function TasksPage() {
             />
 
             <div className="meridian-table-wrap">
-              <table className="meridian-data-table meridian-task-table">
+              <table className="meridian-data-table meridian-task-table" style={{ minWidth: 0, tableLayout: "fixed" }}>
                 <thead>
                   <tr>
                     <th>ID</th>
@@ -234,13 +353,13 @@ export default async function TasksPage() {
 
           <section className="meridian-runtime-section">
             <SectionHeader
-              eyebrow="Execution history"
+              eyebrow="Raw execution history"
               title={`${surface.history.length} recent history rows`}
-              detail="Recent outcomes from the official Task Manager history surface."
+              detail="The complete current history slice remains visible as forensic evidence below the certification-witness summary."
             />
 
             <div className="meridian-table-wrap">
-              <table className="meridian-data-table meridian-task-table">
+              <table className="meridian-data-table meridian-task-table" style={{ minWidth: 0, tableLayout: "fixed" }}>
                 <thead>
                   <tr>
                     <th>Task</th>
@@ -278,8 +397,8 @@ export default async function TasksPage() {
       <section className="meridian-runtime-section">
         <SectionHeader
           eyebrow="Non-deviation boundary"
-          title="Read-only task authority"
-          detail="The task surface exposes metadata, not a public scheduler or operator console."
+          title="Read-only evidence surface, certified task actions"
+          detail="The browser exposes task evidence; T01-T06 remain fixed-purpose server contracts, not a generic scheduler."
         />
 
         <div className="meridian-table-wrap">
@@ -291,14 +410,14 @@ export default async function TasksPage() {
               </tr>
             </thead>
             <tbody>
-              <tr><td>Task mutation controls</td><td>NONE</td></tr>
-              <tr><td>%Admin_Operate</td><td>NOT GRANTED</td></tr>
-              <tr><td>Public task proxy</td><td>NONE</td></tr>
+              <tr><td>Browser task mutation controls</td><td>NONE</td></tr>
+              <tr><td>%Admin_Operate</td><td>NOT GRANTED TO EVIDENCE READER</td></tr>
+              <tr><td>Generic task mutation proxy</td><td>NONE</td></tr>
               <tr><td>Browser credential</td><td>NOT EXPOSED</td></tr>
               <tr><td>Default runtime role</td><td>UNCHANGED</td></tr>
-              <tr><td>Authority mode</td><td>EXPLICIT ESCALATION</td></tr>
-              <tr><td>Product mode</td><td>READ ONLY</td></tr>
-              <tr><td>Permissions centerpiece</td><td>PRESERVED</td></tr>
+              <tr><td>Authority mode</td><td>BOUNDED SERVER AUTHORITY</td></tr>
+              <tr><td>Surface mode</td><td>READ ONLY EVIDENCE</td></tr>
+              <tr><td>Certified task actions</td><td>T01-T06</td></tr>
             </tbody>
           </table>
         </div>

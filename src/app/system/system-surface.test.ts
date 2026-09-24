@@ -128,13 +128,26 @@ describe(
             "%Admin_Operate:U + %DB_IRISSYS:R",
             "%Admin_Manage",
             "NOT GRANTED",
-            "Mutation controls",
+            "Browser process controls",
+            "O01 suspend. O02 resume. O03 terminate.",
+            "O03 non-deviation boundary",
+            "Contract posture",
+            "HIGH / IRREVERSIBLE",
+            "dual authoritative absence",
+            "reads back exactly",
+            "Inspect O03 receipt",
+            "Generic mutation proxy",
+            "Exact process identity; PID alone is insufficient",
+            "RECONCILE; NO BLIND RETRY",
+            "inventory-read endpoint produced a certified server-side INVALID OREF failure",
+            "read-only %SYS.ProcessQuery fallback",
+            "Browser privileged credential",
             "NONE",
-            "Official process endpoint",
-            "REJECTED ON BUILD 221U",
-            "Process fallback",
-            "CERTIFIED READ ONLY",
-            "Browser escalated token",
+
+
+
+
+
             "NOT EXPOSED",
             "{surface.reason}",
           ]
@@ -145,6 +158,20 @@ describe(
             marker,
           );
         }
+
+        expect(
+          page.match(
+            /style=\{\{ minWidth: 0, tableLayout: "fixed" \}\}/g,
+          )?.length,
+        ).toBe(
+          2,
+        );
+
+        expect(
+          page,
+        ).not.toContain(
+          "<th>Risk / reversibility</th>",
+        );
       },
     );
 

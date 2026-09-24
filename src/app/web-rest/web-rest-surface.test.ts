@@ -88,8 +88,15 @@ describe(
           const marker of [
             "WEB APPS / REST",
             "READ ONLY",
-            "Permissions remains the centerpiece",
-            "Official SysAdmin REST",
+            "W01-W04 are certified fixed-purpose server actions",
+            "W01-W04 are four fixed-purpose semantic contracts",
+            "4 certified semantic actions",
+            "retained verified receipts",
+            "Breadth vs evidence volume",
+            "joined proof surface",
+            "Meridian BFF: /api/admin/v2/web-apps",
+            "historical W04 test target",
+            "InterSystems SysAdmin REST, server-side",
             "Native emitted Swagger",
             "Authoritative OpenAPI",
             "Safe failure boundary",
@@ -102,16 +109,16 @@ describe(
             "Verified lifecycle",
             "Historical proof is not current state",
             "Current-state recheck",
-            "Verified receipts",
-            "Receipt SHA-256",
+            "Historical verified receipts",
+            "Receipt integrity",
             "Proof planes",
             "CANONICAL HASH VALIDATED",
             "FRESH READBACK",
             "Required resources",
             "Browser credential",
             "NOT EXPOSED",
-            "Public management proxy",
-            "Mutation controls",
+            "Generic mutation proxy",
+            "Browser mutation controls",
           ]
         ) {
           expect(
@@ -142,7 +149,7 @@ describe(
     );
 
     it(
-      "wires the supporting family into the existing judge fast path without replacing the centerpiece",
+      "wires the certified family into the judge fast path while preserving prior evidence closures",
       () => {
         const home =
           read(
@@ -151,11 +158,11 @@ describe(
 
         for (
           const marker of [
-            "Security changes are not finished when configuration changes.",
+            "Every privileged operation, under proof.",
             "Open Change Queue",
-            "Inspect verified receipt",
+            "Exact durable readback",
             'href="/web-rest"',
-            "Supporting control-plane breadth",
+            "Certified control-plane breadth",
             "Explore Web Apps / REST",
           ]
         ) {

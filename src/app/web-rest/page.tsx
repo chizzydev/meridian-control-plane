@@ -15,6 +15,38 @@ import {
 export const dynamic =
   "force-dynamic";
 
+const webActions = [
+  ["W01", "CREATE", "Create one reviewed web application"],
+  ["W02", "UPDATE", "Update the reviewed application configuration"],
+  ["W03", "ENABLE", "Enable the reviewed application"],
+  ["W04", "DELETE", "Delete the reviewed application"],
+] as const;
+
+function webActionLabel(
+  actionType: string,
+): string {
+  if (actionType === "WEB_APP_CREATE") {
+    return "W01 CREATE";
+  }
+
+  if (actionType === "WEB_APP_UPDATE") {
+    return "W02 UPDATE";
+  }
+
+  if (
+    actionType === "WEB_APP_ENABLE" ||
+    actionType === "WEB_APP_ENABLE_RECOVERY"
+  ) {
+    return "W03 ENABLE";
+  }
+
+  if (actionType === "WEB_APP_DELETE") {
+    return "W04 DELETE";
+  }
+
+  return actionType;
+}
+
 export default async function WebRestPage() {
   const surface =
     await readWebRestProductSurfaceFromEnvironment();
@@ -24,7 +56,7 @@ export default async function WebRestPage() {
       <PageHeader
         eyebrow="Surfaces / WEB APPS / REST"
         title="Deployment identity and endpoint proof."
-        description="Permissions remains the centerpiece. Meridian joins live inventory, deployed REST truth, durable verified receipts, and a fresh current-state recheck without widening browser authority."
+        description="Meridian joins live application inventory, deployed REST truth, durable verified receipts, and fresh current-state readback. W01-W04 are certified fixed-purpose server actions without widening browser authority."
         actions={
           <>
             <Link href="/" className="meridian-action">
@@ -37,9 +69,38 @@ export default async function WebRestPage() {
 
       <section className="meridian-runtime-section">
         <SectionHeader
+          eyebrow="Certified web-application actions"
+          title="W01-W04 are four fixed-purpose semantic contracts"
+          detail="Create, update, enable, and delete remain separate certified actions even when multiple actions share the same official transport."
+        />
+
+        <div className="meridian-table-wrap">
+          <table className="meridian-data-table meridian-authority-table">
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>Semantic operation</th>
+                <th>Contract intent</th>
+              </tr>
+            </thead>
+            <tbody>
+              {webActions.map(([id, action, detail]) => (
+                <tr key={id}>
+                  <td><CodeValue>{id}</CodeValue></td>
+                  <td><strong>{action}</strong></td>
+                  <td>{detail}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="meridian-runtime-section">
+        <SectionHeader
           eyebrow="Provenance"
-          title="Five evidence sources, one joined operator surface"
-          detail="Deployment truth and declared protection are kept distinct so Meridian never implies code authorization it did not prove."
+          title="Five evidence sources, one joined proof surface"
+          detail="Deployment truth and declared protection stay distinct so Meridian never implies code authorization it did not prove."
         />
 
         <div className="meridian-table-wrap">
@@ -47,15 +108,15 @@ export default async function WebRestPage() {
             <thead>
               <tr>
                 <th>Evidence plane</th>
-                <th>Source</th>
-                <th>Proof claim</th>
+                <th>Authoritative source</th>
+                <th>Meridian proof claim</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td>Web application inventory</td>
-                <td>Official SysAdmin REST</td>
-                <td><CodeValue>/api/admin/v2/web-apps</CodeValue></td>
+                <td>InterSystems SysAdmin REST, server-side</td>
+                <td><CodeValue>Meridian BFF: /api/admin/v2/web-apps</CodeValue></td>
               </tr>
               <tr>
                 <td>Deployed REST truth</td>
@@ -87,7 +148,7 @@ export default async function WebRestPage() {
           <AuthorityCallout
             eyebrow="Safe failure boundary"
             title="Live management read unavailable"
-            detail="The live management read failed closed. Meridian exposes no fallback mutation path, browser credential, or public management proxy."
+            detail="The live management read failed closed. Meridian exposes no fallback mutation path, browser credential, or generic mutation proxy."
             tone="warning"
           >
             <CodeValue>{surface.reason}</CodeValue>
@@ -103,19 +164,19 @@ export default async function WebRestPage() {
               detail="live Meridian web apps"
             />
             <MetricCell
-              label="REST operations"
+              label="Application REST operations"
               value={surface.operations.length}
               detail="deployed + declared join"
             />
             <MetricCell
-              label="Verified receipts"
-              value={surface.verifiedLifecycle.historyCount}
-              detail="durable lifecycle history"
+              label="Certified semantic actions"
+              value={4}
+              detail="W01-W04"
             />
             <MetricCell
-              label="Current target"
-              value={surface.verifiedLifecycle.currentApplicationState}
-              detail={`HTTP ${surface.verifiedLifecycle.currentHttpStatus}`}
+              label="Historical verified receipts"
+              value={surface.verifiedLifecycle.historyCount}
+              detail="durable lifecycle evidence"
             />
           </section>
 
@@ -129,7 +190,7 @@ export default async function WebRestPage() {
             <AuthorityCallout
               eyebrow="Current-state recheck"
               title={`${surface.verifiedLifecycle.targetDisplayName}: ${surface.verifiedLifecycle.currentApplicationState}`}
-              detail="This state is freshly re-read on the server. It is not inferred from the last receipt."
+              detail="This historical W04 test target is freshly re-read on the server. Its current state is not inferred from the last receipt."
               tone={surface.verifiedLifecycle.currentApplicationState === "ABSENT" && surface.verifiedLifecycle.currentHttpStatus === 404 ? "success" : "warning"}
             >
               <CodeValue>{surface.verifiedLifecycle.targetCanonicalId}</CodeValue>
@@ -141,16 +202,22 @@ export default async function WebRestPage() {
               </p>
             </AuthorityCallout>
 
+            <AuthorityCallout
+              eyebrow="Breadth vs evidence volume"
+              title={`4 certified semantic actions, ${surface.verifiedLifecycle.historyCount} retained verified receipts`}
+              detail="Receipt count is historical evidence volume, not action breadth. Additional W03 receipts preserve bounded recovery-certification history without creating extra semantic actions."
+              tone="info"
+            />
+
             <div className="meridian-table-wrap">
               <table className="meridian-data-table meridian-runtime-table">
                 <thead>
                   <tr>
                     <th>Step</th>
-                    <th>Action</th>
-                    <th>Type</th>
+                    <th>Semantic action</th>
                     <th>State</th>
                     <th>Proof planes</th>
-                    <th>Receipt SHA-256</th>
+                    <th>Receipt integrity</th>
                     <th>Applied UTC</th>
                   </tr>
                 </thead>
@@ -159,10 +226,10 @@ export default async function WebRestPage() {
                     <tr key={receipt.receiptId}>
                       <td>{String(index + 1).padStart(2, "0")}</td>
                       <td>
-                        <CodeValue>{receipt.actionId}</CodeValue>
+                        <strong>{webActionLabel(receipt.actionType)}</strong>
+                        <small><CodeValue>{receipt.actionId}</CodeValue></small>
                         <small>{receipt.receiptId}</small>
                       </td>
-                      <td><CodeValue>{receipt.actionType}</CodeValue></td>
                       <td><StatusBadge tone="success">{receipt.lifecycleState}</StatusBadge></td>
                       <td>
                         {receipt.proofResults.map((proof) => (
@@ -171,7 +238,10 @@ export default async function WebRestPage() {
                           </small>
                         ))}
                       </td>
-                      <td><CodeValue>{receipt.receiptSha256}</CodeValue></td>
+                      <td>
+                        <CodeValue>{receipt.receiptSha256.slice(0, 16)}...</CodeValue>
+                        <small>Canonical SHA-256 retained in receipt</small>
+                      </td>
                       <td>{receipt.applyUtc}</td>
                     </tr>
                   ))}
@@ -226,8 +296,8 @@ export default async function WebRestPage() {
           <section className="meridian-runtime-section">
             <SectionHeader
               eyebrow="REST / OpenAPI exploration"
-              title={`${surface.operations.length} deployed operations joined to declared protection`}
-              detail="Each row separates deployed route truth from declared Required resources."
+              title={`${surface.operations.length} deployed application operations joined to declared protection`}
+              detail="These are application REST operations, not Meridian's certified mutation-endpoint count. Each row separates deployed route truth from declared Required resources."
             />
 
             <div className="meridian-table-wrap">
@@ -282,7 +352,7 @@ export default async function WebRestPage() {
         <SectionHeader
           eyebrow="Authority boundary"
           title="Rendered evidence, not a management proxy"
-          detail="The public surface exposes inventory and protection proof only."
+          detail="This browser surface exposes inventory and protection proof; W01-W04 execute through separate fixed-purpose server contracts."
         />
 
         <div className="meridian-table-wrap">
@@ -295,9 +365,10 @@ export default async function WebRestPage() {
             </thead>
             <tbody>
               <tr><td>Browser credential</td><td><StatusBadge tone="success">NOT EXPOSED</StatusBadge></td></tr>
-              <tr><td>Public management proxy</td><td><StatusBadge tone="success">NONE</StatusBadge></td></tr>
-              <tr><td>Mutation controls</td><td><StatusBadge tone="success">NONE</StatusBadge></td></tr>
-              <tr><td>Mode</td><td><StatusBadge tone="success">READ ONLY</StatusBadge></td></tr>
+              <tr><td>Generic mutation proxy</td><td><StatusBadge tone="success">NONE</StatusBadge></td></tr>
+              <tr><td>Browser mutation controls</td><td><StatusBadge tone="success">NONE</StatusBadge></td></tr>
+              <tr><td>Surface mode</td><td><StatusBadge tone="success">READ ONLY EVIDENCE</StatusBadge></td></tr>
+              <tr><td>Certified web-app actions</td><td><CodeValue>W01-W04</CodeValue></td></tr>
             </tbody>
           </table>
         </div>

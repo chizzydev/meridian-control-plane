@@ -301,6 +301,7 @@ describe(
             "AUTHORITATIVE_IRIS",
             "Exact durable readback required",
             "Recovery is a separate Verified Action",
+            "Action-scoped only",
             receipt.receiptSha256,
             historyRecord.receiptSha256,
           ]
@@ -337,6 +338,17 @@ describe(
             "EVIDENCE_PLANES",
             "Configuration is not closure.",
             "Read from IRIS history",
+            "Inspect O03 receipt",
+            "meridian-o03-process-terminate-r8-a-001",
+            "Proof Contract V2 lifecycle map",
+            "RECEIPT + READBACK",
+            "AMBIGUITY / RECONCILE",
+            "TERMINAL FAILURES",
+            "COMPLETE STATE VOCABULARY",
+            "Evidence provenance",
+            "AUTHORITATIVE_EXTERNAL_PROBE",
+            "CORRELATED",
+            "exact IRIS readback",
           ]
         ) {
           expect(
@@ -353,6 +365,7 @@ describe(
             "Authorization:",
             "Bearer ",
             "MERIDIAN_RUNTIME_PASSWORD",
+            "meridian-v2-user-remove-role-...",
           ]
         ) {
           expect(

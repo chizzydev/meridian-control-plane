@@ -14,24 +14,34 @@ import {
   summarizeRecordedReceipt,
 } from "@/lib/change-case/recorded-receipt";
 
-const lifecycle: EvidenceStep[] = [
+const closureLifecycle: EvidenceStep[] = [
   {
-    label: "Needs review",
-    detail: "0 cases",
-    state: "pending",
+    label: "PREFLIGHT",
+    detail: "Intent + target bound",
+    state: "complete",
   },
   {
-    label: "Ready",
-    detail: "0 cases",
-    state: "pending",
+    label: "REVALIDATE",
+    detail: "Fresh state matched",
+    state: "complete",
   },
   {
-    label: "Converging",
-    detail: "0 cases",
-    state: "pending",
+    label: "APPLY",
+    detail: "Fixed-purpose dispatch",
+    state: "complete",
   },
   {
-    label: "Verified",
+    label: "EVIDENCE",
+    detail: "Required planes passed",
+    state: "complete",
+  },
+  {
+    label: "RECEIPT",
+    detail: "Persist + exact readback",
+    state: "complete",
+  },
+  {
+    label: "VERIFIED",
     detail: "1 recorded case",
     state: "complete",
   },
@@ -54,7 +64,7 @@ const queueFilters = [
     active: false,
   },
   {
-    label: "Converging",
+    label: "Evidence",
     count: 0,
     active: false,
   },
@@ -73,27 +83,27 @@ export default function ChangeQueuePage() {
     <main className="meridian-change-queue">
       <PageHeader
         eyebrow="Meridian Control Plane / Change control"
-        title="Change Queue"
-        description="Security changes are lifecycle objects. Configuration may finish before live authority has converged, so Meridian keeps a case open until its evidence is complete."
+        title="Recorded proof-contract cases"
+        description="Change cases preserve reviewed intent, fresh revalidation, execution evidence, and durable closure. Configuration or convergence alone never promotes a case to VERIFIED."
         actions={
           <Link
             href="/change-cases/new"
             className="meridian-action meridian-action-primary"
           >
-            Stage access change
+            Inspect action preflight
           </Link>
         }
       />
 
-      <section className="meridian-queue-lifecycle" aria-label="Change Queue lifecycle">
-        <EvidenceRail steps={lifecycle} />
+      <section className="meridian-queue-lifecycle" aria-label="Proof Contract V2 closure lifecycle">
+        <EvidenceRail steps={closureLifecycle} />
       </section>
 
       <section className="meridian-queue-section">
         <SectionHeader
-          eyebrow="Operational work queue"
+          eyebrow="Recorded evidence queue"
           title="Cases by lifecycle state"
-          detail="The seeded surface has one certified case. Empty lifecycle states remain visible without being inflated into empty cards."
+          detail="The current judge surface contains one recorded certified permissions case. Empty queue states remain visible without fabricating additional cases."
         />
 
         <div className="meridian-filter-bar" aria-label="Queue state filters">
@@ -114,14 +124,14 @@ export default function ChangeQueuePage() {
             <thead>
               <tr>
                 <th>State</th>
+                <th>Semantic action</th>
                 <th>Subject</th>
                 <th>Authority change</th>
                 <th>Impact</th>
                 <th>Configuration</th>
                 <th>Live access</th>
                 <th>Native audit</th>
-                <th>Receipt</th>
-                <th aria-label="Open case" />
+                <th>Receipt + inspection</th>
               </tr>
             </thead>
             <tbody>
@@ -129,6 +139,7 @@ export default function ChangeQueuePage() {
                 <td>
                   <StatusBadge tone="success">Verified</StatusBadge>
                 </td>
+                <td><CodeValue>P04 USER_REMOVE_ROLE</CodeValue></td>
                 <td>
                   <strong>Maya Patel</strong>
                   <small>{receipt.change.username}</small>
@@ -160,15 +171,25 @@ export default function ChangeQueuePage() {
                   <CodeValue>UserChange #{receipt.nativeAudit.auditIndex}</CodeValue>
                 </td>
                 <td>
-                  <CodeValue truncate>{receipt.receiptId}</CodeValue>
-                </td>
-                <td>
-                  <Link
-                    href="/change-cases/verified/maya-patel-supervisor-removal"
-                    className="meridian-row-link"
+                  <div
+                    style={{
+                      display: "grid",
+                      gap: "6px",
+                      minWidth: "100px",
+                    }}
                   >
-                    Open verified receipt + IRIS history
-                  </Link>
+                    <CodeValue truncate>{receipt.receiptId}</CodeValue>
+                    <span className="meridian-inline-state" data-tone="success">
+                      <span />
+                      Exact readback
+                    </span>
+                    <Link
+                      href="/change-cases/verified/maya-patel-supervisor-removal"
+                      className="meridian-row-link"
+                    >
+                      Inspect case
+                    </Link>
+                  </div>
                 </td>
               </tr>
             </tbody>
@@ -178,15 +199,15 @@ export default function ChangeQueuePage() {
         <div className="meridian-queue-receipt-note">
           <div>
             <StatusBadge tone="success">Recorded certified receipt</StatusBadge>
-            <StatusBadge>Read-only demo evidence</StatusBadge>
+            <StatusBadge>Read-only case evidence</StatusBadge>
             <StatusBadge>Persistent IRIS history check</StatusBadge>
           </div>
 
           <p>
-            Previewed, revalidated, applied, checked for live runtime residue,
-            converged, and bound to native IRIS UserChange audit evidence.
-            The verified receipt route performs the live server-side IRIS
-            history read; this queue remains static and credential-free.
+            This P04 case was previewed, revalidated, applied, checked for
+            live runtime residue, converged, bound to native IRIS UserChange
+            evidence, persisted, and made inspectable through exact server-side
+            receipt-history readback.
           </p>
 
           <CodeValue>{receipt.receiptId}</CodeValue>
@@ -195,9 +216,9 @@ export default function ChangeQueuePage() {
 
       <section className="meridian-queue-proof-section">
         <SectionHeader
-          eyebrow="Authorization convergence"
-          title="Certified stale-to-converged witness"
-          detail="This read-only witness is derived from the certified authorization-closure model and preserves its original evidence and authority boundary."
+          eyebrow="Recorded permissions convergence case study"
+          title="Configuration can change before live authority converges"
+          detail="This isolated witness demonstrates one permissions-specific convergence hazard. It is evidence inside Proof Contract V2, not a replacement for the full durable closure lifecycle."
         />
 
         <div className="meridian-queue-proof">

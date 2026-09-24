@@ -482,7 +482,7 @@ export function ProofReceiptPanel({
         <SectionHeader
           eyebrow="Authority boundary"
           title="Execution authority is explicit"
-          detail="The browser selects only supported intent. Meridian derives transport and authority server-side."
+          detail="The browser selects only supported intent. Meridian derives fixed-purpose transport and bounded authority server-side."
         />
 
         <div className="meridian-table-wrap">
@@ -492,7 +492,7 @@ export function ProofReceiptPanel({
                 <th>Resource</th>
                 <th>Permission</th>
                 <th>Standing</th>
-                <th>Escalation only</th>
+                <th>Action-scoped only</th>
               </tr>
             </thead>
 

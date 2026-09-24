@@ -13,7 +13,7 @@ describe(
   "pinned SysAdmin operation manifest",
   () => {
     it(
-      "freezes the organizer source and 273 primary-operation count",
+      "freezes the pinned public SysAdmin source and 273 primary-operation count",
       () => {
         expect(
           sysAdminOperationManifest
@@ -34,6 +34,22 @@ describe(
         });
 
 
+
+        expect(
+          sysAdminOperationManifest
+            .generatedFrom
+            .countRule,
+        ).toContain(
+          "pinned public SysAdmin specification",
+        );
+
+        expect(
+          sysAdminOperationManifest
+            .generatedFrom
+            .countRule,
+        ).not.toContain(
+          "organizer",
+        );
 
         expect(
           sysAdminOperationManifest
@@ -134,6 +150,12 @@ describe(
             operation.scopeNote.length,
           ).toBeGreaterThan(
             0,
+          );
+
+          expect(
+            operation.scopeNote,
+          ).not.toMatch(
+            /R2 product surface|not certified at R2|Reserved for R6|organizer/i,
           );
         }
       },

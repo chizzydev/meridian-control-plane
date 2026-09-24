@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import {
   AuthorityCallout,
   CodeValue,
@@ -37,6 +39,68 @@ type SearchParams =
       undefined
     >
   >;
+
+const evidenceProvenance = [
+  "AUTHORITATIVE_IRIS",
+  "AUTHORITATIVE_EXTERNAL_PROBE",
+  "MERIDIAN_DERIVED",
+  "CORRELATED",
+  "NOT_APPLICABLE",
+] as const;
+
+const closurePath = [
+  {
+    label: "PREFLIGHT",
+    states: [
+      "CREATED",
+      "PREFLIGHTING",
+      "PREFLIGHTED",
+      "APPROVED",
+    ],
+  },
+  {
+    label: "REVALIDATE",
+    states: [
+      "REVALIDATING",
+      "READY",
+    ],
+  },
+  {
+    label: "APPLY",
+    states: [
+      "APPLYING",
+      "APPLIED",
+    ],
+  },
+  {
+    label: "EVIDENCE",
+    states: [
+      "VERIFYING",
+      "EVIDENCE_COMPLETE",
+    ],
+  },
+  {
+    label: "RECEIPT + READBACK",
+    states: [
+      "RECEIPT_PERSISTING",
+      "VERIFIED",
+    ],
+  },
+] as const;
+
+const ambiguityPath = [
+  "UNKNOWN_AFTER_DISPATCH",
+  "RECONCILING",
+  "VERIFYING",
+] as const;
+
+const terminalFailures = [
+  "STALE",
+  "DENIED",
+  "APPLY_FAILED",
+  "VERIFY_FAILED",
+  "RECEIPT_WRITE_FAILED",
+] as const;
 
 function firstValue(
   value:
@@ -113,11 +177,19 @@ export default async function ProofConsolePage({
       <PageHeader
         eyebrow="Meridian Control Plane / Proof console"
         title="Every privileged operation, under proof."
-        description="Inspect the generic Verified Action lifecycle, its evidence planes, and any durable Action Receipt V2 that exists in the local IRIS history store."
+        description="Inspect the shared Proof Contract V2 lifecycle, its action-specific evidence planes, and any durable Action Receipt V2 that exists in the local IRIS history store."
         actions={
-          <StatusBadge tone="success">
-            Proof Contract V2
-          </StatusBadge>
+          <>
+            <StatusBadge tone="success">
+              Proof Contract V2
+            </StatusBadge>
+            <Link
+              href="/proof?receiptId=meridian-o03-process-terminate-r8-a-001"
+              className="meridian-action"
+            >
+              Inspect O03 receipt
+            </Link>
+          </>
         }
       />
 
@@ -141,7 +213,7 @@ export default async function ProofConsolePage({
             <input
               name="receiptId"
               defaultValue={receiptId}
-              placeholder="meridian-v2-user-remove-role-..."
+              placeholder="meridian-o03-process-terminate-r8-a-001"
               pattern="[A-Za-z0-9][A-Za-z0-9._:-]{7,127}"
               autoComplete="off"
               spellCheck={false}
@@ -190,25 +262,89 @@ export default async function ProofConsolePage({
 
       <section className={styles.architecture}>
         <SectionHeader
-          eyebrow="Verified Action lifecycle"
-          title="APPLIED is not closure"
-          detail="The generic state machine keeps execution, evidence completion, durable receipt persistence and VERIFIED distinct."
+          eyebrow="Shared Verified Action lifecycle"
+          title="APPLIED is not VERIFIED"
+          detail="Execution, evidence completion, durable receipt persistence, exact IRIS readback, and VERIFIED remain separate states."
         />
 
         <div
-          className={styles.stateGrid}
-          aria-label="Verified Action states"
+          className={styles.lifecycleMap}
+          aria-label="Proof Contract V2 lifecycle map"
         >
-          {VERIFIED_ACTION_STATES.map(
-            (
-              state,
-            ) => (
-              <CodeValue key={state}>
-                {state}
-              </CodeValue>
-            ),
-          )}
+          <div className={styles.closurePath}>
+            {closurePath.map((stage, index) => (
+              <div
+                className={styles.lifecycleStage}
+                key={stage.label}
+              >
+                <span>
+                  {String(index + 1).padStart(2, "0")} / {stage.label}
+                </span>
+                <div>
+                  {stage.states.map((state) => (
+                    <CodeValue key={state}>
+                      {state}
+                    </CodeValue>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className={styles.lifecycleBranches}>
+            <div>
+              <span>AMBIGUITY / RECONCILE</span>
+              <div>
+                {ambiguityPath.map((state) => (
+                  <CodeValue key={state}>
+                    {state}
+                  </CodeValue>
+                ))}
+              </div>
+              <small>
+                Ambiguous dispatch reconciles before verification; it is never
+                blindly retried.
+              </small>
+            </div>
+
+            <div>
+              <span>TERMINAL FAILURES</span>
+              <div>
+                {terminalFailures.map((state) => (
+                  <CodeValue key={state}>
+                    {state}
+                  </CodeValue>
+                ))}
+              </div>
+              <small>
+                Failure states remain terminal unless a separately reviewed
+                recovery contract is authorized.
+              </small>
+            </div>
+          </div>
+
+          <div className={styles.stateVocabulary}>
+            <span>COMPLETE STATE VOCABULARY</span>
+            <div className={styles.stateGrid}>
+              {VERIFIED_ACTION_STATES.map(
+                (
+                  state,
+                ) => (
+                  <CodeValue key={state}>
+                    {state}
+                  </CodeValue>
+                ),
+              )}
+            </div>
+          </div>
         </div>
+
+        <AuthorityCallout
+          eyebrow="Durable closure"
+          title="Receipt persistence is still not enough without exact readback"
+          detail="A certified action reaches VERIFIED only after every REQUIRED proof result passes, Action Receipt V2 persists, and canonical server-side IRIS readback matches the frozen receipt."
+          tone="success"
+        />
       </section>
 
       <section className={styles.architecture}>
@@ -234,13 +370,61 @@ export default async function ProofConsolePage({
             ),
           )}
         </div>
+      </section>
+
+      <section className={styles.architecture}>
+        <SectionHeader
+          eyebrow="Evidence provenance"
+          title="Agreement does not upgrade authority"
+          detail="Every proof result carries an explicit provenance class. REQUIRED evidence must PASS; CORRELATED evidence may support a narrative but is never silently promoted."
+        />
+
+        <div
+          className={styles.stateGrid}
+          aria-label="Evidence provenance classes"
+        >
+          {evidenceProvenance.map((provenance) => (
+            <CodeValue key={provenance}>
+              {provenance}
+            </CodeValue>
+          ))}
+        </div>
 
         <AuthorityCallout
           eyebrow="Judge invariant"
           title="Configuration is not closure."
-          detail="Meridian reaches VERIFIED only after fresh revalidation, bounded execution, action-specific proof evidence, durable receipt persistence and exact readback."
+          detail="Meridian reaches VERIFIED only after fresh revalidation, bounded execution, action-specific proof evidence, durable receipt persistence and exact IRIS readback."
           tone="info"
         />
+      </section>
+
+      <section className={styles.architecture}>
+        <SectionHeader
+          eyebrow="Recorded examples"
+          title="One engine, different proof stories"
+          detail="The process-termination receipt demonstrates high-risk irreversible closure; the Maya case demonstrates permissions convergence and native audit evidence."
+        />
+
+        <div className={styles.closureGrid}>
+          <div>
+            <span>O03 process termination</span>
+            <Link
+              href="/proof?receiptId=meridian-o03-process-terminate-r8-a-001"
+              className="meridian-text-link"
+            >
+              HIGH risk / IRREVERSIBLE receipt
+            </Link>
+          </div>
+          <div>
+            <span>P04 permissions case</span>
+            <Link
+              href="/change-cases/verified/maya-patel-supervisor-removal"
+              className="meridian-text-link"
+            >
+              Maya Patel / supervisor removal
+            </Link>
+          </div>
+        </div>
       </section>
     </main>
   );

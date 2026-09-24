@@ -169,7 +169,7 @@ export function AuthorizationProofSurface() {
         <div className="max-w-4xl">
           <div className="flex flex-wrap items-center gap-2">
             <span className="rounded-full border border-rose-300/25 bg-rose-300/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-rose-100">
-              Recorded certified convergence proof
+              Recorded certified permissions convergence proof
             </span>
 
             <span className="rounded-full border border-white/10 bg-black/15 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/45">
@@ -185,13 +185,13 @@ export function AuthorizationProofSurface() {
             id="authorization-proof-title"
             className="mt-5 max-w-4xl text-3xl font-semibold tracking-[-0.04em] sm:text-4xl"
           >
-            Security changes are not finished when configuration changes.
+            A permissions change can outlive configuration.
           </h2>
 
           <p className="mt-4 max-w-3xl text-base leading-7 text-white/55">
-            Meridian proves when an IRIS authorization change has actually
-            finished by keeping reviewed intent, configured IRIS truth, and
-            live-process authorization visibly separate.
+            This isolated witness shows why Meridian keeps reviewed intent,
+            configured IRIS truth, and live-process authorization visibly
+            separate before durable closure can be claimed.
           </p>
         </div>
 
@@ -281,15 +281,15 @@ export function AuthorizationProofSurface() {
 
         <article className="rounded-2xl border border-emerald-300/20 bg-emerald-300/[0.04] p-5">
           <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-emerald-200/70">
-            After controlled convergence
+            After fresh runtime convergence
           </p>
 
           <p className="mt-3 text-lg font-semibold text-emerald-100">
-            {freshPresentation.statusLabel}
+            LIVE AUTHORITY CONVERGED
           </p>
 
           <p className="mt-1 text-xs leading-5 text-white/45">
-            {freshPresentation.detail}
+            Fresh runtime authorization matches the configured state.
           </p>
 
           <div className="mt-4 grid gap-2 sm:grid-cols-2">
@@ -308,15 +308,22 @@ export function AuthorizationProofSurface() {
             Fresh PID differs from stale PID. The four revoked permissions
             directly report DENY; retained access remains ALLOW.
           </p>
+
+          <p className="mt-3 text-[10px] leading-5 text-white/35">
+            Full recorded proof object closure: {freshPresentation.statusLabel}.
+            That closure also depends on native evidence and durable receipt
+            persistence; convergence alone is not the VERIFIED verdict.
+          </p>
         </article>
       </div>
 
       <p className="mt-5 rounded-xl border border-white/10 bg-black/10 p-4 text-xs leading-5 text-white/40">
         Claim boundary: this is recorded certified evidence from the isolated
         S1 synthetic witness, not a live privileged browser mutation session.
-        It demonstrates the certified stale-to-converged authorization pattern;
-        it does not claim every IRIS authorization change always leaves stale
-        live authority.
+        It demonstrates a permissions-specific stale-to-converged pattern.
+        Convergence is necessary evidence for this case, but Proof Contract V2
+        still requires every REQUIRED proof result plus durable receipt
+        persistence and exact readback before VERIFIED.
       </p>
     </section>
   );

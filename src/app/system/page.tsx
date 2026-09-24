@@ -53,6 +53,27 @@ function pick(
   return "-";
 }
 
+const processActions = [
+  {
+    id: "O01",
+    action: "SUSPEND",
+    risk: "Bounded process state transition",
+    closure: "Exact process identity + action-specific evidence + durable receipt",
+  },
+  {
+    id: "O02",
+    action: "RESUME",
+    risk: "Bounded restoration",
+    closure: "Same reviewed process identity + action-specific evidence + durable receipt",
+  },
+  {
+    id: "O03",
+    action: "TERMINATE",
+    risk: "HIGH / IRREVERSIBLE",
+    closure: "No blind retry after ambiguous dispatch; dual authoritative absence + exact durable receipt readback",
+  },
+] as const;
+
 export default async function SystemPage() {
   const surface =
     await readSystemSurfaceFromEnvironment();
@@ -68,25 +89,132 @@ export default async function SystemPage() {
     <main className="meridian-runtime-page">
       <PageHeader
         eyebrow="Runtime / OS / SYSTEM"
-        title="Runtime evidence under read-only authority."
-        description="Live IRIS resource, memory, lock, and process evidence stays server-read and operator-visible without exposing runtime mutation controls."
+        title="Runtime evidence with bounded process actions."
+        description="This browser route remains a read-only evidence surface for live IRIS resource, memory, lock, and process state. O01-O03 execute only through separate fixed-purpose server contracts."
         actions={
           <>
             <Link href="/" className="meridian-action">
               Control room
             </Link>
             <StatusBadge tone="success">READ ONLY</StatusBadge>
-            <StatusBadge>SERVER-OWNED ESCALATION</StatusBadge>
+            <StatusBadge>BOUNDED SERVER AUTHORITY</StatusBadge>
           </>
         }
       />
+
+      <section className="meridian-runtime-section">
+        <SectionHeader
+          eyebrow="Certified process actions"
+          title="O01 suspend. O02 resume. O03 terminate."
+          detail="Three semantic actions share the same proof discipline without exposing an unrestricted browser process-control console."
+          action={
+            <Link
+              href="/proof?receiptId=meridian-o03-process-terminate-r8-a-001"
+              className="meridian-text-link"
+            >
+              Inspect O03 receipt
+            </Link>
+          }
+        />
+
+        <div className="meridian-table-wrap">
+          <table className="meridian-data-table meridian-authority-table">
+            <thead>
+              <tr>
+                <th>Action</th>
+                <th>Semantic operation</th>
+                <th>Contract posture</th>
+                <th>Closure boundary</th>
+              </tr>
+            </thead>
+            <tbody>
+              {processActions.map((item) => (
+                <tr key={item.id}>
+                  <td><CodeValue>{item.id}</CodeValue></td>
+                  <td><strong>{item.action}</strong></td>
+                  <td>{item.risk}</td>
+                  <td>{item.closure}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <AuthorityCallout
+          eyebrow="O03 non-deviation boundary"
+          title="Termination never becomes a PID-only or blind-retry operation"
+          detail="The certified O03 target binds exact process identity beyond PID, records HIGH risk and IRREVERSIBLE recovery semantics, reconciles UNKNOWN_AFTER_DISPATCH instead of automatically retrying, requires dual authoritative absence, and reaches VERIFIED only after Action Receipt V2 persists and reads back exactly."
+          tone="info"
+        />
+      </section>
+
+      <section className="meridian-runtime-section">
+        <SectionHeader
+          eyebrow="Authority boundary"
+          title="Read evidence and process execution remain separate"
+          detail="MeridianSystemMetadataReader supplies bounded runtime evidence. Certified O01-O03 execution uses separate fixed-purpose server contracts; neither becomes a generic browser mutation proxy."
+        />
+
+        <div className="meridian-table-wrap">
+          <table className="meridian-data-table meridian-authority-table">
+            <thead>
+              <tr>
+                <th>Boundary</th>
+                <th>Value</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Evidence-read role</td>
+                <td><CodeValue>MeridianSystemMetadataReader</CodeValue></td>
+              </tr>
+              <tr>
+                <td>Evidence-read resources</td>
+                <td><CodeValue>%Admin_Operate:U + %DB_IRISSYS:R</CodeValue></td>
+              </tr>
+              <tr>
+                <td>%Admin_Manage</td>
+                <td><StatusBadge tone="success">NOT GRANTED</StatusBadge></td>
+              </tr>
+              <tr>
+                <td>Browser process controls</td>
+                <td><StatusBadge tone="success">NONE</StatusBadge></td>
+              </tr>
+              <tr>
+                <td>Generic mutation proxy</td>
+                <td><StatusBadge tone="success">NONE</StatusBadge></td>
+              </tr>
+              <tr>
+                <td>Browser privileged credential</td>
+                <td>NOT EXPOSED</td>
+              </tr>
+              <tr>
+                <td>Certified execution</td>
+                <td><CodeValue>O01 / O02 / O03 fixed-purpose server contracts</CodeValue></td>
+              </tr>
+              <tr>
+                <td>Target binding</td>
+                <td>Exact process identity; PID alone is insufficient</td>
+              </tr>
+              <tr>
+                <td>Ambiguous dispatch</td>
+                <td>RECONCILE; NO BLIND RETRY</td>
+              </tr>
+              <tr>
+                <td>Surface mode</td>
+                <td>READ ONLY EVIDENCE</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
 
       {!surface.ok ? (
         <section className="meridian-runtime-section">
           <AuthorityCallout
             eyebrow="Safe failure boundary"
             title="Live OS / System metadata unavailable"
-            detail="Meridian fails closed when live system evidence cannot be read. No mutation fallback or public operational proxy is introduced."
+            detail="Meridian fails closed when live system evidence cannot be read. No mutation fallback or generic operational proxy is introduced."
             tone="warning"
           >
             <CodeValue>{surface.reason}</CodeValue>
@@ -99,7 +227,7 @@ export default async function SystemPage() {
                 value: "NONE",
               },
               {
-                label: "Public operational proxy",
+                label: "Generic operational proxy",
                 value: "NONE",
               },
               {
@@ -117,6 +245,16 @@ export default async function SystemPage() {
         <>
           <section className="meridian-runtime-metrics" aria-label="System runtime summary">
             <MetricCell
+              label="Runtime processes"
+              value={surface.processes.length}
+              detail="certified ProcessQuery read fallback"
+            />
+            <MetricCell
+              label="Current locks"
+              value={surface.locks.length}
+              detail="current lock rows"
+            />
+            <MetricCell
               label="System resources"
               value={surface.systemResources.length}
               detail="official SysAdmin rows"
@@ -126,16 +264,80 @@ export default async function SystemPage() {
               value={surface.sharedMemory.length}
               detail="live memory signals"
             />
-            <MetricCell
-              label="Current locks"
-              value={surface.locks.length}
-              detail="current lock rows"
+          </section>
+
+          <section className="meridian-runtime-section">
+            <SectionHeader
+              eyebrow="Process visibility"
+              title="Runtime processes"
+              detail="The official /v2/processes inventory-read endpoint produced a certified server-side INVALID OREF failure on pinned Build 221U, so this evidence surface uses the read-only %SYS.ProcessQuery fallback. That read-path fallback is separate from the certified O01-O03 mutation contracts."
             />
-            <MetricCell
-              label="Runtime processes"
-              value={surface.processes.length}
-              detail="certified ProcessQuery fallback"
+
+            <div className="meridian-table-wrap">
+              <table className="meridian-data-table meridian-process-table">
+                <thead>
+                  <tr>
+                    <th>PID</th>
+                    <th>User</th>
+                    <th>Namespace</th>
+                    <th>Started UTC</th>
+                    <th>Client IP</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {surface.processes.slice(0, 25).map((process, index) => (
+                    <tr key={`${process.pid ?? "unknown"}-${index}`}>
+                      <td>
+                        <CodeValue>{process.pid ?? "-"}</CodeValue>
+                      </td>
+                      <td>{process.username ?? "-"}</td>
+                      <td>{process.namespace ?? "-"}</td>
+                      <td>
+                        <CodeValue>{process.startTimeUtc ?? "-"}</CodeValue>
+                      </td>
+                      <td>
+                        <CodeValue>{process.clientIp ?? process.startupClientIp ?? "-"}</CodeValue>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <section className="meridian-runtime-section">
+            <SectionHeader
+              eyebrow="Current locks"
+              title="Lock visibility"
+              detail="Current lock evidence remains read-only. O01 suspend, O02 resume, and O03 terminate are certified server contracts, not controls on this page."
             />
+
+            <div className="meridian-table-wrap">
+              <table className="meridian-data-table meridian-lock-table">
+                <thead>
+                  <tr>
+                    <th>PID</th>
+                    <th>Reference</th>
+                    <th>Mode</th>
+                    <th>Routine</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {surface.locks.slice(0, 12).map((row, index) => (
+                    <tr key={`${pick(row, ["Pid", "pid"])}-${index}`}>
+                      <td>
+                        <CodeValue>{pick(row, ["Pid", "pid"])}</CodeValue>
+                      </td>
+                      <td>
+                        <CodeValue>{pick(row, ["Reference", "reference"])}</CodeValue>
+                      </td>
+                      <td>{pick(row, ["ModeCount", "modeCount"])}</td>
+                      <td>{pick(row, ["RoutineInfo", "routineInfo"])}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </section>
 
           <section className="meridian-runtime-section">
@@ -184,7 +386,7 @@ export default async function SystemPage() {
               />
 
               <div className="meridian-table-wrap">
-                <table className="meridian-data-table meridian-runtime-table">
+                <table className="meridian-data-table meridian-runtime-table" style={{ minWidth: 0, tableLayout: "fixed" }}>
                   <thead>
                     <tr>
                       <th>Counter</th>
@@ -215,7 +417,7 @@ export default async function SystemPage() {
               />
 
               <div className="meridian-table-wrap">
-                <table className="meridian-data-table meridian-runtime-table">
+                <table className="meridian-data-table meridian-runtime-table" style={{ minWidth: 0, tableLayout: "fixed" }}>
                   <thead>
                     <tr>
                       <th>Description</th>
@@ -240,135 +442,8 @@ export default async function SystemPage() {
               </div>
             </div>
           </section>
-
-          <section className="meridian-runtime-section">
-            <SectionHeader
-              eyebrow="Process visibility"
-              title="Runtime processes"
-              detail="%SYS.ProcessQuery over external SQL is the certified read-only fallback. The official /v2/processes surface is deliberately not used on pinned Build 221U after the certified server-side INVALID OREF failure."
-            />
-
-            <div className="meridian-table-wrap">
-              <table className="meridian-data-table meridian-process-table">
-                <thead>
-                  <tr>
-                    <th>PID</th>
-                    <th>User</th>
-                    <th>Namespace</th>
-                    <th>Started UTC</th>
-                    <th>Client IP</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {surface.processes.slice(0, 25).map((process, index) => (
-                    <tr key={`${process.pid ?? "unknown"}-${index}`}>
-                      <td>
-                        <CodeValue>{process.pid ?? "-"}</CodeValue>
-                      </td>
-                      <td>{process.username ?? "-"}</td>
-                      <td>{process.namespace ?? "-"}</td>
-                      <td>
-                        <CodeValue>{process.startTimeUtc ?? "-"}</CodeValue>
-                      </td>
-                      <td>
-                        <CodeValue>{process.clientIp ?? process.startupClientIp ?? "-"}</CodeValue>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
-
-          <section className="meridian-runtime-section">
-            <SectionHeader
-              eyebrow="Current locks"
-              title="Lock visibility"
-              detail="Current lock evidence is displayed without terminate, suspend, resume, or broadcast controls."
-            />
-
-            <div className="meridian-table-wrap">
-              <table className="meridian-data-table meridian-lock-table">
-                <thead>
-                  <tr>
-                    <th>PID</th>
-                    <th>Reference</th>
-                    <th>Mode</th>
-                    <th>Routine</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {surface.locks.slice(0, 12).map((row, index) => (
-                    <tr key={`${pick(row, ["Pid", "pid"])}-${index}`}>
-                      <td>
-                        <CodeValue>{pick(row, ["Pid", "pid"])}</CodeValue>
-                      </td>
-                      <td>
-                        <CodeValue>{pick(row, ["Reference", "reference"])}</CodeValue>
-                      </td>
-                      <td>{pick(row, ["ModeCount", "modeCount"])}</td>
-                      <td>{pick(row, ["RoutineInfo", "routineInfo"])}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
         </>
       )}
-
-      <section className="meridian-runtime-section">
-        <SectionHeader
-          eyebrow="Authority boundary"
-          title="Server-owned read authority"
-          detail="The browser receives rendered runtime evidence only."
-        />
-
-        <div className="meridian-table-wrap">
-          <table className="meridian-data-table meridian-authority-table">
-            <thead>
-              <tr>
-                <th>Boundary</th>
-                <th>Value</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Escalation role</td>
-                <td><CodeValue>MeridianSystemMetadataReader</CodeValue></td>
-              </tr>
-              <tr>
-                <td>Role resources</td>
-                <td><CodeValue>%Admin_Operate:U + %DB_IRISSYS:R</CodeValue></td>
-              </tr>
-              <tr>
-                <td>%Admin_Manage</td>
-                <td><StatusBadge tone="success">NOT GRANTED</StatusBadge></td>
-              </tr>
-              <tr>
-                <td>Mutation controls</td>
-                <td><StatusBadge tone="success">NONE</StatusBadge></td>
-              </tr>
-              <tr>
-                <td>Official process endpoint</td>
-                <td>REJECTED ON BUILD 221U</td>
-              </tr>
-              <tr>
-                <td>Process fallback</td>
-                <td>CERTIFIED READ ONLY</td>
-              </tr>
-              <tr>
-                <td>Browser escalated token</td>
-                <td>NOT EXPOSED</td>
-              </tr>
-              <tr>
-                <td>Product mode</td>
-                <td>READ ONLY</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
     </main>
   );
 }

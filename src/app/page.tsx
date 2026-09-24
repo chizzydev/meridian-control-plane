@@ -10,35 +10,45 @@ import {
   PageHeader,
   SectionHeader,
   StatusBadge,
+  type EvidenceStep,
 } from "@/components/meridian/primitives";
 import {
   getRecordedVerifiedReceipt,
   summarizeRecordedReceipt,
 } from "@/lib/change-case/recorded-receipt";
 
-const lifecycle = [
+const lifecycle: EvidenceStep[] = [
   {
-    label: "PRE-FLIGHT",
-    detail: "Impact resolved",
+    label: "PREFLIGHT",
+    detail: "Intent + target bound",
+    state: "complete",
+  },
+  {
+    label: "REVALIDATE",
+    detail: "Fresh state matched",
     state: "complete",
   },
   {
     label: "APPLY",
-    detail: "Reviewed mutation",
+    detail: "Bounded action dispatched",
     state: "complete",
   },
   {
-    label: "CONVERGE",
-    detail: "Live authority cleared",
+    label: "EVIDENCE",
+    detail: "Required planes passed",
+    state: "complete",
+  },
+  {
+    label: "RECEIPT",
+    detail: "Persisted + read back",
     state: "complete",
   },
   {
     label: "VERIFIED",
-    detail: "Native audit bound",
+    detail: "Closure reached",
     state: "complete",
   },
-] as const;
-
+];
 
 export default function Home() {
   const receipt = getRecordedVerifiedReceipt();
@@ -50,55 +60,55 @@ export default function Home() {
     <main className="meridian-control-room">
       <PageHeader
         eyebrow="Meridian Control Plane / Control room"
-        title="Security change, under proof."
-        description="Security changes are not finished when configuration changes. Meridian binds reviewed authority, live convergence, and native IRIS evidence into one inspectable Change Case."
+        title="Every privileged operation, under proof."
+        description="Meridian turns selected IRIS administrative actions into Proof Contract V2 lifecycles with fresh revalidation, bounded dispatch, action-specific evidence, durable receipts, and no generic browser mutation proxy."
         actions={
           <>
             <Link
-              href="/change-cases"
+              href="/proof-coverage"
               className="meridian-action meridian-action-primary"
             >
-              Open Change Queue
+              Inspect Proof Coverage
             </Link>
             <Link
-              href="/change-cases/new"
+              href="/change-cases"
               className="meridian-action"
             >
-              Stage access change
+              Open Change Queue
             </Link>
           </>
         }
       />
 
-      <section className="meridian-control-signal-row" aria-label="Control room summary">
+      <section className="meridian-control-signal-row" aria-label="Certified product summary">
         <MetricCell
-          label="Case state"
-          value="VERIFIED"
-          detail="Recorded certified receipt"
+          label="Certified semantic actions"
+          value={19}
+          detail="Permissions + processes + tasks + web apps"
         />
         <MetricCell
-          label="Effective roles removed"
-          value={summary.lostEffectiveRoleCount}
-          detail="Derived from authoritative impact"
+          label="Mutation endpoints"
+          value={14}
+          detail="Fixed-purpose certified transports"
         />
         <MetricCell
-          label="Permissions removed"
-          value={summary.lostPermissionCount}
-          detail="Changed permission pairs"
+          label="Primary operations"
+          value={273}
+          detail="Explicit pinned coverage atlas"
         />
         <MetricCell
-          label="Residual live access"
-          value={receipt.convergence.liveResidueObserved ? "Observed" : "None"}
-          detail="Recorded convergence result"
+          label="Generic mutation proxy"
+          value="NONE"
+          detail="Browser authority stays bounded"
         />
       </section>
 
       <section className="meridian-control-focus">
         <div className="meridian-control-case">
           <SectionHeader
-            eyebrow="Verified centerpiece"
+            eyebrow="Recorded permissions case"
             title="Maya Patel / supervisor removal"
-            detail="One change case carried from pre-flight through native audit closure."
+            detail="One P04 USER_REMOVE_ROLE case showing configuration, live authority, native audit, and durable receipt closure."
             action={<StatusBadge tone="success">VERIFIED</StatusBadge>}
           />
 
@@ -111,20 +121,21 @@ export default function Home() {
           </div>
 
           <div className="meridian-control-rail-wrap">
-            <EvidenceRail steps={[...lifecycle]} />
+            <EvidenceRail steps={lifecycle} />
           </div>
 
           <div className="meridian-control-inspector-grid">
             <KeyValueInspector
               rows={[
                 {
-                  label: "User",
-                  value: receipt.change.username,
+                  label: "Semantic action",
+                  value: "P04 USER_REMOVE_ROLE",
                   mono: true,
                 },
                 {
-                  label: "Operation",
-                  value: receipt.change.operation,
+                  label: "User",
+                  value: receipt.change.username,
+                  mono: true,
                 },
                 {
                   label: "Role",
@@ -156,8 +167,8 @@ export default function Home() {
                   mono: true,
                 },
                 {
-                  label: "Evidence mode",
-                  value: "Read-only demo evidence",
+                  label: "Durable history",
+                  value: "Receipt persisted and inspectable",
                 },
               ]}
             />
@@ -195,13 +206,14 @@ export default function Home() {
           </EvidenceBlock>
 
           <EvidenceBlock
-            label="Convergence"
-            title="CONFIGURATION + LIVE ACCESS"
+            label="Closure"
+            title="EVIDENCE + DURABLE READBACK"
             tone="info"
           >
             <p className="meridian-control-evidence-copy">
-              Configuration changed, live authority converged, and the exact
-              native audit event was bound before VERIFIED closure.
+              Configuration, live authority, native audit, and persistent
+              receipt evidence agree for this case. VERIFIED is not granted
+              by configuration or HTTP success alone.
             </p>
           </EvidenceBlock>
 
@@ -209,7 +221,7 @@ export default function Home() {
             href="/change-cases/verified/maya-patel-supervisor-removal"
             className="meridian-control-receipt-link"
           >
-            Inspect verified receipt
+            Inspect verified case
             <span aria-hidden="true">-&gt;</span>
           </Link>
         </aside>
@@ -218,8 +230,8 @@ export default function Home() {
       <section className="meridian-control-section">
         <SectionHeader
           eyebrow="Change control"
-          title="Recent change cases"
-          detail="The control room favors state, authority, convergence, and receipt evidence over marketing summaries."
+          title="Recorded change cases"
+          detail="Concrete cases remain inspectable without pretending that one permissions example is the entire product."
           action={
             <Link href="/change-cases" className="meridian-text-link">
               Full queue
@@ -228,13 +240,14 @@ export default function Home() {
         />
 
         <div className="meridian-table-wrap">
-          <table className="meridian-data-table">
+          <table className="meridian-data-table meridian-queue-table">
             <thead>
               <tr>
                 <th>Case</th>
+                <th>Semantic action</th>
                 <th>Subject</th>
                 <th>Authority change</th>
-                <th>Convergence</th>
+                <th>Closure</th>
                 <th>Receipt</th>
                 <th aria-label="Open case" />
               </tr>
@@ -244,6 +257,7 @@ export default function Home() {
                 <td>
                   <StatusBadge tone="success">VERIFIED</StatusBadge>
                 </td>
+                <td><CodeValue>P04 USER_REMOVE_ROLE</CodeValue></td>
                 <td>
                   <strong>Maya Patel</strong>
                   <small>{receipt.change.username}</small>
@@ -256,7 +270,7 @@ export default function Home() {
                 <td>
                   <span className="meridian-inline-state" data-tone="success">
                     <span />
-                    No residual access
+                    Exact durable readback
                   </span>
                 </td>
                 <td>
@@ -281,38 +295,48 @@ export default function Home() {
         <div className="meridian-control-section">
           <SectionHeader
             eyebrow="Evidence posture"
-            title="Configuration is not closure"
-            detail="The change only closes when configured state, live process authority, and native audit evidence agree."
+            title="APPLIED is not VERIFIED"
+            detail="The shared proof standard separates reviewed intent, fresh state, execution, evidence, and durable closure."
           />
 
           <div className="meridian-control-posture">
             <div>
               <span className="meridian-posture-index">01</span>
               <div>
-                <strong>PRE-FLIGHT</strong>
+                <strong>PREFLIGHT</strong>
                 <p>
-                  Resolve effective-role, permission, application, REST-operation,
-                  and causal impact before mutation.
+                  Bind action identity, exact target, expected delta, risk,
+                  reversibility, authority, and required evidence.
                 </p>
               </div>
             </div>
             <div>
               <span className="meridian-posture-index">02</span>
               <div>
-                <strong>CONVERGE</strong>
+                <strong>REVALIDATE + APPLY</strong>
                 <p>
-                  Keep CONFIGURATION and LIVE ACCESS separate until changed
-                  authority has actually disappeared.
+                  Fresh authoritative state must still match before one
+                  fixed-purpose server contract may dispatch.
                 </p>
               </div>
             </div>
             <div>
               <span className="meridian-posture-index">03</span>
               <div>
-                <strong>RECEIPT</strong>
+                <strong>PROVE</strong>
                 <p>
-                  Bind an exact native IRIS UserChange event before VERIFIED
-                  becomes defensible.
+                  Every REQUIRED action-specific evidence result must PASS.
+                  Ambiguous dispatch is reconciled instead of blindly retried.
+                </p>
+              </div>
+            </div>
+            <div>
+              <span className="meridian-posture-index">04</span>
+              <div>
+                <strong>PERSIST + READ BACK</strong>
+                <p>
+                  Action Receipt V2 must persist and read back exactly from
+                  IRIS before VERIFIED is defensible.
                 </p>
               </div>
             </div>
@@ -323,26 +347,26 @@ export default function Home() {
           <SectionHeader
             eyebrow="Authority boundary"
             title="Evidence, not browser privilege"
-            detail="The public-facing surface presents certified evidence without widening privileged mutation authority."
+            detail="The public-facing surface presents evidence and supported intent without widening privileged mutation authority."
           />
 
           <AuthorityCallout
-            eyebrow="Recorded evidence"
-            title="Read-only demo evidence"
-            detail="The centerpiece receipt is a recorded certified artifact. Privileged IRIS mutation stays outside the browser authority boundary."
+            eyebrow="Bounded server authority"
+            title="No generic browser mutation proxy"
+            detail="Certified mutations execute through fixed-purpose server contracts. Credentials, transport selection, authority expressions, and proof standards stay server-side."
             tone="info"
           />
 
           <div className="meridian-control-boundary-stats">
             <MetricCell
-              label="Browser mutation authority"
+              label="Browser generic mutation authority"
               value="None"
-              detail="No privileged role mutation from this surface"
+              detail="No arbitrary privileged payload"
             />
             <MetricCell
-              label="Receipt validation"
-              value="Bound"
-              detail="Validated product-side receipt contract"
+              label="Durable closure"
+              value="Exact"
+              detail="Persist + canonical IRIS readback"
             />
           </div>
         </div>
@@ -350,12 +374,26 @@ export default function Home() {
 
       <section className="meridian-control-section">
         <SectionHeader
-          eyebrow="Supporting control-plane breadth"
-          title="Runtime surfaces"
-          detail="Five operational surfaces expose the surrounding IRIS control plane without competing with the change-case fast path."
+          eyebrow="Certified control-plane breadth"
+          title="Management surfaces"
+          detail="Permissions, processes, tasks, and web applications have fixed-purpose certified actions; Logs and Security remain evidence/read surfaces."
         />
 
         <div className="meridian-surface-ledger">
+          <Link href="/change-cases" aria-label="Explore Permissions change cases">
+            <span className="meridian-surface-state" aria-hidden="true" />
+            <span>
+              <strong>Permissions</strong>
+              <small>Recorded change cases, live authority, audit, receipts</small>
+            </span>
+            <span className="meridian-surface-boundary">
+              P01-P06 certified actions
+            </span>
+            <span className="meridian-surface-open" aria-hidden="true">
+              -&gt;
+            </span>
+          </Link>
+
           <Link href="/system" aria-label="Explore OS / System">
             <span className="meridian-surface-state" aria-hidden="true" />
             <span>
@@ -363,7 +401,7 @@ export default function Home() {
               <small>Runtime identity, pressure, locks, process evidence</small>
             </span>
             <span className="meridian-surface-boundary">
-              Read-only server authority
+              O01-O03 certified actions
             </span>
             <span className="meridian-surface-open" aria-hidden="true">
               -&gt;
@@ -374,24 +412,10 @@ export default function Home() {
             <span className="meridian-surface-state" aria-hidden="true" />
             <span>
               <strong>Task Management</strong>
-              <small>Configured schedules, next execution, recent history</small>
+              <small>Configured schedules, state, next execution, history</small>
             </span>
             <span className="meridian-surface-boundary">
-              Task metadata escalation
-            </span>
-            <span className="meridian-surface-open" aria-hidden="true">
-              -&gt;
-            </span>
-          </Link>
-
-          <Link href="/logs" aria-label="Explore Logs">
-            <span className="meridian-surface-state" aria-hidden="true" />
-            <span>
-              <strong>Logs</strong>
-              <small>Operational events by source, severity, and time</small>
-            </span>
-            <span className="meridian-surface-boundary">
-              Narrow SQL SELECT
+              T01-T06 certified actions
             </span>
             <span className="meridian-surface-open" aria-hidden="true">
               -&gt;
@@ -402,10 +426,24 @@ export default function Home() {
             <span className="meridian-surface-state" aria-hidden="true" />
             <span>
               <strong>Web Apps &amp; REST</strong>
-              <small>Protected applications, handlers, deployed operations</small>
+              <small>Application identity, deployed routes, protection proof</small>
             </span>
             <span className="meridian-surface-boundary">
-              Browser remains read-only
+              W01-W04 certified actions
+            </span>
+            <span className="meridian-surface-open" aria-hidden="true">
+              -&gt;
+            </span>
+          </Link>
+
+          <Link href="/logs" aria-label="Explore Logs">
+            <span className="meridian-surface-state" aria-hidden="true" />
+            <span>
+              <strong>Logs</strong>
+              <small>Operational evidence by source, severity, and time</small>
+            </span>
+            <span className="meridian-surface-boundary">
+              Narrow read evidence
             </span>
             <span className="meridian-surface-open" aria-hidden="true">
               -&gt;
@@ -416,10 +454,10 @@ export default function Home() {
             <span className="meridian-surface-state" aria-hidden="true" />
             <span>
               <strong>Security &amp; Secrets</strong>
-              <small>Security metadata and explicit secret boundaries</small>
+              <small>Approved metadata and explicit secret boundaries</small>
             </span>
             <span className="meridian-surface-boundary">
-              Secret material never reaches browser
+              Read metadata; mutation breadth not claimed
             </span>
             <span className="meridian-surface-open" aria-hidden="true">
               -&gt;

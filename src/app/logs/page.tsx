@@ -202,7 +202,7 @@ export default async function LogsPage(
               <AuthorityCallout
                 eyebrow="Empty live runtime"
                 title="No operational log rows are currently present."
-                detail="The read authority and schema are live-certified. Meridian does not manufacture synthetic log entries just to populate this surface."
+                detail="The read authority and schema are live-certified. An empty authoritative result stays empty; Meridian does not manufacture synthetic log entries just to populate this surface."
                 tone="info"
               />
 
@@ -264,8 +264,8 @@ export default async function LogsPage(
       <section className="meridian-runtime-section">
         <SectionHeader
           eyebrow="Authority boundary"
-          title="Narrow non-audit read authority"
-          detail="Operational logs stay distinct from Security audit authority and from any mutation control."
+          title="Narrow operational evidence authority"
+          detail="Operational logs can contribute action-specific operational evidence, but they remain distinct from native Security audit authority and do not create certified Logs mutation breadth."
         />
 
         <div className="meridian-table-wrap">
@@ -281,8 +281,9 @@ export default async function LogsPage(
               <tr><td>Retained privilege</td><td>SELECT ONLY</td></tr>
               <tr><td>Security audit</td><td>DISTINCT AUTHORITY</td></tr>
               <tr><td>Log mutation controls</td><td>NONE</td></tr>
+              <tr><td>Generic mutation proxy</td><td>NONE</td></tr>
               <tr><td>Browser credential</td><td>NOT EXPOSED</td></tr>
-              <tr><td>Raw message output</td><td>NEVER</td></tr>
+              <tr><td>Raw message payloads</td><td>NOT EXPOSED - secret and sensitive-message boundary</td></tr>
               <tr><td>Transport</td><td>SERVER-ONLY DBAPI</td></tr>
               <tr><td>Product mode</td><td>READ ONLY</td></tr>
             </tbody>

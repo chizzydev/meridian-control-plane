@@ -176,6 +176,67 @@
   margin-top: 16px;
 }
 
+.lifecycleMap {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.closurePath {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 1px;
+  border: 1px solid var(--meridian-line);
+  background: var(--meridian-line);
+}
+
+.lifecycleStage,
+.lifecycleBranches > div,
+.stateVocabulary {
+  min-width: 0;
+  background: var(--meridian-surface-0);
+  padding: 13px;
+}
+
+.lifecycleStage > span,
+.lifecycleBranches > div > span,
+.stateVocabulary > span {
+  display: block;
+  color: var(--meridian-text-faint);
+  font-size: 8px;
+  font-weight: 750;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.lifecycleStage > div,
+.lifecycleBranches > div > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 9px;
+}
+
+.lifecycleBranches {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  border: 1px solid var(--meridian-line);
+  background: var(--meridian-line);
+}
+
+.lifecycleBranches small {
+  display: block;
+  margin-top: 9px;
+  color: var(--meridian-text-faint);
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+.stateVocabulary .stateGrid {
+  margin-top: 9px;
+}
+
 .planeGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -201,6 +262,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .closurePath {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .receiptHero {
     grid-template-columns: 1fr;
   }
@@ -214,7 +279,9 @@
   .lookupForm,
   .metrics,
   .closureGrid,
-  .planeGrid {
+  .planeGrid,
+  .closurePath,
+  .lifecycleBranches {
     grid-template-columns: 1fr;
   }
 

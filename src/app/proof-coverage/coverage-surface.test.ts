@@ -31,6 +31,10 @@ describe(
             "No arbitrary URL. No arbitrary method. No generic mutation body.",
             "GENERIC_MUTATION_DISPATCH=NO",
             "BROWSER_CREDENTIAL_EXPOSURE=NO",
+            "Six SysAdmin families, explicit current status",
+            "Certified action binding",
+            "certified semantic actions across",
+            "pinned public InterSystems Community SysAdmin API specification",
             '`EXPLORER_RESULT=${liveResult.ok ? "PASS" : "NOT_PASS"}`',
             '`EXPLORER_HTTP_STATUS=${liveResult.httpStatus ?? "NONE"}`',
             '`AUTHORITY_MODE=${liveResult.authorityMode ?? "NONE"}`',
@@ -61,6 +65,11 @@ describe(
             "Authorization:",
             "Bearer ",
             "process.env",
+            "organizer-declared",
+            "contest families",
+            "Release track",
+            "not certified at R2",
+            "Reserved for R6",
           ]
         ) {
           expect(
@@ -99,6 +108,42 @@ describe(
             marker,
           );
         }
+      },
+    );
+
+    it(
+      "fits the eight-column operation atlas on desktop while preserving bounded mobile overflow",
+      () => {
+        const css =
+          readFileSync(
+            "src/app/proof-coverage/coverage.module.css",
+            "utf8",
+          );
+
+        for (
+          const marker of [
+            "table-layout: fixed",
+            "min-width: 100%",
+            "overflow-wrap: anywhere",
+            "@media (max-width: 900px)",
+            "min-width: 1180px",
+            ".operationTable th:nth-child(8)",
+            "width: 5%",
+            "table-layout: auto",
+          ]
+        ) {
+          expect(
+            css,
+          ).toContain(
+            marker,
+          );
+        }
+
+        expect(
+          css,
+        ).not.toContain(
+          "min-width: 1450px",
+        );
       },
     );
 

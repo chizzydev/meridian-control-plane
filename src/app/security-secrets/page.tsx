@@ -31,7 +31,7 @@ export default async function SecuritySecretsPage() {
       <PageHeader
         eyebrow="Surfaces / SECURITY / SECRETS"
         title="Security metadata, never secret material."
-        description="Meridian uses an EXPLICIT ESCALATION ROLE for server-owned metadata reads. The browser receives approved metadata only; secret material never crosses the display boundary."
+        description="Meridian uses bounded server-held metadata read authority. The browser receives approved metadata only; secret material never crosses the display boundary."
         actions={
           <>
             <Link href="/" className="meridian-action">
@@ -44,10 +44,38 @@ export default async function SecuritySecretsPage() {
       />
 
       <section className="meridian-runtime-section">
+        <AuthorityCallout
+          eyebrow="Certified product boundary"
+          title="Metadata inspection supported. Security / Secrets mutation breadth not claimed."
+          detail="Meridian exposes approved metadata through bounded server-held reads while keeping secret values, private keys, certificate bodies, client secrets, browser credentials, and generic mutation authority outside the display boundary."
+          tone="info"
+        />
+
+        <div className="meridian-table-wrap">
+          <table className="meridian-data-table meridian-authority-table">
+            <thead>
+              <tr>
+                <th>Metadata family</th>
+                <th>Product boundary</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Wallet metadata</td><td>Secret name/type metadata only</td></tr>
+              <tr><td>X.509 metadata</td><td>Identity and presence metadata only</td></tr>
+              <tr><td>TLS / SSL configuration</td><td>Configuration identity and state only</td></tr>
+              <tr><td>OAuth authorization servers</td><td>Approved server-definition metadata</td></tr>
+              <tr><td>OAuth resource servers</td><td>Approved resource-server metadata</td></tr>
+              <tr><td>OAuth registered clients</td><td>Approved registration metadata; no client secret material</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="meridian-runtime-section">
         <SectionHeader
           eyebrow="Authority boundary"
           title="MeridianSecurityMetadataReader"
-          detail="Permissions remains the centerpiece: narrow metadata authority is escalated explicitly instead of broadening the default runtime role."
+          detail="This surface remains deliberately read-only: narrow metadata authority is activated server-side only for approved reads, secret material stays hidden, and Meridian claims no certified Security / Secrets mutation breadth."
         />
 
         <div className="meridian-table-wrap">
@@ -63,7 +91,7 @@ export default async function SecuritySecretsPage() {
               <tr>
                 <td>Authority</td>
                 <td><CodeValue>MeridianSecurityMetadataReader</CodeValue></td>
-                <td>Explicit server-owned metadata escalation.</td>
+                <td>Bounded server-held metadata read authority.</td>
               </tr>
               <tr>
                 <td>Default runtime broadened</td>
@@ -76,7 +104,12 @@ export default async function SecuritySecretsPage() {
                 <td>Six approved metadata families plus safe nested metadata.</td>
               </tr>
               <tr>
-                <td>Public management proxy</td>
+                <td>Certified mutation breadth</td>
+                <td><StatusBadge tone="success">NOT CLAIMED</StatusBadge></td>
+                <td>Security / Secrets remains an evidence/read family in the submitted product.</td>
+              </tr>
+              <tr>
+                <td>Generic mutation proxy</td>
                 <td><StatusBadge tone="success">NONE</StatusBadge></td>
                 <td>No browser management route is created.</td>
               </tr>
@@ -100,7 +133,7 @@ export default async function SecuritySecretsPage() {
           <AuthorityCallout
             eyebrow="Safe failure boundary"
             title="Live security metadata unavailable"
-            detail="The metadata read failed closed. Meridian exposes no fallback secret access, public management proxy, or mutation control."
+            detail="The metadata read failed closed. Meridian exposes no fallback secret access, generic mutation proxy, or mutation control."
             tone="warning"
           >
             <CodeValue>{surface.reason}</CodeValue>
@@ -265,7 +298,7 @@ export default async function SecuritySecretsPage() {
 
           <section className="meridian-runtime-section">
             <SectionHeader
-              eyebrow="OAuth client"
+              eyebrow="OAuth authorization server"
               title={`${surface.oauthClientServers.length} authorization-server definitions`}
               detail="Authorization-server identity plus Client configuration metadata."
             />
@@ -284,7 +317,7 @@ export default async function SecuritySecretsPage() {
                 <tbody>
                   {surface.oauthClientServers.length === 0 ? (
                     <tr>
-                      <td colSpan={5}>No OAuth client-server definitions are configured.</td>
+                      <td colSpan={5}>No OAuth authorization-server definitions are configured.</td>
                     </tr>
                   ) : (
                     surface.oauthClientServers.map((server) => (
@@ -320,7 +353,7 @@ export default async function SecuritySecretsPage() {
               />
 
               <div className="meridian-table-wrap">
-                <table className="meridian-data-table meridian-security-table">
+                <table className="meridian-data-table meridian-security-table" style={{ minWidth: 0, tableLayout: "fixed" }}>
                   <thead>
                     <tr>
                       <th>Resource server</th>
@@ -353,7 +386,7 @@ export default async function SecuritySecretsPage() {
               />
 
               <div className="meridian-table-wrap">
-                <table className="meridian-data-table meridian-security-table">
+                <table className="meridian-data-table meridian-security-table" style={{ minWidth: 0, tableLayout: "fixed" }}>
                   <thead>
                     <tr>
                       <th>Client</th>
@@ -409,7 +442,7 @@ export default async function SecuritySecretsPage() {
               <tr><td>Certificate bodies</td><td><StatusBadge tone="success">NEVER</StatusBadge></td></tr>
               <tr><td>Client secrets / passwords</td><td><StatusBadge tone="success">NEVER</StatusBadge></td></tr>
               <tr><td>Browser credential</td><td><StatusBadge tone="success">NOT EXPOSED</StatusBadge></td></tr>
-              <tr><td>Public management proxy</td><td><StatusBadge tone="success">NONE</StatusBadge></td></tr>
+              <tr><td>Generic mutation proxy</td><td><StatusBadge tone="success">NONE</StatusBadge></td></tr>
               <tr><td>Mutation controls</td><td><StatusBadge tone="success">NONE</StatusBadge></td></tr>
               <tr><td>Mode</td><td><StatusBadge tone="success">READ ONLY</StatusBadge></td></tr>
             </tbody>

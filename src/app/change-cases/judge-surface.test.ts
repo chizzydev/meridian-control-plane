@@ -33,14 +33,14 @@ describe(
 
         for (
           const marker of [
-            "Security changes are not finished when configuration changes.",
-            "PRE-FLIGHT",
+            "Every privileged operation, under proof.",
+            "PREFLIGHT",
             "APPLY",
-            "CONVERGE",
+            "REVALIDATE",
             "VERIFIED",
             "Open Change Queue",
-            "Stage access change",
-            "Inspect verified receipt",
+            "Inspect Proof Coverage",
+            "Exact durable readback",
           ]
         ) {
           expect(
@@ -62,24 +62,68 @@ describe(
 
         for (
           const marker of [
-            "Change Queue",
+            "Recorded proof-contract cases",
             "Needs review",
             "Ready",
-            "Converging",
+            "Evidence",
             "Verified",
-            "Stage access change",
+            "Inspect action preflight",
             "Recorded certified receipt",
-            "Read-only demo evidence",
+            "Read-only case evidence",
             "Persistent IRIS history check",
-            "live server-side IRIS",
-            "static and credential-free",
-            "Open verified receipt + IRIS history",
+            "exact server-side",
+            "receipt-history readback",
+            "Receipt + inspection",
+            "Exact readback",
+            "Inspect case",
           ]
         ) {
           expect(
             queue,
           ).toContain(
             marker,
+          );
+        }
+
+        const preflight =
+          read(
+            "src/app/change-cases/new/page.tsx",
+          );
+
+        for (
+          const marker of [
+            "Action preflight",
+            "19 semantic actions. Four bounded families.",
+            "P01-P06",
+            "O01-O03",
+            "T01-T06",
+            "W01-W04",
+            "UNKNOWN_AFTER_DISPATCH",
+            "Generic mutation authority: NONE.",
+            "Inspect recorded O03 receipt",
+            "Different actions, one closure discipline",
+            "Contract posture",
+          ]
+        ) {
+          expect(
+            preflight,
+          ).toContain(
+            marker,
+          );
+        }
+
+        for (
+          const forbidden of [
+            "CENTERPIECE_CHANGE",
+            "Controlled centerpiece mutation",
+            "Run authoritative preflight",
+            "<button",
+          ]
+        ) {
+          expect(
+            preflight,
+          ).not.toContain(
+            forbidden,
           );
         }
 
@@ -119,6 +163,13 @@ describe(
             "Declared impact",
             "Recorded evidence source",
             "Claim boundary",
+            "P04 USER_REMOVE_ROLE",
+            "Receipt persistence + exact IRIS readback",
+            "binds the native-audit plane",
+            "Configured state confirmed",
+            "Runtime residue checked",
+            'persistent.history.length === 1 ? "history entry" : "history entries"',
+            'persistent.history.length === 1 ? "entry" : "entries"',
           ]
         ) {
           expect(
@@ -132,6 +183,12 @@ describe(
           receipt,
         ).not.toContain(
           "Kill process",
+        );
+
+        expect(
+          receipt,
+        ).not.toContain(
+          "Applied and verified",
         );
       },
     );
@@ -153,7 +210,7 @@ describe(
         expect(
           receipt,
         ).toContain(
-          "Read-only demo evidence",
+          "Read-only case evidence",
         );
 
         expect(
@@ -237,10 +294,10 @@ describe(
 
         for (
           const marker of [
-            "Recorded certified convergence proof",
+            "Recorded certified permissions convergence proof",
             "Isolated synthetic witness",
             "Read-only proof evidence",
-            "Security changes are not finished when configuration changes.",
+            "A permissions change can outlive configuration.",
             "Configuration changed. Live authority did not.",
             "EXPECTED",
             "CONFIGURED",
@@ -251,8 +308,9 @@ describe(
             "173081",
             "Old stale PID gone",
             "Fresh PID",
-            "VERIFIED",
-            "CONFIGURED AND LIVE AUTHORIZATION CONVERGED",
+            "LIVE AUTHORITY CONVERGED",
+            "Full recorded proof object closure:",
+            "convergence alone is not the VERIFIED verdict",
             "not a live privileged browser mutation session",
           ]
         ) {

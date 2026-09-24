@@ -123,8 +123,17 @@ describe(
           const marker of [
             "SECURITY / SECRETS",
             "METADATA ONLY",
-            "EXPLICIT ESCALATION ROLE",
-            "Permissions remains the centerpiece",
+            "bounded server-held metadata read authority",
+            "This surface remains deliberately read-only",
+            "Metadata inspection supported. Security / Secrets mutation breadth not claimed.",
+            "Certified mutation breadth",
+            "NOT CLAIMED",
+            "Wallet metadata",
+            "X.509 metadata",
+            "TLS / SSL configuration",
+            "OAuth authorization servers",
+            "OAuth resource servers",
+            "OAuth registered clients",
             "MeridianSecurityMetadataReader",
             "Default runtime broadened",
             "Wallet",
@@ -133,7 +142,7 @@ describe(
             "Private key present",
             "CA file metadata",
             "TLS / SSL",
-            "OAuth client",
+            "OAuth authorization server",
             "Client configuration metadata",
             "OAuth resource server",
             "OAuth server client",
@@ -145,7 +154,7 @@ describe(
             "Client secrets / passwords",
             "Browser credential",
             "NOT EXPOSED",
-            "Public management proxy",
+            "Generic mutation proxy",
             "Mutation controls",
             "READ ONLY",
           ]
@@ -186,6 +195,26 @@ describe(
         ).not.toContain(
           "<button",
         );
+
+        expect(
+          page,
+        ).not.toContain(
+          'eyebrow="OAuth client"',
+        );
+
+        expect(
+          page,
+        ).toContain(
+          "No OAuth authorization-server definitions are configured.",
+        );
+
+        expect(
+          page.match(
+            /style=\{\{ minWidth: 0, tableLayout: "fixed" \}\}/g,
+          )?.length,
+        ).toBe(
+          2,
+        );
       },
     );
 
@@ -199,9 +228,9 @@ describe(
 
         for (
           const marker of [
-            "Security changes are not finished when configuration changes.",
+            "Every privileged operation, under proof.",
             "Open Change Queue",
-            "Inspect verified receipt",
+            "Exact durable readback",
             'href="/web-rest"',
             "Explore Web Apps / REST",
             'href="/security-secrets"',

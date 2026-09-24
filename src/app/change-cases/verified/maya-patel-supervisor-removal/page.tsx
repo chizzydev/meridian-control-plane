@@ -25,23 +25,38 @@ export const dynamic =
 
 const lifecycle: EvidenceStep[] = [
   {
-    label: "PRE-FLIGHT",
-    detail: "Impact bound",
+    label: "PREFLIGHT",
+    detail: "P04 intent + target bound",
+    state: "complete",
+  },
+  {
+    label: "REVALIDATE",
+    detail: "Fresh state matched",
     state: "complete",
   },
   {
     label: "APPLY",
-    detail: "Configuration changed",
+    detail: "Role removal dispatched",
     state: "complete",
   },
   {
-    label: "CONVERGENCE",
+    label: "CONVERGE",
     detail: "Live authority cleared",
     state: "complete",
   },
   {
+    label: "AUDIT",
+    detail: "UserChange evidence bound",
+    state: "complete",
+  },
+  {
+    label: "READBACK",
+    detail: "Persistent receipt exact",
+    state: "complete",
+  },
+  {
     label: "VERIFIED",
-    detail: "Audit + receipt bound",
+    detail: "Closure reached",
     state: "complete",
   },
 ];
@@ -96,7 +111,7 @@ export default async function VerifiedReceiptPage() {
       <PageHeader
         eyebrow="Change control / Verified case inspector"
         title="Remove MeridianSupervisor from Maya Patel"
-        description="A verified Change Case closes only when configured state, live authority, native audit, and durable receipt evidence agree."
+        description="This recorded P04 USER_REMOVE_ROLE case reaches VERIFIED only when fresh state, configuration, live authority, native audit, and durable receipt evidence agree."
         actions={
           <>
             <Link href="/change-cases" className="meridian-action">
@@ -110,7 +125,7 @@ export default async function VerifiedReceiptPage() {
       <section className="meridian-inspector-identity" aria-label="Verified receipt identity">
         <div>
           <StatusBadge tone="success">Recorded certified receipt</StatusBadge>
-          <StatusBadge>Read-only demo evidence</StatusBadge>
+          <StatusBadge>Read-only case evidence</StatusBadge>
           <StatusBadge tone={persistent ? "success" : "warning"}>
             {persistent ? "Persistent IRIS history live" : <span aria-label="Persistent IRIS history unavailable">Live history check unavailable</span>}
           </StatusBadge>
@@ -118,6 +133,11 @@ export default async function VerifiedReceiptPage() {
 
         <KeyValueInspector
           rows={[
+            {
+              label: "Semantic action",
+              value: "P04 USER_REMOVE_ROLE",
+              mono: true,
+            },
             {
               label: "User",
               value: receipt.change.username,
@@ -202,7 +222,7 @@ export default async function VerifiedReceiptPage() {
                   </CodeValue>
                 </td>
                 <td>
-                  <StatusBadge tone="success">Applied and verified</StatusBadge>
+                  <StatusBadge tone="success">Configured state confirmed</StatusBadge>
                 </td>
                 <td>
                   Direct-role before/after
@@ -224,7 +244,7 @@ export default async function VerifiedReceiptPage() {
                   <StatusBadge tone="success">Converged</StatusBadge>
                 </td>
                 <td>
-                  Claim boundary: POST #3 converged with no active target process.
+                  Recorded end-state probe: no active target process retained the removed authority.
                 </td>
               </tr>
 
@@ -265,7 +285,7 @@ export default async function VerifiedReceiptPage() {
                 </td>
                 <td>
                   {persistent
-                    ? `${persistent.history.length} history entries`
+                    ? `${persistent.history.length} ${persistent.history.length === 1 ? "history entry" : "history entries"}`
                     : "Recorded receipt remains visible; live persistence is not implied"}
                 </td>
               </tr>
@@ -276,7 +296,7 @@ export default async function VerifiedReceiptPage() {
         <AuthorityCallout
           eyebrow="Claim boundary"
           title="Configuration is not closure by itself"
-          detail="POST #3 proves the converged end state. It does not claim that POST #3 demonstrated the stale-process transition; the closed B6C experiment supplies that separate proof."
+          detail="The recorded end-state probe proves convergence for this case. A separate certified stale-process witness demonstrates the stale-to-converged transition. Those claims remain intentionally separate, and neither substitutes for durable receipt closure."
           tone="info"
         />
       </section>
@@ -413,8 +433,8 @@ export default async function VerifiedReceiptPage() {
       <section className="meridian-inspector-section">
         <SectionHeader
           eyebrow="Change Receipt"
-          title="Previewed, applied, observed, converged, audited."
-          detail="The receipt timeline records the closure sequence without collapsing configuration and runtime truth."
+          title="Preflighted, revalidated, applied, evidenced, persisted, verified."
+          detail="The recorded timeline preserves the case sequence without collapsing configuration and runtime truth; the persistent-history section below makes durable receipt readback explicit."
         />
 
         <div className="meridian-table-wrap">
@@ -433,7 +453,11 @@ export default async function VerifiedReceiptPage() {
                     <CodeValue>{String(index + 1).padStart(2, "0")}</CodeValue>
                   </td>
                   <td>
-                    <strong>{item.stage}</strong>
+                    <strong>
+                      {item.stage === "Runtime residue observed"
+                        ? "Runtime residue checked"
+                        : item.stage}
+                    </strong>
                   </td>
                   <td>
                     <StatusBadge tone="success">{item.status}</StatusBadge>
@@ -448,8 +472,8 @@ export default async function VerifiedReceiptPage() {
       <section className="meridian-inspector-section">
         <SectionHeader
           eyebrow="Native Audit"
-          title="One exact IRIS UserChange event closes the receipt."
-          detail="Native evidence is shown with its actor, event identity, role transition, and timing."
+          title="One exact IRIS UserChange event binds the native-audit plane."
+          detail="Native evidence is shown with its actor, event identity, role transition, and timing. The audit event is required evidence for this case, not sufficient closure by itself."
         />
 
         <div className="meridian-inspector-audit">
@@ -493,8 +517,8 @@ export default async function VerifiedReceiptPage() {
       <section className="meridian-inspector-section">
         <SectionHeader
           eyebrow="Durable evidence"
-          title="Persistent IRIS history + recorded source"
-          detail="Recorded receipt evidence remains independently visible; this server-owned check verifies whether the same receipt is currently readable from persistent IRIS history."
+          title="Receipt persistence + exact IRIS readback"
+          detail="Recorded receipt evidence remains independently visible; this server-owned check verifies that the same canonical receipt is readable from persistent IRIS history before durable closure is presented."
         />
 
         <div className="meridian-inspector-history">
@@ -503,7 +527,10 @@ export default async function VerifiedReceiptPage() {
               <>
                 <div className="meridian-inspector-history-heading">
                   <StatusBadge tone="success">Persistent IRIS history live</StatusBadge>
-                  <span>{persistent.history.length} entries</span>
+                  <span>
+                    {persistent.history.length}{" "}
+                    {persistent.history.length === 1 ? "entry" : "entries"}
+                  </span>
                 </div>
 
                 <KeyValueInspector

@@ -24,7 +24,7 @@ const navGroups: NavGroup[] = [
       { href: "/change-cases", label: "Change cases", detail: "Queue and evidence", glyph: "cases" },
       { href: "/proof", label: "Proof", detail: "Verified receipts", glyph: "proof" },
       { href: "/proof-coverage", label: "Coverage", detail: "273-op atlas", glyph: "coverage" },
-      { href: "/change-cases/new", label: "New case", detail: "Preflight a request", glyph: "new" },
+      { href: "/change-cases/new", label: "Action preflight", detail: "Inspect proof contract", glyph: "new" },
     ],
   },
   {

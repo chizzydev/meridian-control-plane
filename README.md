@@ -102,7 +102,7 @@ npm run lint
 npm run build
 ```
 
-The final judge-surface certification passed **99 test files / 534 tests**, TypeScript checking, lint with **0 errors / 20 warnings**, and the production build.
+The final judge-surface certification passed **99 test files / 535 tests**, TypeScript checking, lint with **0 errors / 20 warnings**, and the production build.
 
 ---
 
